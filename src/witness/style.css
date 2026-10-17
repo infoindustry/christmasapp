@@ -1,0 +1,68 @@
+:root { color-scheme: dark; --gold: #e8c46a; --ink: #14102a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #14102a; color: #fff; font-family: Georgia, 'Times New Roman', serif; -webkit-tap-highlight-color: transparent; }
+body.home { overflow: auto; background: radial-gradient(circle at 50% 0%, #2c2260, #14102a 60%); }
+.home header { text-align: center; padding: 8vh 20px 3vh; }
+.home h1 { margin: 0 0 8px; font-size: clamp(28px, 5vw, 46px); letter-spacing: .04em; }
+.home p { margin: 0; opacity: .75; font-family: system-ui, sans-serif; }
+#grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; max-width: 980px; margin: 0 auto; padding: 20px 18px 60px; }
+.card { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; color: inherit; padding: 12px 8px 14px; border-radius: 16px; background: #ffffff0d; transition: transform .2s, background .2s; }
+.card:hover { transform: translateY(-4px); background: #ffffff1a; }
+.card img { width: 100%; max-width: 150px; aspect-ratio: 1; border-radius: 50%; box-shadow: 0 8px 24px #0008; }
+.card b { font-size: 18px; } .card small { opacity: .6; font-family: system-ui, sans-serif; font-size: 12px; }
+body.stage { overflow: hidden; background: radial-gradient(ellipse at 50% 38%, #3a2f6e 0%, #1a1438 55%, #0c0920 100%); }
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#loadbar { position: fixed; left: 0; top: 0; height: 3px; width: 0; background: var(--gold); z-index: 20; transition: width .3s; }
+#back { position: fixed; left: 12px; top: max(10px, env(safe-area-inset-top)); z-index: 6; color: #fff; text-decoration: none; opacity: .75; font-family: system-ui, sans-serif; font-size: 14px; padding: 6px 10px; border-radius: 999px; background: #0005; }
+#head { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 0; right: 0; text-align: center; z-index: 5; pointer-events: none; text-shadow: 0 2px 12px #000; }
+#head h1 { margin: 0; font-size: clamp(22px, 4vw, 34px); letter-spacing: .08em; text-transform: uppercase; }
+#head small { opacity: .7; font-family: system-ui, sans-serif; font-size: 12px; }
+#panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding: 8px 12px max(10px, env(safe-area-inset-bottom)); background: linear-gradient(to top, #0a0718d9 70%, #0a071800); display: flex; flex-direction: column; align-items: center; gap: 6px; }
+#sub { height: 4.4em; max-width: 640px; text-align: center; font-size: clamp(14px, 3.5vw, 17px); line-height: 1.4; text-shadow: 0 1px 8px #000; display: flex; align-items: center; justify-content: center; overflow-y: auto; }
+#sub.hint { opacity: .65; font-style: italic; }
+#dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 360px; }
+#dots i { width: 7px; height: 7px; border-radius: 50%; background: #ffffff33; transition: .3s; } #dots i.done { background: var(--gold); } #dots i.now { background: #fff; transform: scale(1.5); }
+#controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+button { font: inherit; font-family: system-ui, sans-serif; font-size: 15px; padding: 9px 18px; border: 0; border-radius: 999px; background: #ffffff22; color: #fff; cursor: pointer; backdrop-filter: blur(6px); }
+button:active { transform: scale(.97); } button.primary { background: var(--gold); color: #2a1a05; font-weight: 700; }
+#questions { display: flex; gap: 8px; width: 100%; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 4px; scrollbar-width: none; }
+#questions::-webkit-scrollbar { display: none; }
+#questions button { flex: 0 0 auto; width: min(72vw, 260px); scroll-snap-align: start; text-align: left; border-radius: 14px; padding: 9px 12px; font-size: 14px; line-height: 1.3; background: #ffffff1f; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+#questions button.asked { opacity: .55; } #questions button.asked::after { content: ' ✓'; color: var(--gold); }
+#start { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: radial-gradient(circle at 50% 35%, #3a2f6ecc, #0c0920f2 70%); text-align: center; padding: 24px; }
+#start img { width: min(52vw, 240px); border-radius: 50%; box-shadow: 0 10px 40px #000a; } #start h2 { margin: 0; font-size: 30px; letter-spacing: .08em; text-transform: uppercase; } #start p { margin: 0; opacity: .75; font-family: system-ui, sans-serif; }
+[hidden] { display: none !important; }
+
+/* AR: the real camera is behind the transparent canvas */
+#cam { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; background: #000; }
+body.ar, body.stage.ar { background: #000; }
+canvas { z-index: 1; }
+#modes { position: fixed; top: calc(max(10px, env(safe-area-inset-top)) + 54px); left: 50%; transform: translateX(-50%); z-index: 7; display: flex; gap: 4px; padding: 3px; border-radius: 999px; background: #0007; backdrop-filter: blur(8px); }
+#modes button { font-size: 13px; padding: 6px 12px; background: transparent; color: #ffffffbb; white-space: nowrap; }
+#modes button.on { background: var(--gold); color: #2a1a05; font-weight: 700; }
+#arhint button { pointer-events: auto; margin-top: 8px; font-size: 14px; padding: 8px 14px; background: var(--gold); color: #2a1a05; font-weight: 700; }
+#arhint { position: fixed; left: 50%; top: 38%; transform: translateX(-50%); z-index: 7; max-width: 80vw; text-align: center; padding: 10px 16px; border-radius: 14px; background: #000a; font-family: system-ui, sans-serif; font-size: 15px; pointer-events: none; z-index: 8; }
+body.ar #head h1 { text-shadow: 0 2px 10px #000, 0 0 3px #000; }
+
+/* the audiobook ("Слово Божье") */
+body.book #sub, body.book #dots, body.book #controls { display: none; }
+#player { width: 100%; max-width: 640px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+#wsub { min-height: 2.6em; display: flex; align-items: center; text-align: center; font-size: clamp(14px, 3.5vw, 17px); line-height: 1.35; text-shadow: 0 1px 8px #000; }
+#wbar { width: 100%; display: flex; align-items: center; gap: 10px; font-family: system-ui, sans-serif; font-size: 12px; opacity: .9; }
+#seek { flex: 1; accent-color: var(--gold); height: 24px; }
+#tm { min-width: 84px; text-align: right; font-variant-numeric: tabular-nums; }
+#wctl, #wtr { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+#wtr button { font-size: 13px; padding: 6px 12px; background: #ffffff14; } #wtr button.on { background: #ffffff33; box-shadow: inset 0 0 0 1.5px var(--gold); }
+body.book #questions button.asked::after { content: ' ♪'; }
+body.book #btnAsk { display: none; }
+
+/* the Christmas room */
+body.room #sub, body.room #dots, body.room #controls { display: none; }
+#rpanel { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 4px 0; }
+#rsub { min-height: 2.4em; display: flex; align-items: center; text-align: center; font-size: clamp(14px, 3.6vw, 17px); text-shadow: 0 1px 8px #000; }
+#rctl { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+/* home: the featured film */
+#film { display: flex; align-items: center; gap: 14px; max-width: 980px; margin: 0 auto 6px; padding: 10px; width: calc(100% - 36px); border-radius: 18px; background: #ffffff12; color: inherit; text-decoration: none; box-shadow: inset 0 0 0 1.5px #e8c46a66; }
+#film img { width: 42%; max-width: 300px; border-radius: 12px; aspect-ratio: 16 / 9; object-fit: cover; }
+#film b { display: block; font-size: clamp(17px, 3.4vw, 24px); margin-bottom: 4px; } #film small { opacity: .75; font-family: system-ui, sans-serif; font-size: 13px; line-height: 1.4; }

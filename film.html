@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>История Рождества — мультфильм</title>
+<link rel="stylesheet" href="/src/film.css">
+</head>
+<body>
+<a id="back" href="/">‹ Свидетели</a>
+<main>
+  <h1>История Рождества</h1>
+  <p class="lead">Мультфильм для детей: от сада Эдема до храма, где двенадцатилетний Иисус говорил с учителями.</p>
+  <div id="stage">
+    <video id="v" playsinline preload="metadata" poster="/film/poster.jpg" src="/film/story.mp4" crossorigin="anonymous"><track kind="captions" srclang="ru" label="Русский" src="/film/story.vtt" default></video>
+    <div id="cap" aria-live="polite"></div>
+    <button id="big" aria-label="Смотреть">▶</button>
+  </div>
+  <div id="bar"><button id="pp" aria-label="Пауза/пуск">▶</button><input id="seek" type="range" min="0" max="1000" value="0" aria-label="Перемотка"><span id="tm">0:00</span><button id="cc" class="on" aria-label="Субтитры">Aa</button><button id="fs" aria-label="На весь экран">⛶</button></div>
+  <div id="now"></div>
+  <h2>Главы</h2>
+  <div id="chapters"></div>
+</main>
+<script type="module" src="/src/film.js"></script>
+</body></html>

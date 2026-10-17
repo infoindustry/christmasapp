@@ -1,0 +1,11 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Живой вертеп</title>
+<style>html,body{margin:0;height:100%;background:#070816;overflow:hidden;font-family:system-ui,sans-serif;color:#fff}canvas{position:fixed;inset:0;width:100%;height:100%}
+#start{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(circle at 50% 35%,#2b2f7a99,#070816ee 70%);text-align:center;padding:24px}
+#start h1{margin:0;font-size:30px}#start p{margin:0;opacity:.85;max-width:340px;line-height:1.4}
+button{font:inherit;font-size:20px;font-weight:700;padding:15px 36px;border:0;border-radius:999px;background:#ffd75e;color:#3a2410}
+#hint{position:fixed;left:50%;bottom:4vh;transform:translateX(-50%);background:#000a;padding:9px 18px;border-radius:999px;font-size:14px;z-index:4;pointer-events:none;opacity:0;transition:opacity .6s;white-space:nowrap}
+#hint.on{opacity:1}#load{position:fixed;left:0;top:0;height:3px;background:#ffd75e;width:0;z-index:9;transition:width .3s}</style></head>
+<body><canvas id="c"></canvas><div id="load"></div><div id="hint">Коснись героя — он ответит · крути пальцем</div>
+<div id="start"><h1>✨ Живой вертеп ✨</h1><p>Ночь над Вифлеемом. Пастух, волхв, Гавриил, верблюд и Пряничек.</p><button id="go">Войти</button></div>
+<script type="module" src="/src/vertep.js"></script></body></html>

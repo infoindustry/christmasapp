@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Свидетель</title>
+<link rel="stylesheet" href="/src/witness/style.css">
+</head>
+<body class="stage">
+<video id="cam" playsinline muted autoplay hidden></video>
+<canvas id="c"></canvas>
+<div id="loadbar"></div>
+<a id="back" href="/">‹ Все свидетели</a>
+<div id="head"><h1 id="name"></h1><small id="ref"></small></div>
+<div id="modes" role="tablist"><button data-mode="scene" class="on">Сцена</button><button data-mode="marker" hidden>AR · медальон</button><button data-mode="surface" hidden>AR · стол</button></div>
+<div id="arhint" hidden></div>
+<div id="panel">
+  <div id="dots"></div>
+  <div id="sub"></div>
+  <div id="controls">
+    <button id="btnStory" class="primary">▶ Рассказать</button>
+    <button id="btnPause" hidden>⏸</button>
+    <button id="btnNext" hidden>⏭</button>
+    <button id="btnAsk">Спросить</button>
+  </div>
+  <div id="questions" hidden></div>
+</div>
+<div id="start"><img id="startImg" alt=""><h2 id="startName"></h2><p>Включи звук и коснись, чтобы начать</p><button id="go" class="primary">Встретиться</button></div>
+<script type="module" src="/src/witness/main.js"></script>
+</body></html>

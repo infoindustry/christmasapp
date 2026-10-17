@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Вифлеем — AR</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #0c1445; overflow: hidden; font-family: system-ui, sans-serif; color: #fff; }
+  #stage { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  #stage video, #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #stage video { object-fit: fill; }
+  #start, #hint { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 24px; }
+  #start { background: radial-gradient(circle at 50% 30%, #3b3fa8, #0c1445 70%); z-index: 10; }
+  #start h1 { margin: 0; font-size: 28px; }
+  #start p { margin: 0; max-width: 320px; opacity: .85; line-height: 1.4; }
+  button { font: inherit; font-size: 20px; padding: 16px 36px; border: 0; border-radius: 999px; background: #ffd75e; color: #3a2410; font-weight: 700; }
+  #hint { z-index: 5; pointer-events: none; justify-content: flex-end; padding-bottom: 8vh; transition: opacity .4s; }
+  #hint span { background: #0009; padding: 10px 18px; border-radius: 999px; }
+  #hint.hide { opacity: 0; }
+  #counter { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 6; background: #000a; padding: 8px 16px; border-radius: 999px; font-size: 18px; opacity: 0; transition: opacity .4s; pointer-events: none; }
+  #reticle { position: fixed; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; z-index: 6; pointer-events: none; opacity: 0; transition: opacity .3s; -webkit-mask: radial-gradient(circle, transparent 17px, #000 18px, #000 22px, transparent 23px); mask: radial-gradient(circle, transparent 17px, #000 18px, #000 22px, transparent 23px); }
+  #debug { position: fixed; left: 8px; top: 8px; font: 11px monospace; z-index: 20; white-space: pre; opacity: .8; }
+</style>
+</head>
+<body>
+<div id="stage"><video id="cam" playsinline muted autoplay></video></div>
+<div id="hint"><span>Наведи камеру на страницу журнала</span></div>
+<div id="start">
+  <h1>✨ Вифлеем ✨</h1>
+  <p>Наведи телефон на страницу журнала — и заглянешь внутрь!</p>
+  <button id="go">Открыть</button>
+</div>
+<pre id="debug"></pre>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

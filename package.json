@@ -1,0 +1,28 @@
+{
+  "name": "christmas-app",
+  "version": "1.0.0",
+  "description": "Рождественский журнал: AR-свидетели на медальонах (веб, без приложения)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "witnesses": "python3 tools/export_witnesses.py",
+    "voice": "python3 tools/voice_all.py"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.1",
+    "locus-ar": "^1.1.25",
+    "three": "^0.186.1",
+    "vite": "^8.3.4"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.5.1",
+    "sharp": "^0.35.5"
+  },
+  "private": true
+}

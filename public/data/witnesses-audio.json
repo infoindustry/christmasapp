@@ -1,0 +1,1444 @@
+{
+ "zechariah": {
+  "zechariah-s01": {
+   "file": "/audio/witnesses/zechariah/zechariah-s01.mp3",
+   "sec": 13.2,
+   "kind": "story"
+  },
+  "zechariah-s02": {
+   "file": "/audio/witnesses/zechariah/zechariah-s02.mp3",
+   "sec": 13.2,
+   "kind": "story"
+  },
+  "zechariah-s03": {
+   "file": "/audio/witnesses/zechariah/zechariah-s03.mp3",
+   "sec": 13.76,
+   "kind": "story"
+  },
+  "zechariah-s04": {
+   "file": "/audio/witnesses/zechariah/zechariah-s04.mp3",
+   "sec": 12.0,
+   "kind": "story"
+  },
+  "zechariah-s05": {
+   "file": "/audio/witnesses/zechariah/zechariah-s05.mp3",
+   "sec": 12.56,
+   "kind": "story"
+  },
+  "zechariah-s06": {
+   "file": "/audio/witnesses/zechariah/zechariah-s06.mp3",
+   "sec": 10.24,
+   "kind": "story"
+  },
+  "zechariah-s07": {
+   "file": "/audio/witnesses/zechariah/zechariah-s07.mp3",
+   "sec": 12.24,
+   "kind": "story"
+  },
+  "zechariah-s08": {
+   "file": "/audio/witnesses/zechariah/zechariah-s08.mp3",
+   "sec": 8.96,
+   "kind": "story"
+  },
+  "zechariah-s09": {
+   "file": "/audio/witnesses/zechariah/zechariah-s09.mp3",
+   "sec": 14.4,
+   "kind": "story"
+  },
+  "zechariah-s10": {
+   "file": "/audio/witnesses/zechariah/zechariah-s10.mp3",
+   "sec": 12.56,
+   "kind": "story"
+  },
+  "zechariah-s11": {
+   "file": "/audio/witnesses/zechariah/zechariah-s11.mp3",
+   "sec": 10.4,
+   "kind": "story"
+  },
+  "zechariah-s12": {
+   "file": "/audio/witnesses/zechariah/zechariah-s12.mp3",
+   "sec": 8.24,
+   "kind": "story"
+  },
+  "zechariah-s13": {
+   "file": "/audio/witnesses/zechariah/zechariah-s13.mp3",
+   "sec": 16.72,
+   "kind": "story"
+  },
+  "zechariah-s14": {
+   "file": "/audio/witnesses/zechariah/zechariah-s14.mp3",
+   "sec": 22.88,
+   "kind": "story"
+  },
+  "zechariah-s15": {
+   "file": "/audio/witnesses/zechariah/zechariah-s15.mp3",
+   "sec": 19.12,
+   "kind": "story"
+  },
+  "zechariah-q01": {
+   "file": "/audio/witnesses/zechariah/zechariah-q01.mp3",
+   "sec": 12.32,
+   "kind": "answer"
+  },
+  "zechariah-q02": {
+   "file": "/audio/witnesses/zechariah/zechariah-q02.mp3",
+   "sec": 7.68,
+   "kind": "answer"
+  },
+  "zechariah-q03": {
+   "file": "/audio/witnesses/zechariah/zechariah-q03.mp3",
+   "sec": 10.48,
+   "kind": "answer"
+  },
+  "zechariah-q04": {
+   "file": "/audio/witnesses/zechariah/zechariah-q04.mp3",
+   "sec": 13.28,
+   "kind": "answer"
+  },
+  "zechariah-q05": {
+   "file": "/audio/witnesses/zechariah/zechariah-q05.mp3",
+   "sec": 10.48,
+   "kind": "answer"
+  },
+  "zechariah-q06": {
+   "file": "/audio/witnesses/zechariah/zechariah-q06.mp3",
+   "sec": 13.2,
+   "kind": "answer"
+  },
+  "zechariah-q07": {
+   "file": "/audio/witnesses/zechariah/zechariah-q07.mp3",
+   "sec": 14.72,
+   "kind": "answer"
+  },
+  "zechariah-q08": {
+   "file": "/audio/witnesses/zechariah/zechariah-q08.mp3",
+   "sec": 12.8,
+   "kind": "answer"
+  },
+  "zechariah-p01": {
+   "file": "/audio/witnesses/zechariah/zechariah-p01.mp3",
+   "sec": 5.84,
+   "kind": "poke"
+  },
+  "zechariah-p02": {
+   "file": "/audio/witnesses/zechariah/zechariah-p02.mp3",
+   "sec": 4.72,
+   "kind": "poke"
+  },
+  "zechariah-p03": {
+   "file": "/audio/witnesses/zechariah/zechariah-p03.mp3",
+   "sec": 4.0,
+   "kind": "poke"
+  },
+  "zechariah-p04": {
+   "file": "/audio/witnesses/zechariah/zechariah-p04.mp3",
+   "sec": 7.68,
+   "kind": "poke"
+  },
+  "zechariah-p05": {
+   "file": "/audio/witnesses/zechariah/zechariah-p05.mp3",
+   "sec": 5.68,
+   "kind": "poke"
+  }
+ },
+ "mary": {
+  "mary-s01": {
+   "file": "/audio/witnesses/mary/mary-s01.mp3",
+   "sec": 11.28,
+   "kind": "story"
+  },
+  "mary-s02": {
+   "file": "/audio/witnesses/mary/mary-s02.mp3",
+   "sec": 9.04,
+   "kind": "story"
+  },
+  "mary-s03": {
+   "file": "/audio/witnesses/mary/mary-s03.mp3",
+   "sec": 6.96,
+   "kind": "story"
+  },
+  "mary-s04": {
+   "file": "/audio/witnesses/mary/mary-s04.mp3",
+   "sec": 9.84,
+   "kind": "story"
+  },
+  "mary-s05": {
+   "file": "/audio/witnesses/mary/mary-s05.mp3",
+   "sec": 12.64,
+   "kind": "story"
+  },
+  "mary-s06": {
+   "file": "/audio/witnesses/mary/mary-s06.mp3",
+   "sec": 14.64,
+   "kind": "story"
+  },
+  "mary-s07": {
+   "file": "/audio/witnesses/mary/mary-s07.mp3",
+   "sec": 8.48,
+   "kind": "story"
+  },
+  "mary-s08": {
+   "file": "/audio/witnesses/mary/mary-s08.mp3",
+   "sec": 17.44,
+   "kind": "story"
+  },
+  "mary-s09": {
+   "file": "/audio/witnesses/mary/mary-s09.mp3",
+   "sec": 8.4,
+   "kind": "story"
+  },
+  "mary-s10": {
+   "file": "/audio/witnesses/mary/mary-s10.mp3",
+   "sec": 10.72,
+   "kind": "story"
+  },
+  "mary-s11": {
+   "file": "/audio/witnesses/mary/mary-s11.mp3",
+   "sec": 6.24,
+   "kind": "story"
+  },
+  "mary-s12": {
+   "file": "/audio/witnesses/mary/mary-s12.mp3",
+   "sec": 13.92,
+   "kind": "story"
+  },
+  "mary-s13": {
+   "file": "/audio/witnesses/mary/mary-s13.mp3",
+   "sec": 17.44,
+   "kind": "story"
+  },
+  "mary-s14": {
+   "file": "/audio/witnesses/mary/mary-s14.mp3",
+   "sec": 23.6,
+   "kind": "story"
+  },
+  "mary-s15": {
+   "file": "/audio/witnesses/mary/mary-s15.mp3",
+   "sec": 23.52,
+   "kind": "story"
+  },
+  "mary-q01": {
+   "file": "/audio/witnesses/mary/mary-q01.mp3",
+   "sec": 10.88,
+   "kind": "answer"
+  },
+  "mary-q02": {
+   "file": "/audio/witnesses/mary/mary-q02.mp3",
+   "sec": 10.08,
+   "kind": "answer"
+  },
+  "mary-q03": {
+   "file": "/audio/witnesses/mary/mary-q03.mp3",
+   "sec": 12.96,
+   "kind": "answer"
+  },
+  "mary-q04": {
+   "file": "/audio/witnesses/mary/mary-q04.mp3",
+   "sec": 14.48,
+   "kind": "answer"
+  },
+  "mary-q05": {
+   "file": "/audio/witnesses/mary/mary-q05.mp3",
+   "sec": 15.84,
+   "kind": "answer"
+  },
+  "mary-q06": {
+   "file": "/audio/witnesses/mary/mary-q06.mp3",
+   "sec": 14.08,
+   "kind": "answer"
+  },
+  "mary-q07": {
+   "file": "/audio/witnesses/mary/mary-q07.mp3",
+   "sec": 15.6,
+   "kind": "answer"
+  },
+  "mary-q08": {
+   "file": "/audio/witnesses/mary/mary-q08.mp3",
+   "sec": 16.56,
+   "kind": "answer"
+  },
+  "mary-q09": {
+   "file": "/audio/witnesses/mary/mary-q09.mp3",
+   "sec": 12.64,
+   "kind": "answer"
+  },
+  "mary-p01": {
+   "file": "/audio/witnesses/mary/mary-p01.mp3",
+   "sec": 4.88,
+   "kind": "poke"
+  },
+  "mary-p02": {
+   "file": "/audio/witnesses/mary/mary-p02.mp3",
+   "sec": 4.56,
+   "kind": "poke"
+  },
+  "mary-p03": {
+   "file": "/audio/witnesses/mary/mary-p03.mp3",
+   "sec": 5.28,
+   "kind": "poke"
+  },
+  "mary-p04": {
+   "file": "/audio/witnesses/mary/mary-p04.mp3",
+   "sec": 6.96,
+   "kind": "poke"
+  },
+  "mary-p05": {
+   "file": "/audio/witnesses/mary/mary-p05.mp3",
+   "sec": 4.48,
+   "kind": "poke"
+  }
+ },
+ "elizabeth": {
+  "elizabeth-s01": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s01.mp3",
+   "sec": 10.4,
+   "kind": "story"
+  },
+  "elizabeth-s02": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s02.mp3",
+   "sec": 18.16,
+   "kind": "story"
+  },
+  "elizabeth-s03": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s03.mp3",
+   "sec": 18.0,
+   "kind": "story"
+  },
+  "elizabeth-s04": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s04.mp3",
+   "sec": 21.04,
+   "kind": "story"
+  },
+  "elizabeth-s05": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s05.mp3",
+   "sec": 9.84,
+   "kind": "story"
+  },
+  "elizabeth-s06": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s06.mp3",
+   "sec": 8.8,
+   "kind": "story"
+  },
+  "elizabeth-s07": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s07.mp3",
+   "sec": 12.72,
+   "kind": "story"
+  },
+  "elizabeth-s08": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s08.mp3",
+   "sec": 9.52,
+   "kind": "story"
+  },
+  "elizabeth-s09": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s09.mp3",
+   "sec": 12.64,
+   "kind": "story"
+  },
+  "elizabeth-s10": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s10.mp3",
+   "sec": 12.8,
+   "kind": "story"
+  },
+  "elizabeth-s11": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s11.mp3",
+   "sec": 8.96,
+   "kind": "story"
+  },
+  "elizabeth-s12": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s12.mp3",
+   "sec": 12.4,
+   "kind": "story"
+  },
+  "elizabeth-s13": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s13.mp3",
+   "sec": 27.6,
+   "kind": "story"
+  },
+  "elizabeth-s14": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s14.mp3",
+   "sec": 19.44,
+   "kind": "story"
+  },
+  "elizabeth-s15": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-s15.mp3",
+   "sec": 16.4,
+   "kind": "story"
+  },
+  "elizabeth-q01": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-q01.mp3",
+   "sec": 7.84,
+   "kind": "answer"
+  },
+  "elizabeth-q02": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-q02.mp3",
+   "sec": 7.44,
+   "kind": "answer"
+  },
+  "elizabeth-q03": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-q03.mp3",
+   "sec": 14.0,
+   "kind": "answer"
+  },
+  "elizabeth-q04": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-q04.mp3",
+   "sec": 16.08,
+   "kind": "answer"
+  },
+  "elizabeth-q05": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-q05.mp3",
+   "sec": 11.92,
+   "kind": "answer"
+  },
+  "elizabeth-q06": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-q06.mp3",
+   "sec": 14.32,
+   "kind": "answer"
+  },
+  "elizabeth-q07": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-q07.mp3",
+   "sec": 17.36,
+   "kind": "answer"
+  },
+  "elizabeth-q08": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-q08.mp3",
+   "sec": 16.48,
+   "kind": "answer"
+  },
+  "elizabeth-p01": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-p01.mp3",
+   "sec": 7.44,
+   "kind": "poke"
+  },
+  "elizabeth-p02": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-p02.mp3",
+   "sec": 4.56,
+   "kind": "poke"
+  },
+  "elizabeth-p03": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-p03.mp3",
+   "sec": 4.72,
+   "kind": "poke"
+  },
+  "elizabeth-p04": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-p04.mp3",
+   "sec": 4.16,
+   "kind": "poke"
+  },
+  "elizabeth-p05": {
+   "file": "/audio/witnesses/elizabeth/elizabeth-p05.mp3",
+   "sec": 4.72,
+   "kind": "poke"
+  }
+ },
+ "joseph": {
+  "joseph-s01": {
+   "file": "/audio/witnesses/joseph/joseph-s01.mp3",
+   "sec": 11.6,
+   "kind": "story"
+  },
+  "joseph-s02": {
+   "file": "/audio/witnesses/joseph/joseph-s02.mp3",
+   "sec": 9.36,
+   "kind": "story"
+  },
+  "joseph-s03": {
+   "file": "/audio/witnesses/joseph/joseph-s03.mp3",
+   "sec": 12.8,
+   "kind": "story"
+  },
+  "joseph-s04": {
+   "file": "/audio/witnesses/joseph/joseph-s04.mp3",
+   "sec": 11.52,
+   "kind": "story"
+  },
+  "joseph-s05": {
+   "file": "/audio/witnesses/joseph/joseph-s05.mp3",
+   "sec": 4.32,
+   "kind": "story"
+  },
+  "joseph-s06": {
+   "file": "/audio/witnesses/joseph/joseph-s06.mp3",
+   "sec": 9.76,
+   "kind": "story"
+  },
+  "joseph-s07": {
+   "file": "/audio/witnesses/joseph/joseph-s07.mp3",
+   "sec": 7.68,
+   "kind": "story"
+  },
+  "joseph-s08": {
+   "file": "/audio/witnesses/joseph/joseph-s08.mp3",
+   "sec": 7.6,
+   "kind": "story"
+  },
+  "joseph-s09": {
+   "file": "/audio/witnesses/joseph/joseph-s09.mp3",
+   "sec": 10.48,
+   "kind": "story"
+  },
+  "joseph-s10": {
+   "file": "/audio/witnesses/joseph/joseph-s10.mp3",
+   "sec": 11.92,
+   "kind": "story"
+  },
+  "joseph-s11": {
+   "file": "/audio/witnesses/joseph/joseph-s11.mp3",
+   "sec": 8.24,
+   "kind": "story"
+  },
+  "joseph-s12": {
+   "file": "/audio/witnesses/joseph/joseph-s12.mp3",
+   "sec": 15.2,
+   "kind": "story"
+  },
+  "joseph-s13": {
+   "file": "/audio/witnesses/joseph/joseph-s13.mp3",
+   "sec": 10.72,
+   "kind": "story"
+  },
+  "joseph-s14": {
+   "file": "/audio/witnesses/joseph/joseph-s14.mp3",
+   "sec": 23.2,
+   "kind": "story"
+  },
+  "joseph-s15": {
+   "file": "/audio/witnesses/joseph/joseph-s15.mp3",
+   "sec": 23.76,
+   "kind": "story"
+  },
+  "joseph-q01": {
+   "file": "/audio/witnesses/joseph/joseph-q01.mp3",
+   "sec": 5.36,
+   "kind": "answer"
+  },
+  "joseph-q02": {
+   "file": "/audio/witnesses/joseph/joseph-q02.mp3",
+   "sec": 6.56,
+   "kind": "answer"
+  },
+  "joseph-q03": {
+   "file": "/audio/witnesses/joseph/joseph-q03.mp3",
+   "sec": 11.76,
+   "kind": "answer"
+  },
+  "joseph-q04": {
+   "file": "/audio/witnesses/joseph/joseph-q04.mp3",
+   "sec": 15.6,
+   "kind": "answer"
+  },
+  "joseph-q05": {
+   "file": "/audio/witnesses/joseph/joseph-q05.mp3",
+   "sec": 14.0,
+   "kind": "answer"
+  },
+  "joseph-q06": {
+   "file": "/audio/witnesses/joseph/joseph-q06.mp3",
+   "sec": 14.4,
+   "kind": "answer"
+  },
+  "joseph-q07": {
+   "file": "/audio/witnesses/joseph/joseph-q07.mp3",
+   "sec": 15.04,
+   "kind": "answer"
+  },
+  "joseph-q08": {
+   "file": "/audio/witnesses/joseph/joseph-q08.mp3",
+   "sec": 12.08,
+   "kind": "answer"
+  },
+  "joseph-q09": {
+   "file": "/audio/witnesses/joseph/joseph-q09.mp3",
+   "sec": 16.0,
+   "kind": "answer"
+  },
+  "joseph-p01": {
+   "file": "/audio/witnesses/joseph/joseph-p01.mp3",
+   "sec": 4.32,
+   "kind": "poke"
+  },
+  "joseph-p02": {
+   "file": "/audio/witnesses/joseph/joseph-p02.mp3",
+   "sec": 4.56,
+   "kind": "poke"
+  },
+  "joseph-p03": {
+   "file": "/audio/witnesses/joseph/joseph-p03.mp3",
+   "sec": 3.68,
+   "kind": "poke"
+  },
+  "joseph-p04": {
+   "file": "/audio/witnesses/joseph/joseph-p04.mp3",
+   "sec": 5.68,
+   "kind": "poke"
+  },
+  "joseph-p05": {
+   "file": "/audio/witnesses/joseph/joseph-p05.mp3",
+   "sec": 3.44,
+   "kind": "poke"
+  }
+ },
+ "micah": {
+  "micah-s01": {
+   "file": "/audio/witnesses/micah/micah-s01.mp3",
+   "sec": 12.32,
+   "kind": "story"
+  },
+  "micah-s02": {
+   "file": "/audio/witnesses/micah/micah-s02.mp3",
+   "sec": 7.92,
+   "kind": "story"
+  },
+  "micah-s03": {
+   "file": "/audio/witnesses/micah/micah-s03.mp3",
+   "sec": 18.72,
+   "kind": "story"
+  },
+  "micah-s04": {
+   "file": "/audio/witnesses/micah/micah-s04.mp3",
+   "sec": 15.52,
+   "kind": "story"
+  },
+  "micah-s05": {
+   "file": "/audio/witnesses/micah/micah-s05.mp3",
+   "sec": 12.16,
+   "kind": "story"
+  },
+  "micah-s06": {
+   "file": "/audio/witnesses/micah/micah-s06.mp3",
+   "sec": 17.6,
+   "kind": "story"
+  },
+  "micah-s07": {
+   "file": "/audio/witnesses/micah/micah-s07.mp3",
+   "sec": 17.12,
+   "kind": "story"
+  },
+  "micah-s08": {
+   "file": "/audio/witnesses/micah/micah-s08.mp3",
+   "sec": 10.56,
+   "kind": "story"
+  },
+  "micah-s09": {
+   "file": "/audio/witnesses/micah/micah-s09.mp3",
+   "sec": 12.24,
+   "kind": "story"
+  },
+  "micah-s10": {
+   "file": "/audio/witnesses/micah/micah-s10.mp3",
+   "sec": 3.52,
+   "kind": "story"
+  },
+  "micah-s11": {
+   "file": "/audio/witnesses/micah/micah-s11.mp3",
+   "sec": 13.44,
+   "kind": "story"
+  },
+  "micah-s12": {
+   "file": "/audio/witnesses/micah/micah-s12.mp3",
+   "sec": 15.2,
+   "kind": "story"
+  },
+  "micah-s13": {
+   "file": "/audio/witnesses/micah/micah-s13.mp3",
+   "sec": 12.0,
+   "kind": "story"
+  },
+  "micah-s14": {
+   "file": "/audio/witnesses/micah/micah-s14.mp3",
+   "sec": 17.44,
+   "kind": "story"
+  },
+  "micah-s15": {
+   "file": "/audio/witnesses/micah/micah-s15.mp3",
+   "sec": 22.32,
+   "kind": "story"
+  },
+  "micah-q01": {
+   "file": "/audio/witnesses/micah/micah-q01.mp3",
+   "sec": 13.68,
+   "kind": "answer"
+  },
+  "micah-q02": {
+   "file": "/audio/witnesses/micah/micah-q02.mp3",
+   "sec": 14.96,
+   "kind": "answer"
+  },
+  "micah-q03": {
+   "file": "/audio/witnesses/micah/micah-q03.mp3",
+   "sec": 17.6,
+   "kind": "answer"
+  },
+  "micah-q04": {
+   "file": "/audio/witnesses/micah/micah-q04.mp3",
+   "sec": 17.92,
+   "kind": "answer"
+  },
+  "micah-q05": {
+   "file": "/audio/witnesses/micah/micah-q05.mp3",
+   "sec": 14.56,
+   "kind": "answer"
+  },
+  "micah-q06": {
+   "file": "/audio/witnesses/micah/micah-q06.mp3",
+   "sec": 14.32,
+   "kind": "answer"
+  },
+  "micah-q07": {
+   "file": "/audio/witnesses/micah/micah-q07.mp3",
+   "sec": 15.36,
+   "kind": "answer"
+  },
+  "micah-q08": {
+   "file": "/audio/witnesses/micah/micah-q08.mp3",
+   "sec": 15.28,
+   "kind": "answer"
+  },
+  "micah-p01": {
+   "file": "/audio/witnesses/micah/micah-p01.mp3",
+   "sec": 4.56,
+   "kind": "poke"
+  },
+  "micah-p02": {
+   "file": "/audio/witnesses/micah/micah-p02.mp3",
+   "sec": 8.4,
+   "kind": "poke"
+  },
+  "micah-p03": {
+   "file": "/audio/witnesses/micah/micah-p03.mp3",
+   "sec": 7.84,
+   "kind": "poke"
+  },
+  "micah-p04": {
+   "file": "/audio/witnesses/micah/micah-p04.mp3",
+   "sec": 5.28,
+   "kind": "poke"
+  },
+  "micah-p05": {
+   "file": "/audio/witnesses/micah/micah-p05.mp3",
+   "sec": 4.24,
+   "kind": "poke"
+  }
+ },
+ "shepherd": {
+  "shepherd-s01": {
+   "file": "/audio/witnesses/shepherd/shepherd-s01.mp3",
+   "sec": 12.32,
+   "kind": "story"
+  },
+  "shepherd-s02": {
+   "file": "/audio/witnesses/shepherd/shepherd-s02.mp3",
+   "sec": 10.64,
+   "kind": "story"
+  },
+  "shepherd-s03": {
+   "file": "/audio/witnesses/shepherd/shepherd-s03.mp3",
+   "sec": 4.4,
+   "kind": "story"
+  },
+  "shepherd-s04": {
+   "file": "/audio/witnesses/shepherd/shepherd-s04.mp3",
+   "sec": 6.24,
+   "kind": "story"
+  },
+  "shepherd-s05": {
+   "file": "/audio/witnesses/shepherd/shepherd-s05.mp3",
+   "sec": 9.84,
+   "kind": "story"
+  },
+  "shepherd-s06": {
+   "file": "/audio/witnesses/shepherd/shepherd-s06.mp3",
+   "sec": 6.48,
+   "kind": "story"
+  },
+  "shepherd-s07": {
+   "file": "/audio/witnesses/shepherd/shepherd-s07.mp3",
+   "sec": 10.0,
+   "kind": "story"
+  },
+  "shepherd-s08": {
+   "file": "/audio/witnesses/shepherd/shepherd-s08.mp3",
+   "sec": 7.36,
+   "kind": "story"
+  },
+  "shepherd-s09": {
+   "file": "/audio/witnesses/shepherd/shepherd-s09.mp3",
+   "sec": 12.72,
+   "kind": "story"
+  },
+  "shepherd-s10": {
+   "file": "/audio/witnesses/shepherd/shepherd-s10.mp3",
+   "sec": 9.44,
+   "kind": "story"
+  },
+  "shepherd-s11": {
+   "file": "/audio/witnesses/shepherd/shepherd-s11.mp3",
+   "sec": 8.24,
+   "kind": "story"
+  },
+  "shepherd-s12": {
+   "file": "/audio/witnesses/shepherd/shepherd-s12.mp3",
+   "sec": 8.8,
+   "kind": "story"
+  },
+  "shepherd-s13": {
+   "file": "/audio/witnesses/shepherd/shepherd-s13.mp3",
+   "sec": 11.84,
+   "kind": "story"
+  },
+  "shepherd-s14": {
+   "file": "/audio/witnesses/shepherd/shepherd-s14.mp3",
+   "sec": 15.76,
+   "kind": "story"
+  },
+  "shepherd-s15": {
+   "file": "/audio/witnesses/shepherd/shepherd-s15.mp3",
+   "sec": 22.32,
+   "kind": "story"
+  },
+  "shepherd-q01": {
+   "file": "/audio/witnesses/shepherd/shepherd-q01.mp3",
+   "sec": 10.24,
+   "kind": "answer"
+  },
+  "shepherd-q02": {
+   "file": "/audio/witnesses/shepherd/shepherd-q02.mp3",
+   "sec": 6.64,
+   "kind": "answer"
+  },
+  "shepherd-q03": {
+   "file": "/audio/witnesses/shepherd/shepherd-q03.mp3",
+   "sec": 10.88,
+   "kind": "answer"
+  },
+  "shepherd-q04": {
+   "file": "/audio/witnesses/shepherd/shepherd-q04.mp3",
+   "sec": 13.84,
+   "kind": "answer"
+  },
+  "shepherd-q05": {
+   "file": "/audio/witnesses/shepherd/shepherd-q05.mp3",
+   "sec": 16.16,
+   "kind": "answer"
+  },
+  "shepherd-q06": {
+   "file": "/audio/witnesses/shepherd/shepherd-q06.mp3",
+   "sec": 11.84,
+   "kind": "answer"
+  },
+  "shepherd-q07": {
+   "file": "/audio/witnesses/shepherd/shepherd-q07.mp3",
+   "sec": 10.24,
+   "kind": "answer"
+  },
+  "shepherd-q08": {
+   "file": "/audio/witnesses/shepherd/shepherd-q08.mp3",
+   "sec": 12.0,
+   "kind": "answer"
+  },
+  "shepherd-q09": {
+   "file": "/audio/witnesses/shepherd/shepherd-q09.mp3",
+   "sec": 13.52,
+   "kind": "answer"
+  },
+  "shepherd-p01": {
+   "file": "/audio/witnesses/shepherd/shepherd-p01.mp3",
+   "sec": 5.36,
+   "kind": "poke"
+  },
+  "shepherd-p02": {
+   "file": "/audio/witnesses/shepherd/shepherd-p02.mp3",
+   "sec": 3.04,
+   "kind": "poke"
+  },
+  "shepherd-p03": {
+   "file": "/audio/witnesses/shepherd/shepherd-p03.mp3",
+   "sec": 2.64,
+   "kind": "poke"
+  },
+  "shepherd-p04": {
+   "file": "/audio/witnesses/shepherd/shepherd-p04.mp3",
+   "sec": 4.16,
+   "kind": "poke"
+  },
+  "shepherd-p05": {
+   "file": "/audio/witnesses/shepherd/shepherd-p05.mp3",
+   "sec": 3.36,
+   "kind": "poke"
+  }
+ },
+ "simeon": {
+  "simeon-s01": {
+   "file": "/audio/witnesses/simeon/simeon-s01.mp3",
+   "sec": 12.48,
+   "kind": "story"
+  },
+  "simeon-s02": {
+   "file": "/audio/witnesses/simeon/simeon-s02.mp3",
+   "sec": 12.0,
+   "kind": "story"
+  },
+  "simeon-s03": {
+   "file": "/audio/witnesses/simeon/simeon-s03.mp3",
+   "sec": 15.36,
+   "kind": "story"
+  },
+  "simeon-s04": {
+   "file": "/audio/witnesses/simeon/simeon-s04.mp3",
+   "sec": 9.12,
+   "kind": "story"
+  },
+  "simeon-s05": {
+   "file": "/audio/witnesses/simeon/simeon-s05.mp3",
+   "sec": 10.56,
+   "kind": "story"
+  },
+  "simeon-s06": {
+   "file": "/audio/witnesses/simeon/simeon-s06.mp3",
+   "sec": 12.72,
+   "kind": "story"
+  },
+  "simeon-s07": {
+   "file": "/audio/witnesses/simeon/simeon-s07.mp3",
+   "sec": 7.2,
+   "kind": "story"
+  },
+  "simeon-s08": {
+   "file": "/audio/witnesses/simeon/simeon-s08.mp3",
+   "sec": 10.88,
+   "kind": "story"
+  },
+  "simeon-s09": {
+   "file": "/audio/witnesses/simeon/simeon-s09.mp3",
+   "sec": 7.76,
+   "kind": "story"
+  },
+  "simeon-s10": {
+   "file": "/audio/witnesses/simeon/simeon-s10.mp3",
+   "sec": 7.44,
+   "kind": "story"
+  },
+  "simeon-s11": {
+   "file": "/audio/witnesses/simeon/simeon-s11.mp3",
+   "sec": 9.44,
+   "kind": "story"
+  },
+  "simeon-s12": {
+   "file": "/audio/witnesses/simeon/simeon-s12.mp3",
+   "sec": 8.72,
+   "kind": "story"
+  },
+  "simeon-s13": {
+   "file": "/audio/witnesses/simeon/simeon-s13.mp3",
+   "sec": 14.48,
+   "kind": "story"
+  },
+  "simeon-s14": {
+   "file": "/audio/witnesses/simeon/simeon-s14.mp3",
+   "sec": 11.44,
+   "kind": "story"
+  },
+  "simeon-s15": {
+   "file": "/audio/witnesses/simeon/simeon-s15.mp3",
+   "sec": 11.28,
+   "kind": "story"
+  },
+  "simeon-q01": {
+   "file": "/audio/witnesses/simeon/simeon-q01.mp3",
+   "sec": 7.52,
+   "kind": "answer"
+  },
+  "simeon-q02": {
+   "file": "/audio/witnesses/simeon/simeon-q02.mp3",
+   "sec": 10.56,
+   "kind": "answer"
+  },
+  "simeon-q03": {
+   "file": "/audio/witnesses/simeon/simeon-q03.mp3",
+   "sec": 16.8,
+   "kind": "answer"
+  },
+  "simeon-q04": {
+   "file": "/audio/witnesses/simeon/simeon-q04.mp3",
+   "sec": 20.64,
+   "kind": "answer"
+  },
+  "simeon-q05": {
+   "file": "/audio/witnesses/simeon/simeon-q05.mp3",
+   "sec": 9.2,
+   "kind": "answer"
+  },
+  "simeon-q06": {
+   "file": "/audio/witnesses/simeon/simeon-q06.mp3",
+   "sec": 14.0,
+   "kind": "answer"
+  },
+  "simeon-q07": {
+   "file": "/audio/witnesses/simeon/simeon-q07.mp3",
+   "sec": 17.12,
+   "kind": "answer"
+  },
+  "simeon-q08": {
+   "file": "/audio/witnesses/simeon/simeon-q08.mp3",
+   "sec": 17.68,
+   "kind": "answer"
+  },
+  "simeon-p01": {
+   "file": "/audio/witnesses/simeon/simeon-p01.mp3",
+   "sec": 6.32,
+   "kind": "poke"
+  },
+  "simeon-p02": {
+   "file": "/audio/witnesses/simeon/simeon-p02.mp3",
+   "sec": 4.88,
+   "kind": "poke"
+  },
+  "simeon-p03": {
+   "file": "/audio/witnesses/simeon/simeon-p03.mp3",
+   "sec": 3.12,
+   "kind": "poke"
+  },
+  "simeon-p04": {
+   "file": "/audio/witnesses/simeon/simeon-p04.mp3",
+   "sec": 5.12,
+   "kind": "poke"
+  },
+  "simeon-p05": {
+   "file": "/audio/witnesses/simeon/simeon-p05.mp3",
+   "sec": 5.04,
+   "kind": "poke"
+  }
+ },
+ "anna": {
+  "anna-s01": {
+   "file": "/audio/witnesses/anna/anna-s01.mp3",
+   "sec": 9.04,
+   "kind": "story"
+  },
+  "anna-s02": {
+   "file": "/audio/witnesses/anna/anna-s02.mp3",
+   "sec": 7.44,
+   "kind": "story"
+  },
+  "anna-s03": {
+   "file": "/audio/witnesses/anna/anna-s03.mp3",
+   "sec": 6.56,
+   "kind": "story"
+  },
+  "anna-s04": {
+   "file": "/audio/witnesses/anna/anna-s04.mp3",
+   "sec": 10.24,
+   "kind": "story"
+  },
+  "anna-s05": {
+   "file": "/audio/witnesses/anna/anna-s05.mp3",
+   "sec": 6.72,
+   "kind": "story"
+  },
+  "anna-s06": {
+   "file": "/audio/witnesses/anna/anna-s06.mp3",
+   "sec": 12.4,
+   "kind": "story"
+  },
+  "anna-s07": {
+   "file": "/audio/witnesses/anna/anna-s07.mp3",
+   "sec": 11.2,
+   "kind": "story"
+  },
+  "anna-s08": {
+   "file": "/audio/witnesses/anna/anna-s08.mp3",
+   "sec": 8.64,
+   "kind": "story"
+  },
+  "anna-s09": {
+   "file": "/audio/witnesses/anna/anna-s09.mp3",
+   "sec": 9.92,
+   "kind": "story"
+  },
+  "anna-s10": {
+   "file": "/audio/witnesses/anna/anna-s10.mp3",
+   "sec": 6.96,
+   "kind": "story"
+  },
+  "anna-s11": {
+   "file": "/audio/witnesses/anna/anna-s11.mp3",
+   "sec": 9.76,
+   "kind": "story"
+  },
+  "anna-s12": {
+   "file": "/audio/witnesses/anna/anna-s12.mp3",
+   "sec": 8.8,
+   "kind": "story"
+  },
+  "anna-s13": {
+   "file": "/audio/witnesses/anna/anna-s13.mp3",
+   "sec": 7.76,
+   "kind": "story"
+  },
+  "anna-s14": {
+   "file": "/audio/witnesses/anna/anna-s14.mp3",
+   "sec": 17.2,
+   "kind": "story"
+  },
+  "anna-s15": {
+   "file": "/audio/witnesses/anna/anna-s15.mp3",
+   "sec": 16.24,
+   "kind": "story"
+  },
+  "anna-q01": {
+   "file": "/audio/witnesses/anna/anna-q01.mp3",
+   "sec": 10.32,
+   "kind": "answer"
+  },
+  "anna-q02": {
+   "file": "/audio/witnesses/anna/anna-q02.mp3",
+   "sec": 5.28,
+   "kind": "answer"
+  },
+  "anna-q03": {
+   "file": "/audio/witnesses/anna/anna-q03.mp3",
+   "sec": 13.52,
+   "kind": "answer"
+  },
+  "anna-q04": {
+   "file": "/audio/witnesses/anna/anna-q04.mp3",
+   "sec": 12.08,
+   "kind": "answer"
+  },
+  "anna-q05": {
+   "file": "/audio/witnesses/anna/anna-q05.mp3",
+   "sec": 10.56,
+   "kind": "answer"
+  },
+  "anna-q06": {
+   "file": "/audio/witnesses/anna/anna-q06.mp3",
+   "sec": 15.28,
+   "kind": "answer"
+  },
+  "anna-q07": {
+   "file": "/audio/witnesses/anna/anna-q07.mp3",
+   "sec": 15.6,
+   "kind": "answer"
+  },
+  "anna-q08": {
+   "file": "/audio/witnesses/anna/anna-q08.mp3",
+   "sec": 13.68,
+   "kind": "answer"
+  },
+  "anna-p01": {
+   "file": "/audio/witnesses/anna/anna-p01.mp3",
+   "sec": 4.56,
+   "kind": "poke"
+  },
+  "anna-p02": {
+   "file": "/audio/witnesses/anna/anna-p02.mp3",
+   "sec": 4.72,
+   "kind": "poke"
+  },
+  "anna-p03": {
+   "file": "/audio/witnesses/anna/anna-p03.mp3",
+   "sec": 4.0,
+   "kind": "poke"
+  },
+  "anna-p04": {
+   "file": "/audio/witnesses/anna/anna-p04.mp3",
+   "sec": 5.52,
+   "kind": "poke"
+  },
+  "anna-p05": {
+   "file": "/audio/witnesses/anna/anna-p05.mp3",
+   "sec": 4.08,
+   "kind": "poke"
+  }
+ },
+ "wiseman": {
+  "wiseman-s01": {
+   "file": "/audio/witnesses/wiseman/wiseman-s01.mp3",
+   "sec": 16.4,
+   "kind": "story"
+  },
+  "wiseman-s02": {
+   "file": "/audio/witnesses/wiseman/wiseman-s02.mp3",
+   "sec": 19.44,
+   "kind": "story"
+  },
+  "wiseman-s03": {
+   "file": "/audio/witnesses/wiseman/wiseman-s03.mp3",
+   "sec": 18.72,
+   "kind": "story"
+  },
+  "wiseman-s04": {
+   "file": "/audio/witnesses/wiseman/wiseman-s04.mp3",
+   "sec": 14.32,
+   "kind": "story"
+  },
+  "wiseman-s05": {
+   "file": "/audio/witnesses/wiseman/wiseman-s05.mp3",
+   "sec": 14.32,
+   "kind": "story"
+  },
+  "wiseman-s06": {
+   "file": "/audio/witnesses/wiseman/wiseman-s06.mp3",
+   "sec": 14.72,
+   "kind": "story"
+  },
+  "wiseman-s07": {
+   "file": "/audio/witnesses/wiseman/wiseman-s07.mp3",
+   "sec": 10.16,
+   "kind": "story"
+  },
+  "wiseman-s08": {
+   "file": "/audio/witnesses/wiseman/wiseman-s08.mp3",
+   "sec": 9.92,
+   "kind": "story"
+  },
+  "wiseman-s09": {
+   "file": "/audio/witnesses/wiseman/wiseman-s09.mp3",
+   "sec": 8.72,
+   "kind": "story"
+  },
+  "wiseman-s10": {
+   "file": "/audio/witnesses/wiseman/wiseman-s10.mp3",
+   "sec": 11.04,
+   "kind": "story"
+  },
+  "wiseman-s11": {
+   "file": "/audio/witnesses/wiseman/wiseman-s11.mp3",
+   "sec": 19.6,
+   "kind": "story"
+  },
+  "wiseman-s12": {
+   "file": "/audio/witnesses/wiseman/wiseman-s12.mp3",
+   "sec": 15.36,
+   "kind": "story"
+  },
+  "wiseman-s13": {
+   "file": "/audio/witnesses/wiseman/wiseman-s13.mp3",
+   "sec": 14.96,
+   "kind": "story"
+  },
+  "wiseman-s14": {
+   "file": "/audio/witnesses/wiseman/wiseman-s14.mp3",
+   "sec": 12.64,
+   "kind": "story"
+  },
+  "wiseman-s15": {
+   "file": "/audio/witnesses/wiseman/wiseman-s15.mp3",
+   "sec": 6.88,
+   "kind": "story"
+  },
+  "wiseman-q01": {
+   "file": "/audio/witnesses/wiseman/wiseman-q01.mp3",
+   "sec": 13.28,
+   "kind": "answer"
+  },
+  "wiseman-q02": {
+   "file": "/audio/witnesses/wiseman/wiseman-q02.mp3",
+   "sec": 11.04,
+   "kind": "answer"
+  },
+  "wiseman-q03": {
+   "file": "/audio/witnesses/wiseman/wiseman-q03.mp3",
+   "sec": 12.4,
+   "kind": "answer"
+  },
+  "wiseman-q04": {
+   "file": "/audio/witnesses/wiseman/wiseman-q04.mp3",
+   "sec": 13.52,
+   "kind": "answer"
+  },
+  "wiseman-q05": {
+   "file": "/audio/witnesses/wiseman/wiseman-q05.mp3",
+   "sec": 5.12,
+   "kind": "answer"
+  },
+  "wiseman-q06": {
+   "file": "/audio/witnesses/wiseman/wiseman-q06.mp3",
+   "sec": 10.0,
+   "kind": "answer"
+  },
+  "wiseman-q07": {
+   "file": "/audio/witnesses/wiseman/wiseman-q07.mp3",
+   "sec": 10.8,
+   "kind": "answer"
+  },
+  "wiseman-q08": {
+   "file": "/audio/witnesses/wiseman/wiseman-q08.mp3",
+   "sec": 12.48,
+   "kind": "answer"
+  },
+  "wiseman-q09": {
+   "file": "/audio/witnesses/wiseman/wiseman-q09.mp3",
+   "sec": 13.04,
+   "kind": "answer"
+  },
+  "wiseman-p01": {
+   "file": "/audio/witnesses/wiseman/wiseman-p01.mp3",
+   "sec": 4.88,
+   "kind": "poke"
+  },
+  "wiseman-p02": {
+   "file": "/audio/witnesses/wiseman/wiseman-p02.mp3",
+   "sec": 3.6,
+   "kind": "poke"
+  },
+  "wiseman-p03": {
+   "file": "/audio/witnesses/wiseman/wiseman-p03.mp3",
+   "sec": 2.8,
+   "kind": "poke"
+  },
+  "wiseman-p04": {
+   "file": "/audio/witnesses/wiseman/wiseman-p04.mp3",
+   "sec": 4.64,
+   "kind": "poke"
+  },
+  "wiseman-p05": {
+   "file": "/audio/witnesses/wiseman/wiseman-p05.mp3",
+   "sec": 4.48,
+   "kind": "poke"
+  }
+ },
+ "herod": {
+  "herod-s01": {
+   "file": "/audio/witnesses/herod/herod-s01.mp3",
+   "sec": 9.2,
+   "kind": "story"
+  },
+  "herod-s02": {
+   "file": "/audio/witnesses/herod/herod-s02.mp3",
+   "sec": 9.44,
+   "kind": "story"
+  },
+  "herod-s03": {
+   "file": "/audio/witnesses/herod/herod-s03.mp3",
+   "sec": 9.44,
+   "kind": "story"
+  },
+  "herod-s04": {
+   "file": "/audio/witnesses/herod/herod-s04.mp3",
+   "sec": 10.48,
+   "kind": "story"
+  },
+  "herod-s05": {
+   "file": "/audio/witnesses/herod/herod-s05.mp3",
+   "sec": 8.64,
+   "kind": "story"
+  },
+  "herod-s06": {
+   "file": "/audio/witnesses/herod/herod-s06.mp3",
+   "sec": 6.24,
+   "kind": "story"
+  },
+  "herod-s07": {
+   "file": "/audio/witnesses/herod/herod-s07.mp3",
+   "sec": 8.56,
+   "kind": "story"
+  },
+  "herod-s08": {
+   "file": "/audio/witnesses/herod/herod-s08.mp3",
+   "sec": 5.2,
+   "kind": "story"
+  },
+  "herod-s09": {
+   "file": "/audio/witnesses/herod/herod-s09.mp3",
+   "sec": 11.52,
+   "kind": "story"
+  },
+  "herod-s10": {
+   "file": "/audio/witnesses/herod/herod-s10.mp3",
+   "sec": 9.12,
+   "kind": "story"
+  },
+  "herod-s11": {
+   "file": "/audio/witnesses/herod/herod-s11.mp3",
+   "sec": 5.92,
+   "kind": "story"
+  },
+  "herod-s12": {
+   "file": "/audio/witnesses/herod/herod-s12.mp3",
+   "sec": 3.84,
+   "kind": "story"
+  },
+  "herod-s13": {
+   "file": "/audio/witnesses/herod/herod-s13.mp3",
+   "sec": 11.2,
+   "kind": "story"
+  },
+  "herod-s14": {
+   "file": "/audio/witnesses/herod/herod-s14.mp3",
+   "sec": 8.24,
+   "kind": "story"
+  },
+  "herod-s15": {
+   "file": "/audio/witnesses/herod/herod-s15.mp3",
+   "sec": 15.76,
+   "kind": "story"
+  },
+  "herod-q01": {
+   "file": "/audio/witnesses/herod/herod-q01.mp3",
+   "sec": 4.48,
+   "kind": "answer"
+  },
+  "herod-q02": {
+   "file": "/audio/witnesses/herod/herod-q02.mp3",
+   "sec": 11.76,
+   "kind": "answer"
+  },
+  "herod-q03": {
+   "file": "/audio/witnesses/herod/herod-q03.mp3",
+   "sec": 13.84,
+   "kind": "answer"
+  },
+  "herod-q04": {
+   "file": "/audio/witnesses/herod/herod-q04.mp3",
+   "sec": 3.44,
+   "kind": "answer"
+  },
+  "herod-q05": {
+   "file": "/audio/witnesses/herod/herod-q05.mp3",
+   "sec": 9.84,
+   "kind": "answer"
+  },
+  "herod-q06": {
+   "file": "/audio/witnesses/herod/herod-q06.mp3",
+   "sec": 10.96,
+   "kind": "answer"
+  },
+  "herod-q07": {
+   "file": "/audio/witnesses/herod/herod-q07.mp3",
+   "sec": 15.52,
+   "kind": "answer"
+  },
+  "herod-q08": {
+   "file": "/audio/witnesses/herod/herod-q08.mp3",
+   "sec": 13.68,
+   "kind": "answer"
+  },
+  "herod-p01": {
+   "file": "/audio/witnesses/herod/herod-p01.mp3",
+   "sec": 6.32,
+   "kind": "poke"
+  },
+  "herod-p02": {
+   "file": "/audio/witnesses/herod/herod-p02.mp3",
+   "sec": 3.92,
+   "kind": "poke"
+  },
+  "herod-p03": {
+   "file": "/audio/witnesses/herod/herod-p03.mp3",
+   "sec": 5.12,
+   "kind": "poke"
+  },
+  "herod-p04": {
+   "file": "/audio/witnesses/herod/herod-p04.mp3",
+   "sec": 3.84,
+   "kind": "poke"
+  },
+  "herod-p05": {
+   "file": "/audio/witnesses/herod/herod-p05.mp3",
+   "sec": 4.8,
+   "kind": "poke"
+  }
+ },
+ "word": {},
+ "room": {}
+}

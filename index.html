@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Свидетели Рождества</title>
+<link rel="stylesheet" href="/src/witness/style.css">
+</head>
+<body class="home">
+<header><h1>Свидетели Рождества</h1><p>Выбери свидетеля. Он расскажет, как всё было.</p></header>
+<a id="film" href="/film.html"><img src="/film/poster.jpg" alt=""><span><b>Мультфильм «История Рождества»</b><small>От сада Эдема до двенадцатилетнего Иисуса в храме · 4,5 минуты</small></span></a>
+<main id="grid"></main>
+<script type="module">
+  const data = await fetch('/data/witnesses.json').then(r => r.json());
+  document.getElementById('grid').innerHTML = data.map(w => `
+    <a class="card" href="/witness.html?id=${w.id}"><img src="/medallions/${w.id}.png" alt="" loading="lazy"><b>${w.name}</b><small>${w.scripture.split(';')[0]}</small></a>`).join('');
+</script>
+</body></html>

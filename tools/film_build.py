@@ -19,6 +19,8 @@ def render(s):
         seg=f"work/film/scenes/{s['id']}_c{i}.mp4"
         args=['ffmpeg','-y','-loglevel','error','-ss',str(ss)]+(['-to',str(to)] if to else [])+['-i',raw(k),'-an','-vf',f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},format=yuv420p",'-c:v','libx264','-crf','20','-preset','fast',seg]
         sh(*args); segs.append(seg)
+    if s.get('boom'):   # a short clip: play it forward, back and forward again, so the picture lives as long as the narration
+        rev=f"work/film/scenes/{s['id']}_r.mp4"; sh('ffmpeg','-y','-loglevel','error','-i',segs[0],'-vf','reverse','-c:v','libx264','-crf','20','-preset','fast',rev); segs=[segs[0],rev,segs[0]]
     base=segs[0]
     if len(segs)>1:
         lst='work/film/scenes/%s_l.txt'%s['id']; open(lst,'w').write(''.join(f"file '{os.getcwd()}/{x}'\n" for x in segs)); base=f"work/film/scenes/{s['id']}_b.mp4"; sh('ffmpeg','-y','-loglevel','error','-f','concat','-safe','0','-i',lst,'-c','copy',base)

@@ -17,7 +17,13 @@ function setVerse(v) {
 $('verses').onclick = e => { const b = e.target.closest('button'); if (b) { setVerse(+b.dataset.i); audio.currentTime = 0; } };
 setVerse(0); if (song.credit) $('credit').textContent = song.credit;
 // ?tap: listen and press "Отметить" when each line starts; the eight seconds are printed to copy into song.json
-if (new URLSearchParams(location.search).has('tap')) { const out = []; $('tap').hidden = false; $('tap').onclick = () => { if (out.length < 8) out.push(+audio.currentTime.toFixed(1)); $('tap').textContent = out.length < 8 ? `Отметить строку ${out.length + 1}` : 'Готово'; $('tapout').textContent = JSON.stringify(out); }; $('tap').textContent = 'Отметить строку 1'; }
+if (new URLSearchParams(location.search).has('tap')) {
+  let out = []; const show = () => { $('tap').textContent = out.length < 8 ? `Отметить строку ${out.length + 1}` : 'Готово'; $('tapout').textContent = JSON.stringify(out); };
+  $('tap').hidden = false; $('tap').textContent = 'Нажми «Петь»: строка 1 отметится сама';
+  audio.addEventListener('play', () => { if (!out.length) { out = [0]; show(); } });
+  $('rst').addEventListener('click', () => { out = [0]; show(); });
+  $('tap').onclick = () => { if (out.length && out.length < 8) out.push(+audio.currentTime.toFixed(1)); show(); };
+}
 let playing = false;
 $('play').onclick = () => { if (playing) { audio.pause(); } else { audio.play(); } };
 audio.onplay = () => { playing = true; $('play').textContent = '❚❚ Пауза'; }; audio.onpause = () => { playing = false; $('play').textContent = '▶ Петь'; };

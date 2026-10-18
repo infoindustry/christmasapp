@@ -6,7 +6,7 @@ export async function initQuiz({ stage, $ }) {
   const bank = await fetch('data/quiz.json').then(r => r.json());
   $('panel').insertAdjacentHTML('afterbegin', `<div id="qpanel"><div id="qprog"></div><div id="qcard">Готов проверить, что ты знаешь о Рождестве?</div><div id="qans" hidden><button id="qT" class="ans yes">✅ Правда</button><button id="qF" class="ans no">❌ Неправда</button></div><div id="qexp" hidden></div><div id="qctl"><button id="qstart" class="primary">▶ Играть</button><button id="qnext" class="primary" hidden>Дальше →</button><button id="qmore" class="alt" hidden>💬 Про Иисуса</button><button id="qend" hidden>⏹ Закончить</button><button id="qsnd">🔊</button></div></div>`);
   let sound = true, best = 0; try { best = +localStorage.getItem('quizBest') || 0; } catch (e) {}
-  const music = new Audio('audio/theme-joy.mp3'); music.loop = true; music.volume = 0.12;
+  const music = new Audio('audio/theme-xmas.mp3'); music.loop = true; music.volume = 0.14;
   const vp = new Audio(); let vtok = 0;
   const say = (src, onEnd) => { vp.onended = null; if (!sound) { onEnd?.(); return; } const my = ++vtok; vp.src = src; vp.volume = 0.95; vp.onended = () => { if (my === vtok) onEnd?.(); }; vp.play().catch(() => onEnd?.()); };
   const sfx = f => { if (!sound) return; const a = new Audio(f); a.volume = 0.6; a.play().catch(() => {}); };

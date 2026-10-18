@@ -37,7 +37,7 @@ async function draw() {
   const to = $('to').value.trim(), from = $('from').value.trim();
   if (to) { g.font = '600 40px Georgia, serif'; g.fillStyle = '#fff'; g.shadowBlur = 12; g.fillText('Для ' + to, S / 2, 240); g.shadowBlur = 0; }
   // verse
-  const hasStk = st.stk >= 0 || !!ph.img, [vt, vr] = VERSES[st.v], left = 70, maxW = hasStk ? 650 : 940, cx = left + maxW / 2;
+  const hasStk = st.stk >= 0 || !!ph.img, [vt, vr] = VERSES[st.v], left = 70, maxW = hasStk ? 600 : 940, cx = left + maxW / 2;
   let size = 50; g.font = `italic ${size}px Georgia, "Times New Roman", serif`; let lines = wrap(vt, maxW); while (lines.length > 6 && size > 30) { size -= 4; g.font = `italic ${size}px Georgia, serif`; lines = wrap(vt, maxW); }
   const lh = size * 1.28, total = lines.length * lh, y0 = 770 - total / 2 + lh / 2 - 10;
   g.fillStyle = '#fff'; g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 10; lines.forEach((l, i) => g.fillText(l, cx, y0 + i * lh)); g.shadowBlur = 0;

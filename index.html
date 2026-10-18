@@ -1,16 +1,45 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#14102a">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Рождество">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Свидетели Рождества</title>
 <link rel="stylesheet" href="/src/witness/style.css">
 </head>
 <body class="home">
 <header><h1>Свидетели Рождества</h1><p>Выбери свидетеля. Он расскажет, как всё было.</p></header>
 <a id="film" href="film.html"><img src="film/poster.jpg" alt=""><span><b>Мультфильм «История Рождества»</b><small>От сада Эдема до двенадцатилетнего Иисуса в храме · 4,5 минуты</small></span></a>
+<section id="pwa" hidden>
+  <div class="pwa-row"><img src="icons/icon-192.png" alt=""><div><b>Поставь на телефон</b><small id="pwaSub">Откроется как обычное приложение, без адресной строки.</small></div><button id="pwaInstall" hidden>Установить</button></div>
+  <ol id="iosHow" hidden><li>Нажми значок <b>«Поделиться»</b> <span class="shr">⬆︎</span> внизу Safari.</li><li>Выбери <b>«На экран „Домой“»</b>.</li><li>Нажми <b>«Добавить»</b>: значок-звезда появится среди приложений.</li></ol>
+  <div class="pwa-off"><button id="offBtn">⬇ Скачать для работы без интернета</button><div id="offBar" hidden><i></i></div><small id="offTxt"></small></div>
+</section>
 <main id="grid"></main>
 <script type="module">
   const data = await fetch('data/witnesses.json').then(r => r.json());
   document.getElementById('grid').innerHTML = data.map(w => `
     <a class="card" href="witness.html?id=${w.id}"><img src="medallions/thumb/${w.id}.webp" alt="" loading="lazy"><b>${w.name}</b><small>${w.scripture.split(';')[0]}</small></a>`).join('');
+  // ---- install as an app + offline copy
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone, isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const $p = id => document.getElementById(id); let deferred = null;
+  if (location.hostname !== 'localhost' || location.search.includes('pwa')) $p('pwa').hidden = false;
+  if (standalone) { document.querySelector('.pwa-row').hidden = true; }
+  else if (isIOS) { $p('iosHow').hidden = false; $p('pwaSub').textContent = 'В Safari это делается так:'; }
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $p('pwaInstall').hidden = false; });
+  $p('pwaInstall').onclick = async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $p('pwaInstall').hidden = true; };
+  addEventListener('appinstalled', () => { document.querySelector('.pwa-row').hidden = true; });
+  try { const pc = await fetch('precache.json', { cache: 'no-store' }).then(r => r.json()); const mb = Math.round(pc.mediaBytes / 1048576);
+    const done = () => { $p('offBtn').hidden = true; $p('offTxt').textContent = '✓ Всё сохранено: приложение работает без интернета.'; };
+    if (localStorage.getItem('offlineDone') === pc.version) done(); else $p('offTxt').textContent = `Голоса, модели и мультфильм (около ${mb} МБ). Лучше качать по Wi-Fi.`;
+    $p('offBtn').onclick = async () => {
+      $p('offBtn').disabled = true; $p('offBar').hidden = false; const cache = await caches.open('nativity-media-v1'); let n = 0, fail = 0; const list = pc.media;
+      const work = async () => { while (list.length) { const u = list.shift(); try { const res = await fetch(u); if (res.ok) await cache.put(new Request(new URL(u, location.href).href), res); else fail++; } catch (e) { fail++; } n++; $p('offBar').firstElementChild.style.width = `${Math.round(n / pc.media.length * 100)}%`; $p('offTxt').textContent = `Сохраняю… ${Math.round(n / pc.media.length * 100)}%`; } };
+      await Promise.all([work(), work(), work()]);
+      if (!fail) { localStorage.setItem('offlineDone', pc.version); done(); $p('offBar').hidden = true; } else { $p('offTxt').textContent = `Не всё сохранилось (${fail}). Проверь интернет и нажми ещё раз.`; $p('offBtn').disabled = false; }
+    };
+  } catch (e) { $p('pwa').hidden = true; }
   // warm the cache for the card you are about to open
   const warm = e => { const a = e.target.closest('.card'); if (!a || a.dataset.w) return; a.dataset.w = 1; const id = new URL(a.href).searchParams.get('id'); const f = id === 'room' ? 'room/room.glb' : id === 'word' ? '' : `witnesses/${id}/model.glb`; if (f) fetch(f).catch(() => {}); };
   document.getElementById('grid').addEventListener('pointerdown', warm); document.getElementById('grid').addEventListener('pointerover', warm);

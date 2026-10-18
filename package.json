@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite build && node tools/make_precache.mjs",
     "preview": "vite preview --host",
     "witnesses": "python3 tools/export_witnesses.py",
     "voice": "python3 tools/voice_all.py"

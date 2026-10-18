@@ -66,3 +66,19 @@ body.room #sub, body.room #dots, body.room #controls { display: none; }
 #film { display: flex; align-items: center; gap: 14px; max-width: 980px; margin: 0 auto 6px; padding: 10px; width: calc(100% - 36px); border-radius: 18px; background: #ffffff12; color: inherit; text-decoration: none; box-shadow: inset 0 0 0 1.5px #e8c46a66; }
 #film img { width: 42%; max-width: 300px; border-radius: 12px; aspect-ratio: 16 / 9; object-fit: cover; }
 #film b { display: block; font-size: clamp(17px, 3.4vw, 24px); margin-bottom: 4px; } #film small { opacity: .75; font-family: system-ui, sans-serif; font-size: 13px; line-height: 1.4; }
+
+/* the "how do you want to look" start screen */
+#start { overflow-y: auto; justify-content: flex-start; padding: max(18px, env(safe-area-inset-top)) 16px 24px; gap: 10px; }
+#start img { width: min(30vw, 130px); flex: none; } #start h2 { font-size: 26px; flex: none; }
+#startQ { margin: 4px 0 0; font-size: 18px; opacity: .95; }
+#opts { display: flex; flex-direction: column; gap: 8px; width: min(440px, 100%); }
+.opt { display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 14px; border-radius: 16px; background: #ffffff14; border: 2px solid transparent; }
+.opt.on { background: #ffffff26; border-color: var(--gold); } .opt.off { opacity: .45; }
+.opt .oi { font-size: 30px; flex: none; width: 40px; text-align: center; } .opt b { display: block; font-size: 17px; } .opt small { display: block; opacity: .75; font-size: 13px; margin-top: 1px; }
+#how { list-style: none; margin: 4px 0 0; padding: 0; width: min(440px, 100%); display: flex; flex-direction: column; gap: 6px; text-align: left; }
+#how li { display: flex; align-items: center; gap: 12px; font-family: system-ui, sans-serif; font-size: 15px; line-height: 1.3; }
+#how li span { font-size: 24px; flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #ffffff1c; }
+#tip { margin: 0; max-width: 440px; font-size: 13px !important; opacity: .7 !important; font-family: system-ui, sans-serif; }
+#go { margin-top: 6px; font-size: 18px; padding: 13px 34px; }
+#arhint img { display: block; width: 84px; margin: 0 auto 8px; border-radius: 50%; animation: scan 1.6s ease-in-out infinite; }
+@keyframes scan { 0%, 100% { transform: scale(.92); opacity: .75; } 50% { transform: scale(1.06); opacity: 1; } }

@@ -4,6 +4,7 @@ import { Stage } from './stage.js';
 import { AR } from './ar.js';
 import { initWord } from './word.js';
 import { initRoom } from './room.js';
+import { chooseMode } from './start.js';
 
 const $ = id => document.getElementById(id);
 const id = new URLSearchParams(location.search).get('id') || 'zechariah';
@@ -84,22 +85,25 @@ cv.addEventListener('pointerup', e => {
   } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
 });
 
-$('go').onclick = async () => {
+// the first screen asks HOW to look (in the magazine / on the table / on the phone) and explains it; that tap also unlocks the sound
+const startMode = chooseMode({ $, kind: ROOM ? 'room' : BOOK ? 'word' : 'witness', name: w.name, preset: new URLSearchParams(location.search).get('mode') });
+(async () => {
+  const mode = await startMode;
   $('go').disabled = true; await loading; $('start').remove();
-  if (ROOM) { room = initRoom({ stage, $ }); window.__w.room = room; const m1 = new URLSearchParams(location.search).get('mode'); if (m1) setMode(m1); return; }
-  if (BOOK) { word = await initWord({ stage, $ }); window.__w.word = word; const m0 = new URLSearchParams(location.search).get('mode'); if (m0) setMode(m0); return; }
+  if (ROOM) { room = initRoom({ stage, $ }); window.__w.room = room; if (mode !== 'scene') setMode(mode); return; }
+  if (BOOK) { word = await initWord({ stage, $ }); window.__w.word = word; if (mode !== 'scene') setMode(mode); return; }
   audio.src = fileOf(story[0]); audio.volume = 0; audio.play().then(() => { audio.pause(); audio.volume = 1; }).catch(() => { audio.volume = 1; }); // unlock audio on this tap
   stage.bow();
   setSub('Нажми «Рассказать», и я расскажу, как всё было.', true); showDots();
-  const m0 = new URLSearchParams(location.search).get('mode'); if (m0) setMode(m0);   // ?mode=marker|surface opens straight in AR (handy for testing)
-};
+  if (mode !== 'scene') setMode(mode);
+})();
 // view modes: the virtual stage, AR on the printed medallion, AR on any surface
 let hintTimer = null;
 const ar = new AR(stage, w.id, {
   // hint(text, hideAfterMs, offerAfterMs): a floating note; after offerAfterMs it also offers to stand the witness anywhere, without the medallion
   hint: (t, hide = 0, offer = 0) => {
-    clearTimeout(hintTimer); const el = $('arhint'); el.hidden = !t; el.textContent = t;
-    if (t && offer) hintTimer = setTimeout(() => { el.innerHTML = ''; el.append(t + ' '); const b = Object.assign(document.createElement('button'), { textContent: 'Нет медальона? Поставить здесь' }); b.onclick = () => setMode('surface'); el.append(document.createElement('br'), b); }, offer);
+    clearTimeout(hintTimer); const el = $('arhint'); el.hidden = !t; const pic = offer ? `<img src="medallions/${w.id}.png" alt="">` : ''; el.innerHTML = pic; el.append(t);   // while looking for the medallion: show what to look for
+    if (t && offer) hintTimer = setTimeout(() => { el.innerHTML = `<img src="medallions/${w.id}.png" alt="">`; el.append(t + ' '); const b = Object.assign(document.createElement('button'), { textContent: 'Нет медальона? Поставить здесь' }); b.onclick = () => setMode('surface'); el.append(document.createElement('br'), b); }, offer);
     if (t && hide) hintTimer = setTimeout(() => (el.hidden = true), hide);
   },
   exited: () => setMode('scene', true),

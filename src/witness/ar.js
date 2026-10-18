@@ -17,7 +17,7 @@ export class AR {
 
   static async support() {
     const cam = !!navigator.mediaDevices?.getUserMedia;
-    let xr = false; try { xr = !!(navigator.xr && await navigator.xr.isSessionSupported('immersive-ar')); } catch (e) {}
+    let xr = false; try { xr = !!(navigator.xr && await Promise.race([navigator.xr.isSessionSupported('immersive-ar'), new Promise(r => setTimeout(() => r(false), 1500))])); } catch (e) {}
     const gyro = typeof DeviceOrientationEvent !== 'undefined';
     return { marker: cam, surface: xr || (cam && gyro), xr };
   }
@@ -78,7 +78,7 @@ export class AR {
     controller.processVideo(feed);
     this.cleanup.push(() => { pumping = false; controller.dispose?.(); controller.stopProcessVideo?.(); });
 
-    let shown = false; this.ui.hint('Наведи камеру на медальон', 0, 4000);
+    let shown = false; this.ui.hint('Наведи камеру на этот кружок в журнале. Он должен быть виден весь', 0, 5000);
     s.onFrame = () => {
       const now = performance.now() / 1000;
       if (smoother.visible(now)) { s.arRoot.matrix.copy(smoother.step(now)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; if (!shown) { shown = true; this.ui.hint(''); } }
@@ -113,7 +113,7 @@ export class AR {
   async _gyro() {
     const s = this.stage; this.kind = 'gyro';
     // without the gyroscope (a computer, or access refused) the camera simply stays fixed: the witness still stands in front of you
-    try { if (typeof DeviceOrientationEvent.requestPermission === 'function') await DeviceOrientationEvent.requestPermission(); } catch (e) { console.warn('gyro not available', e.message); }
+    try { if (window.__gyroPerm) await window.__gyroPerm; else if (typeof DeviceOrientationEvent.requestPermission === 'function') await DeviceOrientationEvent.requestPermission(); } catch (e) { console.warn('gyro not available', e.message); }
     await this._camera(); s.setAR(true); s.controls.enabled = false;
     s.camera.fov = 60; s.camera.position.set(0, 0, 0); s.camera.rotation.order = 'YXZ'; s.camera.updateProjectionMatrix();
     const DIST = 2.2; s.arRoot.scale.setScalar(0.7); s.arRoot.position.set(0, -1.0, -DIST); s.arRoot.visible = true;   // stands in front of you right away; tap to put it somewhere else

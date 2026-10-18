@@ -190,3 +190,6 @@ body.family #sub, body.family #dots, body.family #controls { display: none; }
 #fpanel { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 9px; font-family: var(--sys); }
 #fsub { min-height: 2.6em; display: flex; align-items: center; text-align: center; font-family: Georgia, serif; font-size: clamp(14px, 3.6vw, 17px); text-shadow: 0 1px 8px #000; }
 #fctl { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+#btnCC { padding: 9px 14px; font-weight: 700; opacity: .75; } #btnCC.on { opacity: 1; box-shadow: inset 0 0 0 1.5px var(--gold); }
+body.book #btnCC, body.room #btnCC, body.game #btnCC, body.quiz #btnCC, body.beth #btnCC { display: none; }

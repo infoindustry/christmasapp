@@ -37,7 +37,10 @@ const loading = stage.load(w.id, p => { $('loadbar').style.width = `${Math.round
 // one shared <audio> element: it is unlocked by the first tap, so lines can chain on phones
 const audio = new Audio(); audio.preload = 'auto';
 let mode = 'idle', idx = 0, paused = false, timer = null, token = 0;
-const setSub = (t, hint = false) => { $('sub').textContent = t; $('sub').classList.toggle('hint', hint); };
+// subtitles of the spoken lines are OFF by default (they take the space the scene needs); the "Aa" button turns them on. Hints stay.
+let subsOn = false; try { subsOn = localStorage.getItem('subs') === '1'; } catch (e) {}
+const setSub = (t, hint = false) => { $('sub').hidden = !t; $('sub').textContent = t; $('sub').classList.toggle('hint', hint); };
+const speakSub = t => { if (subsOn) setSub(t); else { $('sub').hidden = true; $('sub').textContent = ''; } };
 const showDots = () => dots.forEach((d, i) => { d.className = i < idx ? 'done' : (i === idx && mode === 'story' ? 'now' : ''); });
 const fileOf = l => audioMan[w.id][l.id].file;
 let word = null, room = null, game = null;
@@ -45,7 +48,7 @@ let word = null, room = null, game = null;
 function playLine(line, onEnd) {
   const my = ++token; clearTimeout(timer);
   audio.pause(); audio.src = fileOf(line); audio.currentTime = 0;
-  setSub(plain(line.text)); stage.setSpeaking(true, tagOf(line.text));
+  speakSub(plain(line.text)); stage.setSpeaking(true, tagOf(line.text));
   audio.play().catch(() => {});
   audio.onended = () => { if (my !== token) return; stage.setSpeaking(false); onEnd?.(); };
 }
@@ -65,6 +68,8 @@ function openQuestions(show = true) { $('questions').hidden = !show; }
 $('btnStory').onclick = () => { if (mode === 'done') idx = 0; playStory(); };
 $('btnPause').onclick = () => { if (paused) { audio.play(); stage.setSpeaking(true, ''); paused = false; $('btnPause').textContent = '⏸'; } else { audio.pause(); stage.setSpeaking(false); clearTimeout(timer); paused = true; $('btnPause').textContent = '▶'; } };
 $('btnNext').onclick = () => { stopAll(); idx = Math.min(story.length, idx + 1); showDots(); paused = false; playStory(); };
+$('btnCC').classList.toggle('on', subsOn);
+$('btnCC').onclick = () => { subsOn = !subsOn; $('btnCC').classList.toggle('on', subsOn); try { localStorage.setItem('subs', subsOn ? '1' : '0'); } catch (e) {} if (!subsOn) { $('sub').hidden = true; } };
 $('btnAsk').onclick = () => { const open = $('questions').hidden; openQuestions(open); if (open && mode === 'story' && !paused) $('btnPause').click(); };
 // an answer or a reaction in the middle of the story: the story is held, then offered again
 function aside(line) {

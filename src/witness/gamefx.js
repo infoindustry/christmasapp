@@ -1,7 +1,7 @@
 // "Пряничек и звёзды Вифлеема": the gingerbread runs to where you tap and collects stars. The board is the medallion (the printed one in AR).
 import * as THREE from 'three';
 
-const R = 0.5, BOARD = 0.42;   // playable radius on the disc
+let R = 0.5, BOARD = 0.42, MAXI = 7;   // playable radius (on the plate; on the table it grows), and how many candies at once
 const rnd = (a, b) => a + Math.random() * (b - a);
 const star = (outer, inner, depth) => {
   const s = new THREE.Shape(); for (let i = 0; i < 10; i++) { const r = i % 2 ? inner : outer, a = i / 10 * Math.PI * 2 - Math.PI / 2; (i ? s.lineTo : s.moveTo).call(s, Math.cos(a) * r, Math.sin(a) * r); } s.closePath();
@@ -130,7 +130,7 @@ export async function buildGame(loader, discTop, hooks = {}) {
       }
     }
     if (S.playing) {
-      spawnT -= dt; if (spawnT <= 0 && items.length < 7) { spawn(); spawnT = rnd(0.7, 1.3); }
+      spawnT -= dt; if (spawnT <= 0 && items.length < MAXI) { spawn(); spawnT = rnd(0.7, 1.3); }
       ballT -= dt; if (ballT <= 0) { spawnBall(); ballT = Math.max(1.3, 3.4 - 2 * (1 - S.left / S.total)) * rnd(0.8, 1.2); }
       S.left -= dt; S.idle += target ? -S.idle : dt; if (S.idle > 6) { S.idle = 0; once('wave', 1.6); emit('idle'); }
       if (S.left <= 0) { S.left = 0; S.playing = false; for (const o of balls) { root.remove(o.mesh); root.remove(o.warn); } balls.length = 0; const win = S.score >= 10; once(win ? 'cheer' : 'wave', 3); if (win) setTimeout(() => play('dance'), 3000); emit('end', { score: S.score, win }); }
@@ -175,6 +175,7 @@ export async function buildGame(loader, discTop, hooks = {}) {
   return {
     group: root, model: gb, update, S, items, on: f => listeners.push(f),
     setMode, get mode() { return mode; },
+    setArena(r) { BOARD = r; R = r + 0.08; MAXI = Math.min(14, Math.round(7 * (r / 0.42) ** 2 * 0.6)); },
     get runInfo() { return { obs: RUN.obs.length, pick: RUN.pick.length, speed: +RUN.speed.toFixed(2), dist: +RUN.dist.toFixed(1) }; },
     // the quiz host: the gingerbread reacts to answers
     react(kind) { if (kind === 'ok') { once('cheer', 2.2); burst(new THREE.Vector3(gb.position.x, discTop + 0.22, gb.position.z), 26, true); } else if (kind === 'no') { once('fall', 1.4); } else if (kind === 'win') { once('cheer', 3); burst(new THREE.Vector3(gb.position.x, discTop + 0.22, gb.position.z), 40, true); setTimeout(() => play('dance'), 3000); } else if (kind === 'idle') { play('idle'); } else if (kind === 'think') { once('wave', 1.6); } },

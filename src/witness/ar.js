@@ -88,20 +88,34 @@ export class AR {
 
   /* ----------------------------------------------------------------- surface */
   async startSurface() {
-    return (await AR.support()).xr ? this._xr() : this._gyro();
+    const xr = (await AR.support()).xr; if (this.stage.gameFx && !xr) throw new Error('the game needs real surface tracking (WebXR)');   // no plane tracking on this phone: no AR for the game
+    return xr ? this._xr() : this._gyro();
   }
 
   async _xr() {
     const s = this.stage, r = s.renderer; this.kind = 'xr'; s.setAR(true); s.controls.enabled = false;
-    s.arRoot.visible = false; const SCALE = s.gameFx ? 0.85 : 0.4;   // the game board fills the table s.arRoot.scale.setScalar(SCALE);
+    s.arRoot.visible = false; const game = s.gameFx, SCALE = game ? 0.8 : 0.4; s.arRoot.scale.setScalar(SCALE);   // the game: no plate, the whole table is the playground
+    if (game) { s.disc.visible = false; game.setArena(0.88); }   // 0.88 local units * 0.8 = a 70 cm radius around the first tap
     r.xr.enabled = true; r.xr.setReferenceSpaceType('local');
     const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: document.body } });
     await r.xr.setSession(session);
     const viewer = await session.requestReferenceSpace('viewer'), src = await session.requestHitTestSource({ space: viewer });
     const ref = r.xr.getReferenceSpace();
     const ret = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.08, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xe8c46a })); ret.matrixAutoUpdate = false; ret.visible = false; s.scene.add(ret);
-    let placed = false, last = null; this.ui.hint('Наведи на стол или пол и коснись экрана');
-    session.addEventListener('select', () => { if (last) { s.arRoot.matrixAutoUpdate = false; s.arRoot.matrix.copy(last).multiply(new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; placed = true; ret.visible = false; this.ui.hint(''); } });
+    let placed = false, last = null; this.ui.hint(game ? 'Наведи на стол и коснись, чтобы поставить пряничка' : 'Наведи на стол или пол и коснись экрана');
+    // taps on the page UI (buttons, panel) must not count as taps on the table
+    for (const sel of ['#panel', '#modes', '#back', '#head', '#hud']) document.querySelector(sel)?.addEventListener('beforexrselect', ev => ev.preventDefault());
+    const ray = new THREE.Raycaster(), tmpM = new THREE.Matrix4(), O = new THREE.Vector3(), D = new THREE.Vector3(), P = new THREE.Vector3();
+    session.addEventListener('select', e => {
+      if (!placed) {   // the first tap puts the world on the table; after that the world stays where it is
+        if (!last) return; s.arRoot.matrixAutoUpdate = false; s.arRoot.matrix.copy(last).multiply(new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; placed = true; ret.visible = false; this.ui.hint(''); return;
+      }
+      if (!game || !e.frame) return;   // the game: a tap sends the gingerbread there (or makes him jump if you touch him)
+      const pose = e.frame.getPose(e.inputSource.targetRaySpace, ref); if (!pose) return;
+      tmpM.fromArray(pose.transform.matrix); O.setFromMatrixPosition(tmpM); D.set(0, 0, -1).transformDirection(tmpM);
+      ray.set(O, D); const hit = ray.intersectObject(game.model, true)[0]; if (hit) { game.tap(hit.point, hit.object); return; }
+      const y = P.setFromMatrixPosition(s.arRoot.matrixWorld).y; if (D.y > -0.01) return; const t = (y - O.y) / D.y; game.tap(O.clone().addScaledVector(D, t), null);
+    });
     s.onFrame = (t, dt, frame) => {
       if (!frame || placed) return; const hits = frame.getHitTestResults(src);
       if (hits.length) { const pose = hits[0].getPose(ref); last = new THREE.Matrix4().fromArray(pose.transform.matrix); ret.matrix.copy(last); ret.visible = true; } else { ret.visible = false; last = null; }

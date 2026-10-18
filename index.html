@@ -11,6 +11,7 @@
 <body class="home">
 <header><h1>Свидетели Рождества</h1><p>История рождения Иисуса: услышь, увидь и поиграй.</p></header>
 <main id="home"></main>
+<p class="home-foot"><a href="parents.html">👪 Родителям</a></p>
 <section id="pwa" hidden>
   <div class="pwa-row"><img src="icons/icon-192.png" alt=""><div><b>Поставь на телефон</b><small id="pwaSub">Откроется как обычное приложение, без адресной строки.</small></div><button id="pwaInstall" hidden>Установить</button></div>
   <ol id="iosHow" hidden><li>Нажми значок <b>«Поделиться»</b> <span class="shr">⬆︎</span> внизу Safari.</li><li>Выбери <b>«На экран „Домой“»</b>.</li><li>Нажми <b>«Добавить»</b>: значок-звезда появится среди приложений.</li></ol>
@@ -26,6 +27,7 @@
     <section class="blk"><h2 class="sec-title">Слушать и смотреть<small>Рассказ из Евангелия и рождественская комната.</small></h2>
       <a id="film" href="film.html"><img src="film/poster.jpg" alt=""><span><b>Мультфильм «История Рождества»</b><small>От сада Эдема до двенадцатилетнего Иисуса в храме · 4,5 минуты</small></span></a>
       <div class="grid">${listen.map(card).join('')}</div></section>
+    <section class="blk"><h2 class="sec-title">Подарить<small>Сделай открытку и отправь тому, кого любишь.</small></h2><a id="film" href="card.html"><img src="card/bg/manger.jpg" alt=""><span><b>Открытка «С Рождеством!»</b><small>Картинка, герой и слова из Библии. Отправь в мессенджер или сохрани.</small></span></a></section>
     <section class="blk games"><h2 class="sec-title">Игры<small>Весёлые игры для детей. Пряничек придуман для игры, а не из Библии.</small></h2><div class="grid">${games.map(card).join('')}</div></section>`;
   // ---- install as an app + offline copy
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone, isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

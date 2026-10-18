@@ -193,3 +193,5 @@ body.family #sub, body.family #dots, body.family #controls { display: none; }
 
 #btnCC { padding: 9px 14px; font-weight: 700; opacity: .75; } #btnCC.on { opacity: 1; box-shadow: inset 0 0 0 1.5px var(--gold); }
 body.book #btnCC, body.room #btnCC, body.game #btnCC, body.quiz #btnCC, body.beth #btnCC { display: none; }
+
+.home-foot { text-align: center; margin: 6px 0 0; } .home-foot a { color: var(--gold); text-decoration: none; font-family: var(--sys); font-size: 15px; font-weight: 600; padding: 10px 18px; border-radius: 999px; background: #ffffff12; display: inline-block; }

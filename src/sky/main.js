@@ -50,11 +50,14 @@ const lookAt = v => { const f = forward(); return sepDeg(f, v); };
 const turnTo = v => { const a = altAz(v); goal = { alt: a.alt, az: a.az }; };
 
 // ---------- audio ----------
-const AC = window.AudioContext || window.webkitAudioContext; let ac, pan, choir, voice;
-function speak(src, onend) { voice?.pause(); voice = new Audio(src); voice.onended = onend || null; voice.play().catch(() => onend && setTimeout(onend, 4000)); }
-function startChoir() {
-  try { ac ||= new AC(); choir = new Audio('audio/family/choir.mp3'); choir.loop = true; choir.volume = 1; const s = ac.createMediaElementSource(choir); pan = ac.createPanner(); pan.panningModel = 'HRTF'; pan.distanceModel = 'inverse'; pan.refDistance = 4; pan.rolloffFactor = 0.5; s.connect(pan); pan.connect(ac.destination); ac.resume(); choir.play(); } catch { }
+const AC = window.AudioContext || window.webkitAudioContext; let ac, pan, choir; const voice = new Audio(); let voiceEnd = null;
+voice.onended = () => { const f = voiceEnd; voiceEnd = null; f?.(); };
+function speak(src, onend) { voice.pause(); voiceEnd = onend || null; voice.src = src; voice.play().catch(() => onend && setTimeout(() => { if (voiceEnd === onend) { voiceEnd = null; onend(); } }, 4000)); }
+// everything that needs a user gesture (iOS) is prepared in the tap on the mode card: the voice element, the audio context and the choir
+function unlockAudio() {
+  try { ac ||= new AC(); ac.resume(); choir = new Audio('audio/family/choir.mp3'); choir.loop = true; const s = ac.createMediaElementSource(choir); pan = ac.createPanner(); pan.panningModel = 'HRTF'; pan.distanceModel = 'inverse'; pan.refDistance = 4; pan.rolloffFactor = 0.5; s.connect(pan); pan.connect(ac.destination); choir.muted = true; choir.play().then(() => { choir.pause(); choir.muted = false; }).catch(() => { choir.muted = false; }); } catch { }
 }
+function startChoir() { try { ac?.resume(); choir.currentTime = 0; choir.play(); } catch { } }
 const caption = t => { const c = $('cap'); c.textContent = t; c.hidden = !subs || !t; };
 $('cc').onclick = () => { subs = !subs; try { localStorage.setItem('subs', subs ? '1' : '0'); } catch { } $('cc').classList.toggle('on', subs); if (!subs) $('cap').hidden = true; else if ($('cap').textContent) $('cap').hidden = false; };
 $('cc').classList.toggle('on', subs);
@@ -95,11 +98,10 @@ function startBeth() {
   BS.houses = Array.from({ length: 34 }, (_, i) => { const az0 = (az + 180 + (Math.random() - .5) * 70 + 360) % 360; return { az: az0, w: .8 + Math.random() * 1.1, lit: Math.random() < .6 }; });
   if (!useCam) view.yaw = -((az + 120) % 360), view.pitch = 12;   // start looking away from the star: the child has to find it
   $('hint').textContent = 'Поверни телефон вокруг. Найди яркую звезду и держи её в круге.'; caption('Найди Вифлеемскую звезду.');
-  speak('audio/sky/s0.mp3');
 }
 function makeAngels() {
-  const n = 15; BS.angels = Array.from({ length: n }, (_, i) => ({ i, big: i === 0, a0: BS.starAlt - 4 + (Math.random() - .5) * 50, z0: BS.azStar + (Math.random() - .5) * 110, wa: .25 + Math.random() * .3, wz: .15 + Math.random() * .25, pa: Math.random() * 6, pz: Math.random() * 6, delay: i * .5, sz: i === 0 ? 11 : 4.5 + Math.random() * 2.5 }));
-  BS.angels[0].a0 = BS.starAlt - 9; BS.angels[0].z0 = BS.azStar; BS.angels[0].wa = .12; BS.angels[0].wz = .1;
+  const n = 15; BS.angels = Array.from({ length: n }, (_, i) => ({ i, big: i === 0, a0: BS.starAlt - 6 + (Math.random() - .5) * 40, z0: BS.azStar + (Math.random() - .5) * 100, wa: .15 + Math.random() * .15, wz: .1 + Math.random() * .12, pa: Math.random() * 6, pz: Math.random() * 6, delay: i * .5, sz: i === 0 ? 11 : 4.5 + Math.random() * 2.5 }));
+  BS.angels[0].a0 = BS.starAlt - 9; BS.angels[0].z0 = BS.azStar; BS.angels[0].wa = .1; BS.angels[0].wz = .08;
 }
 function drawAngel(x, y, s, t, ph, al) {
   g.save(); g.globalAlpha = al; g.translate(x, y); glow(0, -s * .1, s * 1.5, 'rgba(255,238,190,.55)');
@@ -124,7 +126,7 @@ function drawBeth(t, dt) {
   // angels fly across the sky (and the choir sings from where they are)
   if (BS.angels.length) {
     let ax = 0, ay = 0, az2 = 0, w = 0; const list = [];
-    for (const a of BS.angels) { const al = ease(Math.max(0, Math.min(1, (BS.t - BS.tA - a.delay) / 1.6))); if (al <= 0) continue; const alt = Math.max(6, Math.min(80, a.a0 + 9 * Math.sin(BS.t * a.wa + a.pa))), azm = a.z0 + 32 * Math.sin(BS.t * a.wz + a.pz), v = dirOf(alt, azm); ax += v[0] * al; ay += v[1] * al; az2 += v[2] * al; w += al; list.push([v, a, al]); }
+    for (const a of BS.angels) { const al = ease(Math.max(0, Math.min(1, (BS.t - BS.tA - a.delay) / 1.6))); if (al <= 0) continue; const alt = Math.max(6, Math.min(80, a.a0 + 3 * Math.sin(BS.t * a.wa + a.pa))), azm = a.z0 + 7 * Math.sin(BS.t * a.wz + a.pz), v = dirOf(alt, azm); ax += v[0] * al; ay += v[1] * al; az2 += v[2] * al; w += al; list.push([v, a, al]); }
     list.sort((p, q) => p[1].sz - q[1].sz);
     for (const [v, a, al] of list) if (proj(...v)) drawAngel(sx(), sy(), a.sz * D * F * 1.1, BS.t, a.pa, al);
     if (pan && w) { proj(ax / w, ay / w, az2 / w); const k = 6, px = P[0], py = P[1], pz = P[2]; if (pan.positionX) { pan.positionX.value = px * k; pan.positionY.value = py * k; pan.positionZ.value = pz * k; } else pan.setPosition(px * k, py * k, pz * k); }
@@ -163,7 +165,7 @@ function refreshMagi() {
 function startMagi() {
   mode = 'magi'; $('ttl').textContent = 'Небо волхвов'; $('end').hidden = true; $('arrow').hidden = true; $('ring').hidden = true; caption('');
   $('magi').hidden = false; $('hint').textContent = ''; $('presets').innerHTML = MP.map((p, i) => `<button data-i="${i}">${p.n}</button>`).join('');
-  pickPreset(0); speak('audio/sky/m0.mp3');
+  pickPreset(0);
 }
 $('presets').onclick = async e => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.i; if (MP[i].now) await new Promise(r => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => { MS.loc = { lat: p.coords.latitude, lon: p.coords.longitude }; r(); }, () => r(), { timeout: 4000 }) : r()); else MS.loc = PERSIA; pickPreset(i); };
 $('hour').oninput = e => { MS.hour = +e.target.value; dirty = true; };
@@ -194,6 +196,7 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 async function begin(m) {
+  unlockAudio(); speak(m === 'beth' ? 'audio/sky/s0.mp3' : 'audio/sky/m0.mp3');
   $('start').hidden = true; $('hud').hidden = false; useCam = $('usecam').checked;
   await startSensors();
   if (useCam) { try { vid.srcObject = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }); vid.classList.add('on'); vid.play(); } catch { useCam = false; } }
@@ -201,7 +204,7 @@ async function begin(m) {
   (m === 'beth' ? startBeth : startMagi)();
 }
 document.querySelectorAll('.card').forEach(b => b.onclick = () => begin(b.dataset.mode));
-$('again').onclick = () => { choir?.pause(); startBeth(); }; $('tomagi').onclick = () => { choir?.pause(); voice?.pause(); startMagi(); };
+$('again').onclick = () => { choir?.pause(); speak('audio/sky/s0.mp3'); startBeth(); }; $('tomagi').onclick = () => { choir?.pause(); speak('audio/sky/m0.mp3'); startMagi(); };
 const qm = new URLSearchParams(location.search).get('m'); if (qm) requestAnimationFrame(() => begin(qm));
 requestAnimationFrame(loop);
 window.__sky = { view, BS, MS, get sky() { return sky; }, turnTo };

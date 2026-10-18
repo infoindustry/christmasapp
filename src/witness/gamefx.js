@@ -167,6 +167,8 @@ export async function buildGame(loader, discTop, hooks = {}) {
   return {
     group: root, model: gb, update, S, items, on: f => listeners.push(f),
     setMode, get mode() { return mode; },
+    // the quiz host: the gingerbread reacts to answers
+    react(kind) { if (kind === 'ok') { once('cheer', 2.2); burst(new THREE.Vector3(gb.position.x, discTop + 0.22, gb.position.z), 26, true); } else if (kind === 'no') { once('fall', 1.4); } else if (kind === 'win') { once('cheer', 3); burst(new THREE.Vector3(gb.position.x, discTop + 0.22, gb.position.z), 40, true); setTimeout(() => play('dance'), 3000); } else if (kind === 'idle') { play('idle'); } else if (kind === 'think') { once('wave', 1.6); } },
     // runner controls
     lane(d) { RUN.lane = Math.max(0, Math.min(2, RUN.lane + d)); },
     jump() { if (RUN.jump <= 0 && RUN.on) { RUN.jump = 0.75; once('jump', 0.75); emit('jump'); } },

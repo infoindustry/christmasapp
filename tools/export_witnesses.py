@@ -20,6 +20,7 @@ for w in m.W:
     out.append(dict(id=w['id'],name=w['name'],voiceId=vid,voiceName=w['voiceName'],model=w['model'],scripture=w['intro'],lines=lines))
 out.append(dict(id='word',name='Слово Божье',type='book',voiceId='',voiceName='аудиокнига',model='',scripture='Лк 1–2; Мф 1–2; Ин 1:14',lines=[]))
 out.append(dict(id='room',name='Рождественская комната',type='room',voiceId='',voiceName='',model='',scripture='Загляни внутрь',lines=[]))
+out.append(dict(id='quiz',name='Викторина',type='game',voiceId='',voiceName='',model='',scripture='Правда или нет',lines=[]))
 out.append(dict(id='game',name='Пряничек',type='game',voiceId='',voiceName='',model='',scripture='Игра: собери звёзды',lines=[]))
 json.dump(out,open('data/witnesses.json','w'),ensure_ascii=False,indent=1)
 md=['# 11 свидетелей Рождества — реплики\n','Каждому: 15 реплик рассказа по порядку и 7 ответов на вопросы ребёнка (всего 22). Теги в [скобках] — подача голоса Eleven v4, не произносятся. Цитаты Писания слово в слово по Синодальному переводу (из базы gospel-context).\n']

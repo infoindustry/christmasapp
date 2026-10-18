@@ -1,4 +1,5 @@
 // The gingerbread game: two modes (collect stars on the plate / endless run), HUD (stars, hearts), sounds, the little voice, results.
+import { FACTS } from './jesus.js';
 export function initGame({ stage, $ }) {
   document.body.classList.add('game');
   const fx = stage.gameFx, S = fx.S;
@@ -11,7 +12,6 @@ export function initGame({ stage, $ }) {
   let lastVoice = 0; const voice = (k, force = false) => { const now = performance.now(); if (!sound || (!force && now - lastVoice < 1800)) return false; lastVoice = now; vp.src = `audio/game/${k}.mp3`; vp.volume = 0.95; vp.play().catch(() => {}); return true; };
   let ci = 0, wi = 0, bi = 0, fi = 0, kind = 'collect', factsOn = false;
   // after a win the gingerbread can tell more about Jesus (short, optional, one by one)
-  const FACTS = ['Знаешь, почему на Рождество зажигают звёзды? Потому что над Вифлеемом зажглась особенная звезда: родился Иисус!', 'Иисус — Сын Божий. Сам Бог пришёл на землю, чтобы быть рядом с нами!', 'Ангел сказал пастухам: «Ныне родился вам Спаситель, Который есть Христос Господь!»', 'Спаситель — это Тот, Кто спасает. Иисус пришёл, чтобы вернуть всех нас к Богу.', 'Иисус родился не во дворце, а в простой семье, и первыми об этом узнали пастухи.', 'Мудрецы из далёких стран пришли к Нему и принесли золото, ладан и смирну.', 'Бог любит каждого из нас. Даже маленьких пряничков! Хи-хи.', 'Иисус вырос и учил людей любить друг друга. Он говорил: «Я есмь свет миру».', 'С Рождеством! Иисус любит тебя, и я тоже.'];
   const showResult = (win, lines, again) => { $('hud').hidden = true; $('gpanel').classList.remove('playing'); $('gres').hidden = false; $('gres').innerHTML = lines; $('gplay').hidden = $('grun').hidden = false; };
   fx.on((name, d) => {
     if (name === 'start') { const run = fx.mode === 'run'; kind = run ? 'run' : 'collect'; factsOn = false; $('hearts').textContent = '❤️❤️❤️'; $('hud').hidden = false; $('gres').hidden = true; $('gpanel').classList.add('playing'); $('gplay').hidden = $('grun').hidden = true; $('score').querySelector('b').textContent = 0; $('dist').hidden = !run; $('timer').hidden = run; say(run ? 'Свайп влево и вправо: перебегай. Свайп вверх или касание: прыжок!' : 'Собирай звёздочки, а от снежков прыгай: коснись пряничка!'); voice('start', true); if (sound) music.play().catch(() => {}); }

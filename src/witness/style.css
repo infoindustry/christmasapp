@@ -154,3 +154,15 @@ body.home header p { margin-top: 4px; font-size: 15px; }
 #iosHow { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.5; opacity: .9; } .shr { display: inline-block; padding: 0 4px; border-radius: 4px; background: #ffffff22; }
 .pwa-off { display: flex; flex-direction: column; gap: 6px; } .pwa-off small { opacity: .7; font-size: 13px; }
 #offBar { height: 8px; border-radius: 99px; background: #0007; overflow: hidden; } #offBar i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .3s; }
+
+/* the Christmas quiz */
+body.quiz #sub, body.quiz #dots, body.quiz #controls { display: none; }
+#qpanel { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 9px; font-family: var(--sys); }
+#qprog { font-size: 13px; letter-spacing: .04em; opacity: .8; min-height: 1.2em; }
+#qcard { width: 100%; text-align: center; font-family: Georgia, serif; font-size: clamp(18px, 4.6vw, 23px); line-height: 1.3; padding: 14px 16px; border-radius: 18px; background: #ffffff16; box-shadow: inset 0 0 0 1px #ffffff1c; min-height: 3.4em; display: flex; flex-direction: column; justify-content: center; }
+#qcard.good { background: #3ec57a33; box-shadow: inset 0 0 0 2px #3ec57a99; } #qcard.bad { background: #ff6b6b30; box-shadow: inset 0 0 0 2px #ff6b6b88; }
+#qans { display: flex; gap: 10px; width: 100%; } #qans .ans { flex: 1; padding: 15px 8px; font-size: 18px; font-weight: 700; border-radius: 16px; background: #ffffff1f; }
+#qans .yes { background: #3ec57a40; } #qans .no { background: #ff6b6b40; }
+#qans .ans.right { background: #3ec57a; color: #082010; } #qans .ans.wrong { background: #ff6b6b; color: #2a0808; } #qans .ans:disabled { opacity: .85; }
+#qexp { font-size: 14px; line-height: 1.4; text-align: center; opacity: .95; max-width: 520px; }
+#qctl { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; } #qctl .primary { font-size: 17px; padding: 12px 28px; } #qctl .alt { background: #5b8def; color: #fff; }

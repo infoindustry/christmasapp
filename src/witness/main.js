@@ -5,10 +5,12 @@ import { AR } from './ar.js';
 import { initWord } from './word.js';
 import { initRoom } from './room.js';
 import { initGame } from './game.js';
+import { initQuiz } from './quiz.js';
 import { chooseMode } from './start.js';
 
 const $ = id => document.getElementById(id);
 const id = new URLSearchParams(location.search).get('id') || 'zechariah';
+const QUIZ = new URLSearchParams(location.search).get('id') === 'quiz';   // the Christmas quiz (true or false)
 const GAME = new URLSearchParams(location.search).get('id') === 'game';   // the gingerbread game
 const ROOM = new URLSearchParams(location.search).get('id') === 'room';   // the Christmas room
 const BOOK = new URLSearchParams(location.search).get('id') === 'word';   // the twelfth "witness" is the audiobook
@@ -85,14 +87,15 @@ cv.addEventListener('pointerup', e => {
   if (hit.companion) {
     const n = hit.companion.cfg.sound; if (n) { soundI[n] = ((soundI[n] ?? -1) + 1) % 2; play(animalAudio, `audio/animals/${n}-${soundI[n] + 1}.mp3`); }
     hit.companion.react();
-  } else if (GAME) { game?.tap(hit); } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
+  } else if (QUIZ) { /* the quiz is answered with the buttons */ } else if (GAME) { game?.tap(hit); } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
 });
 
 // the first screen asks HOW to look (in the magazine / on the table / on the phone) and explains it; that tap also unlocks the sound
-const startMode = chooseMode({ $, kind: GAME ? 'game' : ROOM ? 'room' : BOOK ? 'word' : 'witness', name: w.name, ref: w.scripture.split(';')[0], preset: new URLSearchParams(location.search).get('mode') });
+const startMode = chooseMode({ $, kind: QUIZ ? 'quiz' : GAME ? 'game' : ROOM ? 'room' : BOOK ? 'word' : 'witness', name: w.name, ref: w.scripture.split(';')[0], preset: new URLSearchParams(location.search).get('mode') });
 (async () => {
   const mode = await startMode;
   $('go').disabled = true; await loading; $('start').remove();
+  if (QUIZ) { window.__w.quiz = await initQuiz({ stage, $ }); if (mode !== 'scene') setMode(mode); return; }
   if (GAME) { game = initGame({ stage, $ }); window.__w.game = game; if (mode !== 'scene') setMode(mode); return; }
   if (ROOM) { room = initRoom({ stage, $ }); window.__w.room = room; if (mode !== 'scene') setMode(mode); return; }
   if (BOOK) { word = await initWord({ stage, $ }); window.__w.word = word; if (mode !== 'scene') setMode(mode); return; }
@@ -113,7 +116,7 @@ const ar = new AR(stage, w.id, {
   exited: () => setMode('scene', true),
 });
 const sup = await AR.support(); for (const b of document.querySelectorAll('#modes button[data-mode]')) if (b.dataset.mode !== 'scene') b.hidden = !sup[b.dataset.mode];
-if (GAME) document.querySelector('#modes button[data-mode=marker]').hidden = true;   // no printed medallion for the game
+if (GAME || QUIZ) document.querySelector('#modes button[data-mode=marker]').hidden = true;   // no printed medallion for the game
 if (document.querySelectorAll('#modes button:not([hidden])').length < 2) $('modes').hidden = true;
 fit();
 let busy = false;

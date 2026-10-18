@@ -11,8 +11,8 @@
   // start downloading the big files right away, in parallel with the page script (the model, the medallion texture, the first words)
   (function () {
     var id = new URLSearchParams(location.search).get('id') || 'zechariah', h = document.head, add = function (href, as, type) { var l = document.createElement('link'); l.rel = 'preload'; l.href = href; l.as = as; if (type) l.type = type; if (as === 'fetch') l.crossOrigin = ''; h.appendChild(l); };
-    if (id !== 'word' && id !== 'room') add('witnesses/' + id + '/model.glb', 'fetch'); if (id === 'room') add('room/room.glb', 'fetch');
-    if (id !== 'game') add('medallions/' + id + '.webp', 'image'); if (id === 'game') add('game/gingerbread.glb', 'fetch'); add('data/witnesses.json', 'fetch'); add('data/witnesses-audio.json', 'fetch');
+    if (id !== 'word' && id !== 'room' && id !== 'game' && id !== 'quiz') add('witnesses/' + id + '/model.glb', 'fetch'); if (id === 'room') add('room/room.glb', 'fetch');
+    if (id !== 'game' && id !== 'quiz') add('medallions/' + id + '.webp', 'image'); if (id === 'game' || id === 'quiz') add('game/gingerbread.glb', 'fetch'); add('data/witnesses.json', 'fetch'); add('data/witnesses-audio.json', 'fetch');
   })();
 </script>
 </head>

@@ -1624,6 +1624,16 @@
   "lines": []
  },
  {
+  "id": "quiz",
+  "name": "Викторина",
+  "type": "game",
+  "voiceId": "",
+  "voiceName": "",
+  "model": "",
+  "scripture": "Правда или нет",
+  "lines": []
+ },
+ {
   "id": "game",
   "name": "Пряничек",
   "type": "game",

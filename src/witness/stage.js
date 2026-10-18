@@ -103,12 +103,12 @@ export class Stage {
     const t = new THREE.CanvasTexture(c); this.anchor.add(this.dust = new THREE.Points(g, new THREE.PointsMaterial({ map: t, size: 0.028, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.75 })));
   }
   async load(id, onProgress) {
-    const [tex] = await Promise.all([id === 'game' ? this._boardTexture() : new THREE.TextureLoader().loadAsync(`medallions/${id}.webp`)]);   // the game board is drawn here, it is not a medallion
+    const [tex] = await Promise.all([id === 'game' || id === 'quiz' ? this._boardTexture() : new THREE.TextureLoader().loadAsync(`medallions/${id}.webp`)]);   // the game board is drawn here, it is not a medallion
     tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.center.set(0.5, 0.5); tex.rotation = Math.PI; // name reads from the viewer's side
     const gold = new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.85, roughness: 0.32 });
     const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.12 });
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_H, 128), [gold, top, gold]); disc.position.y = DISC_H / 2; disc.castShadow = disc.receiveShadow = true; this.disc = disc; this.anchor.add(disc);
-    if (id === 'game') { await this._game(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
+    if (id === 'game' || id === 'quiz') { await this._game(id); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'room') { await this._room(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'word') { onProgress?.(1); this._book(); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
@@ -172,11 +172,11 @@ export class Stage {
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
   /** the gingerbread game: a small board on the medallion, so the camera comes closer */
-  async _game() {
+  async _game(id) {
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
     this.gameFx = await buildGame(loader, DISC_H, { setView: m => this._gameView(m) }); this.anchor.add(this.gameFx.group);
     this.figure = this.gameFx.group; this.model = this.gameFx.group; this.fixedFacing = true; this.pickRoots = [this.disc, this.gameFx.model]; this.fitHeight = 0.55;
-    this.camera.position.set(0, 1.0, 1.65); this.controls.target.set(0, 0.06, 0); Object.assign(this.controls, { minDistance: 0.6, maxDistance: 3 }); this.controls.update();
+    this.camera.position.set(0, 1.0, 1.65); this.controls.target.set(0, 0.06, 0); if (id === 'quiz') { this.camera.position.set(0, 0.42, 0.95); this.controls.target.set(0, 0.13, 0.12); this.fitHeight = 0.34; } Object.assign(this.controls, { minDistance: 0.5, maxDistance: 3 }); this.controls.update();
   }
   /** the runner looks along the track from behind; the collecting game looks down at the plate */
   _gameView(m) {

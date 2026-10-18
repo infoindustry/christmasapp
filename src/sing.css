@@ -11,3 +11,6 @@ h1 { margin: 0 0 4px; font: 700 clamp(24px, 6vw, 32px) Georgia, serif; } .lead {
 .bar { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
 button { font: 600 17px var(--sys); border: 0; border-radius: 14px; padding: 13px 20px; background: #ffffff22; color: #fff; } .primary { background: linear-gradient(180deg, #f3d48a, #e0b54e); color: #2a1a05; min-width: 150px; }
 #prog { height: 6px; border-radius: 3px; background: #ffffff22; margin-top: 16px; overflow: hidden; } #prog i { display: block; height: 100%; width: 0; background: var(--gold); }
+#lines .far { display: none; } #lines { font-size: 20px; }
+.chips { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; } .chips button { padding: 8px 14px; font-size: 14px; } .chips .on { background: var(--gold); color: #2a1a05; }
+.credit { text-align: center; opacity: .5; font-size: 12.5px; margin-top: 18px; } #tapout { font-family: monospace; word-break: break-all; }

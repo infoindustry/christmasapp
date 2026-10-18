@@ -4,13 +4,20 @@ const $ = id => document.getElementById(id), cv = $('cv'), g = cv.getContext('2d
 const demo = new URLSearchParams(location.search).has('demo');
 const song = await fetch('data/song.json').then(r => r.json()).catch(() => ({ lines: [] }));
 const audio = new Audio(song.audio || 'audio/song/minus.mp3'); audio.preload = 'auto';
-let lines = song.lines || []; if (demo) lines = ['Первая строчка песни', 'Вторая строчка песни', 'Третья строчка песни', 'Четвёртая строчка песни'].map(text => ({ text }));
+const times = song.times?.length === 8 ? song.times : null; let lines = [], els = [], verse = 0;
+if (demo) song.verses = [['Первая строчка песни', 'Вторая строчка песни', 'Третья строчка песни', 'Четвёртая строчка песни']];
 $('ttl').textContent = song.title || 'Поём песню';
-let dur = 40; audio.onloadedmetadata = () => { dur = audio.duration || 40; layout(); };
-function layout() { lines.forEach((l, i) => { if (l.t == null || demo) l.t = i * dur / lines.length; }); }
-layout();
-$('lines').innerHTML = lines.map(l => `<div>${l.text}</div>`).join('') || '<div class="on">Слова песни скоро появятся</div>';
-const els = [...$('lines').children];
+let dur = 40; audio.onloadedmetadata = () => { dur = audio.duration || 40; setVerse(verse); };
+// the track is one verse: its eight lines start at data/song.json "times" (seconds); without them they are spread evenly
+function setVerse(v) {
+  verse = v; const vs = song.verses || [], txt = vs[v] || []; lines = txt.map((text, i) => ({ text, t: times ? times[i] : i * dur / txt.length }));
+  $('lines').innerHTML = lines.map(l => `<div>${l.text}</div>`).join(''); els = [...$('lines').children];
+  $('verses').innerHTML = vs.map((_, i) => `<button data-i="${i}" class="${i === v ? 'on' : ''}">Куплет ${i + 1}</button>`).join('');
+}
+$('verses').onclick = e => { const b = e.target.closest('button'); if (b) { setVerse(+b.dataset.i); audio.currentTime = 0; } };
+setVerse(0); if (song.credit) $('credit').textContent = song.credit;
+// ?tap: listen and press "Отметить" when each line starts; the eight seconds are printed to copy into song.json
+if (new URLSearchParams(location.search).has('tap')) { const out = []; $('tap').hidden = false; $('tap').onclick = () => { if (out.length < 8) out.push(+audio.currentTime.toFixed(1)); $('tap').textContent = out.length < 8 ? `Отметить строку ${out.length + 1}` : 'Готово'; $('tapout').textContent = JSON.stringify(out); }; $('tap').textContent = 'Отметить строку 1'; }
 let playing = false;
 $('play').onclick = () => { if (playing) { audio.pause(); } else { audio.play(); } };
 audio.onplay = () => { playing = true; $('play').textContent = '❚❚ Пауза'; }; audio.onpause = () => { playing = false; $('play').textContent = '▶ Петь'; };
@@ -37,7 +44,7 @@ function frame(now) {
   for (const n of notes) { const y = ((n.y - t * n.v * beat * .5) % 1 + 1) % 1; g.font = `${n.s}px serif`; g.fillStyle = `rgba(255,230,150,${.5 * Math.sin(y * Math.PI)})`; g.fillText(n.ch, n.x * W, y * H); }
   // current line
   let cur = -1; for (let i = 0; i < lines.length; i++) if (ct >= lines[i].t) cur = i;
-  els.forEach((e, i) => { e.classList.toggle('on', i === cur); e.classList.toggle('past', i < cur - 0 && playing); });
+  els.forEach((e, i) => { e.classList.toggle('on', i === cur); e.classList.toggle('past', i < cur - 1); e.classList.toggle('far', i > cur + 2); });
   $('prog').firstElementChild.style.width = (dur ? ct / dur * 100 : 0) + '%';
   requestAnimationFrame(frame);
 }

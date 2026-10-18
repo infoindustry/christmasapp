@@ -68,7 +68,7 @@ function drawStars(alpha, lines) {
   const S = sky.stars, M = sky.mags, buckets = [[], [], [], [], [], []];
   for (let i = 0; i < M.length; i++) { if (!proj(S[i * 3], S[i * 3 + 1], S[i * 3 + 2])) continue; const x = sx(), y = sy(); if (x < -5 || x > W + 5 || y < -5 || y > H + 5) continue; buckets[Math.max(0, Math.min(5, Math.floor(M[i] + 1)))].push(x, y); }
   buckets.forEach((b, k) => { const r = Math.max(.7, (5.2 - k) * .62) * Math.min(1.6, F / 700 + .4); g.fillStyle = `rgba(255,248,235,${Math.min(1, (0.45 + (5 - k) * .13)) * alpha})`; g.beginPath(); for (let i = 0; i < b.length; i += 2) { g.moveTo(b[i] + r, b[i + 1]); g.arc(b[i], b[i + 1], r, 0, 7); } g.fill(); });
-  if (lines) for (const c of sky.lines) { const hot = lines === 'psc' && c.id === 'Psc'; g.strokeStyle = hot ? `rgba(240,200,110,${.85 * alpha})` : `rgba(150,170,255,${.28 * alpha})`; g.lineWidth = hot ? 2.2 : 1; g.beginPath(); for (const part of c.parts) { let pen = false; for (const v of part) { if (proj(v[0], v[1], v[2])) { const x = sx(), y = sy(); pen ? g.lineTo(x, y) : g.moveTo(x, y); pen = true; } else pen = false; } } g.stroke(); }
+  if (lines) for (const c of sky.lines) { const hot = lines === 'psc' && c.id === 'Psc'; if (!hot) continue; g.strokeStyle = `rgba(240,200,110,${.85 * alpha})`; g.lineWidth = hot ? 2.2 : 1; g.beginPath(); for (const part of c.parts) { let pen = false; for (const v of part) { if (proj(v[0], v[1], v[2])) { const x = sx(), y = sy(); pen ? g.lineTo(x, y) : g.moveTo(x, y); pen = true; } else pen = false; } } g.stroke(); }
 }
 function label(text, x, y, size, color, dx = 0) { g.font = `${size}px -apple-system, "Segoe UI", sans-serif`; g.fillStyle = color; g.textAlign = dx ? 'left' : 'center'; g.fillText(text, x + dx, y); }
 function glow(x, y, r, c0, c1 = 'rgba(255,255,255,0)') { const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c0); gr.addColorStop(1, c1); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
@@ -135,10 +135,10 @@ function drawBeth(t, dt) {
 
 // ---------- the sky of the Magi ----------
 const MP = [
-  { n: 'Первое сближение', g: [-6, 5, 27], t: 'Юпитер и Сатурн встретились в созвездии Рыб: первый раз из трёх.' },
-  { n: 'Второе', g: [-6, 10, 1], t: 'Планеты разошлись, а потом вернулись друг к другу: второе сближение, на этот раз высоко на юге.' },
-  { n: 'Третье', g: [-6, 12, 3], t: 'Третья встреча за один год, снова в Рыбах. Такое бывает очень редко.' },
-  { n: 'Небо сейчас', now: true, t: 'Так выглядит небо над тобой сейчас. Найди Юпитер и Сатурн.' },
+  { n: '1. Май', g: [-6, 5, 27], t: 'Две яркие звезды рядом: это Юпитер и Сатурн. Они встретились в созвездии Рыбы.' },
+  { n: '2. Октябрь', g: [-6, 10, 1], t: 'Они разошлись и встретились снова.' },
+  { n: '3. Декабрь', g: [-6, 12, 3], t: 'Третья встреча за один год. Это очень редко!' },
+  { n: 'Сейчас', now: true, t: 'Так выглядит небо над тобой сейчас. Найди Юпитер и Сатурн.' },
 ];
 const MS = { p: 0, days: 0, hour: 22, loc: PERSIA };
 function magiDate(p) { if (p.now) return new Date(Date.now() + MS.days * 864e5); const [y, m, d] = p.g; return makeDate(y, m, d + MS.days, MS.hour, MS.loc.lon); }
@@ -156,36 +156,35 @@ function pickPreset(i) {
 function refreshMagi() {
   const p = MP[MS.p], date = magiDate(p); magiSky = sky = skyAt(date, MS.loc.lat, MS.loc.lon, cat);
   const lh = localHours(date, MS.loc.lon), tm = Math.round(lh * 60) % 1440, h = Math.floor(tm / 60), mn = tm % 60;
-  $('mdate').textContent = p.now ? date.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' }) : julianText(date);
+  $('mdate').textContent = p.now ? date.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' }) : julianText(date).replace(/^(\d+ \S+) (\d+) г\. до н\. э\./, '$1, $2 год до Рождества');
   $('hlab').textContent = `${String(h).padStart(2, '0')}:${String(mn).padStart(2, '0')}`; $('hour').value = lh;
-  const sep = sepDeg(sky.bodies.Jupiter.v, sky.bodies.Saturn.v), ja = altAz(sky.bodies.Jupiter.v);
-  $('minfo').textContent = `${p.t} Юпитер и Сатурн сейчас в ${sep.toFixed(1).replace('.', ',')}° друг от друга` + (ja.alt < 0 ? '; они под горизонтом, выбери другой час.' : '.') + (p.now ? '' : ' Юпитер называли царской звездой, Сатурн связывали с Израилем.');
+  const ja = altAz(sky.bodies.Jupiter.v); $('minfo').textContent = p.t + (ja.alt < 0 ? ' Сейчас они под горизонтом: подвинь час в «Ещё».' : '');
   dirty = false;
 }
 function startMagi() {
   mode = 'magi'; $('ttl').textContent = 'Небо волхвов'; $('end').hidden = true; $('arrow').hidden = true; $('ring').hidden = true; caption('');
-  $('magi').hidden = false; $('hint').textContent = ''; $('presets').innerHTML = MP.map((p, i) => `<button data-i="${i}">${p.n}</button>`).join('');
+  $('magi').hidden = false; $('hint').textContent = ''; zoomed = false; FOV = 65; resize(); $('presets').innerHTML = MP.map((p, i) => `<button data-i="${i}">${p.n}</button>`).join('');
   pickPreset(0);
 }
 $('presets').onclick = async e => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.i; if (MP[i].now) await new Promise(r => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => { MS.loc = { lat: p.coords.latitude, lon: p.coords.longitude }; r(); }, () => r(), { timeout: 4000 }) : r()); else MS.loc = PERSIA; pickPreset(i); };
 $('hour').oninput = e => { MS.hour = +e.target.value; dirty = true; };
 document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { MS.days += +b.dataset.d; dirty = true; });
 $('findj').onclick = () => { if (magiSky) { target = 'Jupiter'; turnTo(magiSky.bodies.Jupiter.v); } }; $('finds').onclick = () => { if (magiSky) { target = 'Saturn'; turnTo(magiSky.bodies.Saturn.v); } };
+let zoomed = false; $('zoom').onclick = () => { zoomed = !zoomed; FOV = zoomed ? 16 : 65; resize(); $('zoom').textContent = zoomed ? '🔍 Отдалить' : '🔍 Приблизить'; if (zoomed && magiSky && !sens.on) turnTo(magiSky.bodies.Jupiter.v); };
 $('tell').onclick = () => speak('audio/sky/m1.mp3');
 function drawMagi() {
   const sa = sky.sunAlt, dark = Math.max(0, Math.min(1, (-sa - 1) / 14)), day = Math.max(0, Math.min(1, (sa + 4) / 10));
   if (!useCam) { const top = `rgb(${Math.round(1 + 50 * day)},${Math.round(2 + 110 * day + 6 * (1 - dark))},${Math.round(10 + 190 * day + 20 * (1 - dark))})`, bot = `rgb(${Math.round(8 + 190 * day)},${Math.round(14 + 150 * day)},${Math.round(40 + 120 * day)})`; const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, top); gr.addColorStop(1, bot); g.fillStyle = gr; g.fillRect(0, 0, W, H); } else g.clearRect(0, 0, W, H);
   drawStars(Math.max(0.05, dark) * (useCam ? .85 : 1), 'psc');
-  for (const c of sky.cons) if (proj(...c.v)) { const x = sx(), y = sy(); if (x > 0 && x < W && y > 50 && y < H - 160) label(c.ru, x, y, c.id === 'Psc' ? 17 : 11, c.id === 'Psc' ? `rgba(245,210,120,${.95 * dark})` : `rgba(180,195,255,${.45 * dark})`); }
-  for (const n of sky.named) if (proj(...n.v)) label(n.ru, sx(), sy() - 6, 10, `rgba(255,255,255,${.5 * dark})`);
+  for (const c of sky.cons) if (c.id === 'Psc' && proj(...c.v)) { const x = sx(), y = sy(); if (x > 0 && x < W && y > 50 && y < H - 160) label(c.ru, x, y, 20, `rgba(245,210,120,${.95 * dark})`); }
   if (!useCam) drawGround(() => 0, null);
   for (const [id] of BODIES) { const b = sky.bodies[id]; if (!proj(...b.v)) continue; const x = sx(), y = sy(); if (altAz(b.v).alt < -1 && !useCam) continue; const big = id === 'Jupiter' || id === 'Saturn';
     if (id === 'Sun') { glow(x, y, 60, 'rgba(255,230,150,.9)'); g.fillStyle = '#fff6c8'; g.beginPath(); g.arc(x, y, 14, 0, 7); g.fill(); label('Солнце', x, y + 34, 12, '#fff'); continue; }
     if (id === 'Moon') { glow(x, y, 30, 'rgba(230,236,255,.45)'); g.fillStyle = '#e9edf8'; g.beginPath(); g.arc(x, y, 9, 0, 7); g.fill(); label('Луна', x, y + 24, 12, '#dfe6ff'); continue; }
     const col = { Jupiter: '#ffe6a8', Saturn: '#ead9a2', Venus: '#ffffff', Mars: '#ff9b78', Mercury: '#cfd3dc' }[id], r = big ? 5.5 : 4; glow(x, y, big ? 26 : 16, col + '88', col + '00'); g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
-    label(b.ru + (id === 'Jupiter' ? ' (царская планета)' : id === 'Saturn' ? ' (защитник Израиля)' : ''), x, y + (id === 'Saturn' ? 26 : -16), big ? 14 : 12, big ? '#ffe9b0' : '#fff'); }
+    if (big) label(b.ru, x, y + (id === 'Saturn' ? 30 : -20), 20, '#ffe9b0'); }
   const tg = sky.bodies[target]; if (tg) arrowTo(tg.v);
-  if (!useCam) for (const [az, tx] of [[0, 'С'], [90, 'В'], [180, 'Ю'], [270, 'З'], [45, 'СВ'], [135, 'ЮВ'], [225, 'ЮЗ'], [315, 'СЗ']]) if (proj(...dirOf(1.2, az))) label(tx, sx(), sy() - 6, az % 90 ? 12 : 18, az % 90 ? 'rgba(255,255,255,.5)' : '#f3d48a');
+  if (!useCam) for (const [az, tx] of [[0, 'С'], [90, 'В'], [180, 'Ю'], [270, 'З']]) if (proj(...dirOf(1.2, az))) label(tx, sx(), sy() - 6, 22, '#f3d48a');
 }
 
 // ---------- start / loop ----------

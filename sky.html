@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#04061a">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Небо над Вифлеемом</title>
+<link rel="stylesheet" href="/src/sky/sky.css">
+</head>
+<body>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="sky"></canvas>
+<div id="hud" hidden>
+  <a id="back" href="./">‹</a><div id="ttl"></div><button id="cc" title="Подписи">Aa</button>
+  <div id="arrow" hidden>➤</div><div id="ring" hidden><i></i></div>
+  <div id="cap" hidden></div>
+  <div id="hint"></div>
+  <div id="end" hidden><button id="again">↻ Ещё раз</button><button id="tomagi">⭐ Небо волхвов</button></div>
+  <div id="magi" hidden>
+    <div id="mdate"></div><div id="minfo"></div>
+    <div class="chips" id="presets"></div>
+    <label class="slide">Час ночи <input id="hour" type="range" min="0" max="24" step="0.25"><b id="hlab"></b></label>
+    <div class="chips"><button data-d="-10">◀ 10 дн.</button><button data-d="-1">◀ день</button><button data-d="1">день ▶</button><button data-d="10">10 дн. ▶</button></div>
+    <div class="chips"><button id="findj">🔎 Юпитер</button><button id="finds">🔎 Сатурн</button><button id="tell">🔊 Рассказ</button></div>
+    <p class="note">Это одна из версий: Библия не говорит, какая звезда вела волхвов.</p>
+  </div>
+</div>
+<div id="start">
+  <div class="box">
+    <h1>Небо Рождества</h1>
+    <p>Подними телефон и смотри вокруг: небо повернётся вместе с тобой.</p>
+    <button class="card" data-mode="beth"><b>🌟 Небо над Вифлеемом</b><span>Найди звезду и услышь ангелов, которые пели пастухам.</span></button>
+    <button class="card" data-mode="magi"><b>🔭 Небо волхвов</b><span>Настоящая карта звёзд и планет, какой её видели мудрецы с востока.</span></button>
+    <label class="opt"><input id="usecam" type="checkbox"> 📷 Показать мир вокруг (камера, лучше вечером на улице)</label>
+    <a href="./" class="home">‹ На главную</a>
+  </div>
+</div>
+<script type="module" src="/src/sky/main.js"></script>
+</body></html>

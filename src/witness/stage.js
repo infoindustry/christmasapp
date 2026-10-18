@@ -101,7 +101,7 @@ export class Stage {
     const t = new THREE.CanvasTexture(c); this.anchor.add(this.dust = new THREE.Points(g, new THREE.PointsMaterial({ map: t, size: 0.028, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.75 })));
   }
   async load(id, onProgress) {
-    const [tex] = await Promise.all([new THREE.TextureLoader().loadAsync(`/medallions/${id}.png`)]);
+    const [tex] = await Promise.all([new THREE.TextureLoader().loadAsync(`medallions/${id}.png`)]);
     tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.center.set(0.5, 0.5); tex.rotation = Math.PI; // name reads from the viewer's side
     const gold = new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.85, roughness: 0.32 });
     const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.12 });
@@ -109,7 +109,7 @@ export class Stage {
     if (id === 'room') { await this._room(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'word') { onProgress?.(1); this._book(); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
-    const gltf = await loader.loadAsync(`/witnesses/${id}/model.glb`, e => e.total && onProgress?.(e.loaded / e.total));
+    const gltf = await loader.loadAsync(`witnesses/${id}/model.glb`, e => e.total && onProgress?.(e.loaded / e.total));
     const fig = new THREE.Group(); fig.add(gltf.scene); this.anchor.add(fig); this.figure = fig; this.model = gltf.scene;
     const b = new THREE.Box3().setFromObject(gltf.scene), s = b.getSize(new THREE.Vector3()); const k = FIGURE_H / s.y; gltf.scene.scale.setScalar(k);
     const b2 = new THREE.Box3().setFromObject(gltf.scene), c = b2.getCenter(new THREE.Vector3()); gltf.scene.position.set(-c.x, -b2.min.y, -c.z); fig.position.y = DISC_H;
@@ -132,7 +132,7 @@ export class Stage {
   async _borrowTalk(loader, targetScene, id) {
     const donor = id === 'zechariah' ? 'joseph' : 'zechariah';
     try {
-      const d = await loader.loadAsync(`/witnesses/${donor}/model.glb`); const src = d.animations.find(a => /Talk/.test(a.name)); if (!src) return null;
+      const d = await loader.loadAsync(`witnesses/${donor}/model.glb`); const src = d.animations.find(a => /Talk/.test(a.name)); if (!src) return null;
       const clip = src.clone(); clip.name = 'Talk_borrowed';
       clip.tracks = clip.tracks.filter(t => { const { nodeName, propertyName } = THREE.PropertyBinding.parseTrackName(t.name); return propertyName !== 'position' && UPPER.test(nodeName) && !LOWER.test(nodeName) && targetScene.getObjectByName(nodeName); }); // upper body only: no legs, no hip drift
       return clip;

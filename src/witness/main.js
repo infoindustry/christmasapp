@@ -7,14 +7,14 @@ const $ = id => document.getElementById(id);
 const id = new URLSearchParams(location.search).get('id') || 'zechariah';
 const ROOM = new URLSearchParams(location.search).get('id') === 'room';   // the Christmas room
 const BOOK = new URLSearchParams(location.search).get('id') === 'word';   // the twelfth "witness" is the audiobook
-const [all, audioMan] = await Promise.all([fetch('/data/witnesses.json').then(r => r.json()), fetch('/data/witnesses-audio.json').then(r => r.json())]);
+const [all, audioMan] = await Promise.all([fetch('data/witnesses.json').then(r => r.json()), fetch('data/witnesses-audio.json').then(r => r.json())]);
 const w = all.find(x => x.id === id) || all[0];
 const story = w.lines.filter(l => l.kind === 'story'), answers = w.lines.filter(l => l.kind === 'answer');
 const tagOf = t => (t.match(/^\[([^\]]*)\]/) || [, ''])[1];
 const plain = t => t.replace(/\[[^\]]*\]/g, '').replace(/\s+/g, ' ').trim();
 
 document.title = `${w.name} — свидетель Рождества`;
-$('name').textContent = w.name; $('ref').textContent = w.scripture.split(';')[0]; $('startName').textContent = w.name; $('startImg').src = `/medallions/${w.id}.png`;
+$('name').textContent = w.name; $('ref').textContent = w.scripture.split(';')[0]; $('startName').textContent = w.name; $('startImg').src = `medallions/${w.id}.png`;
 $('dots').innerHTML = story.map(() => '<i></i>').join('');
 $('questions').innerHTML = answers.map(a => `<button data-id="${a.id}">${a.question}</button>`).join('');
 const dots = [...$('dots').children];
@@ -77,7 +77,7 @@ cv.addEventListener('pointerup', e => {
   if (moved > 8 || dt > 500) return;   // a drag turns the view, it is not a tap
   const hit = stage.pick(e.clientX, e.clientY); if (!hit) return;
   if (hit.companion) {
-    const n = hit.companion.cfg.sound; if (n) { soundI[n] = ((soundI[n] ?? -1) + 1) % 2; play(animalAudio, `/audio/animals/${n}-${soundI[n] + 1}.mp3`); }
+    const n = hit.companion.cfg.sound; if (n) { soundI[n] = ((soundI[n] ?? -1) + 1) % 2; play(animalAudio, `audio/animals/${n}-${soundI[n] + 1}.mp3`); }
     hit.companion.react();
   } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
 });

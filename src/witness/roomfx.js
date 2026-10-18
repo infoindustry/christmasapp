@@ -26,7 +26,7 @@ const add = (map, color, size, opacity = 1) => new THREE.Sprite(new THREE.Sprite
 const rnd = (a, b) => a + Math.random() * (b - a);
 
 export async function buildRoom(loader, { debug = false } = {}) {
-  const gltf = await loader.loadAsync('/room/room.glb'); const model = gltf.scene;
+  const gltf = await loader.loadAsync('room/room.glb'); const model = gltf.scene;
   // the texture already holds the baked light: show it a little self-lit so the dark corners stay readable, and let the fire add on top
   model.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; const m = o.material; m.emissive = new THREE.Color(0xffffff); m.emissiveMap = m.map; m.emissiveIntensity = 0.55; m.roughness = 0.9; m.metalness = 0; o.frustumCulled = false; } });
   const group = new THREE.Group(); group.add(model);

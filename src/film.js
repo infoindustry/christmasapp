@@ -1,8 +1,8 @@
 // The film player: one MP4, big friendly captions, chapters.
 const $ = id => document.getElementById(id), v = $('v');
-const info = await fetch('/film/story.json').then(r => r.json());
+const info = await fetch('film/story.json').then(r => r.json());
 const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-$('chapters').innerHTML = info.chapters.map((c, i) => `<button class="ch" data-t="${c.start}" data-i="${c.ch}"><img src="/film/ch${c.ch}.jpg" alt="" loading="lazy"><b>${i + 1}. ${c.title}</b><small>${fmt(c.start)}</small></button>`).join('');
+$('chapters').innerHTML = info.chapters.map((c, i) => `<button class="ch" data-t="${c.start}" data-i="${c.ch}"><img src="film/ch${c.ch}.jpg" alt="" loading="lazy"><b>${i + 1}. ${c.title}</b><small>${fmt(c.start)}</small></button>`).join('');
 $('tm').textContent = fmt(info.duration);
 const tt = v.textTracks[0]; if (tt) tt.mode = 'hidden';   // cues still fire, the browser does not draw them
 let cc = true;
@@ -20,4 +20,4 @@ v.ontimeupdate = () => {
 $('seek').oninput = e => { v.currentTime = e.target.value / 1000 * info.duration; };
 $('chapters').onclick = e => { const b = e.target.closest('.ch'); if (!b) return; v.currentTime = +b.dataset.t; v.play(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 $('fs').onclick = () => { const el = $('stage'); if (document.fullscreenElement) document.exitFullscreen(); else (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el); };
-if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: 'История Рождества', artist: 'Свидетели Рождества', artwork: [{ src: '/film/poster.jpg', sizes: '1280x720', type: 'image/jpeg' }] });
+if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: 'История Рождества', artist: 'Свидетели Рождества', artwork: [{ src: 'film/poster.jpg', sizes: '1280x720', type: 'image/jpeg' }] });

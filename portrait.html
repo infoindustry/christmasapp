@@ -1,0 +1,26 @@
+<!doctype html><meta charset="utf-8"><title>portraits</title><body style="margin:0;background:#222;color:#fff;font:14px system-ui"><canvas id="c" width="512" height="512"></canvas><div id="log"></div>
+<script type="module">
+// Renders a head-and-shoulders portrait of every witness from its 3D model (for the centre of the medallions).
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+const ids = (await fetch('/data/witnesses.json').then(r => r.json())).filter(w => !w.type).map(w => w.id);
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), alpha: true, antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(512, 512, false); renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+for (const id of ids) {
+  const scene = new THREE.Scene(); scene.add(new THREE.HemisphereLight(0xffffff, 0x887766, 1.6));
+  const key = new THREE.DirectionalLight(0xfff0d8, 2.6); key.position.set(-1.2, 1.8, 2.5); scene.add(key); const rim = new THREE.DirectionalLight(0xaac0ff, 1.0); rim.position.set(1.5, 1.2, -1.5); scene.add(rim);
+  const gltf = await loader.loadAsync(`/witnesses/${id}/model.glb`); const m = gltf.scene; scene.add(m);
+  const b = new THREE.Box3().setFromObject(m), s = b.getSize(new THREE.Vector3()); m.scale.setScalar(1.18 / s.y); m.updateMatrixWorld(true);
+  const b2 = new THREE.Box3().setFromObject(m); m.position.set(-(b2.min.x + b2.max.x) / 2, -b2.min.y, -(b2.min.z + b2.max.z) / 2); m.updateMatrixWorld(true);
+  let head = null; m.traverse(o => { if (o.isBone && /Head$/.test(o.name) && !/End|Top/.test(o.name)) head = o; });
+  const hp = new THREE.Vector3(); (head || m).getWorldPosition(hp);
+  const cam = new THREE.PerspectiveCamera(16, 1, 0.1, 10); const cy = hp.y + 0.05;
+  cam.position.set(0, cy, 2.2); cam.lookAt(0, cy, 0);
+  renderer.setClearColor(0x000000, 0); renderer.render(scene, cam);
+  await fetch(`http://localhost:5175/?id=${id}`, { method: 'POST', body: renderer.domElement.toDataURL('image/png') });
+  document.getElementById('log').textContent += ` ${id}(${hp.y.toFixed(2)})`; scene.clear();
+}
+document.getElementById('log').textContent += ' DONE'; window.__done = true;
+</script>

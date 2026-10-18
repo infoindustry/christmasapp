@@ -32,7 +32,7 @@ export class AR {
   async _camera() {
     const v = this.video;
     const sim = new URLSearchParams(location.search).get('sim');   // desktop testing: a fake camera that "sees" this witness's medallion
-    if (sim) { const { simStream } = await import('../sim.js'); v.srcObject = await simStream(sim, new URLSearchParams(location.search).get('simimg') || `/medallions/${this.id}.png`); }
+    if (sim) { const { simStream } = await import('../sim.js'); v.srcObject = await simStream(sim, new URLSearchParams(location.search).get('simimg') || `medallions/${this.id}.png`); }
     else v.srcObject = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } });
     v.hidden = false; await v.play(); await new Promise(r => (v.videoWidth ? r() : (v.onloadedmetadata = r)));
     return v;
@@ -49,7 +49,7 @@ export class AR {
     s.arRoot.matrixAutoUpdate = false; s.arRoot.visible = false;
     s.anchor.rotation.set(Math.PI / 2, 0, 0);   // the stage's up (y) becomes the page's normal (+z, out of the paper)
 
-    const ids = await fetch('/data/medallions.json').then(r => r.json()), taar = new URLSearchParams(location.search).get('taar'), mine = taar ? 0 : ids.indexOf(this.id);   // ?taar= : test with another tracking file
+    const ids = await fetch('data/medallions.json').then(r => r.json()), taar = new URLSearchParams(location.search).get('taar'), mine = taar ? 0 : ids.indexOf(this.id);   // ?taar= : test with another tracking file
     const P = new THREE.Matrix4(), wm = new THREE.Matrix4(), v4 = new THREE.Vector4();
     const corners = [[-.5, .5], [.5, .5], [.5, -.5], [-.5, -.5]];
     const plausible = arr => {   // geometry of the found medallion must be believable: in front of the camera, convex, a sensible size
@@ -69,7 +69,7 @@ export class AR {
       },
     });
     s.camera.projectionMatrix.fromArray(controller.getProjectionMatrix()); s.camera.projectionMatrixInverse.copy(s.camera.projectionMatrix).invert();
-    await controller.addImageTargetsFromBuffer(await (await fetch(taar || '/medallions.taar')).arrayBuffer());
+    await controller.addImageTargetsFromBuffer(await (await fetch(taar || 'medallions.taar')).arrayBuffer());
 
     const feed = document.createElement('canvas'); feed.width = vw; feed.height = vh;
     const fg = feed.getContext('2d', { willReadFrequently: true });

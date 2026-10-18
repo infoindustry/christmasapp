@@ -3,9 +3,9 @@
 import * as THREE from 'three';
 
 export const COMPANIONS = {
-  shepherd: [{ name: 'овечка', sound: 'sheep', file: '/animals/sheep.glb', height: 0.36, pos: [0.30, 0.20], yaw: -0.75, ears: 0.7, tail: 0.6 }],
-  joseph:   [{ name: 'ослик', sound: 'donkey', file: '/animals/donkey.glb', height: 1.0, pos: [-0.68, 0.06], yaw: 0.95, ears: 1.0, tail: 0.5, onPage: true }]  /* rideable size; stands on the page beside the disc */,
-  wiseman:  [{ name: 'верблюд', sound: 'camel', file: '/animals/camel.glb', height: 1.25, pos: [1.0, 0.0], narrow: [0.62, -0.75], yaw: -1.0, ears: 0.35, tail: 0.3, onPage: true }],   // full-size camel standing on the page beside the disc
+  shepherd: [{ name: 'овечка', sound: 'sheep', file: 'animals/sheep.glb', height: 0.36, pos: [0.30, 0.20], yaw: -0.75, ears: 0.7, tail: 0.6 }],
+  joseph:   [{ name: 'ослик', sound: 'donkey', file: 'animals/donkey.glb', height: 1.0, pos: [-0.68, 0.06], yaw: 0.95, ears: 1.0, tail: 0.5, onPage: true }]  /* rideable size; stands on the page beside the disc */,
+  wiseman:  [{ name: 'верблюд', sound: 'camel', file: 'animals/camel.glb', height: 1.25, pos: [1.0, 0.0], narrow: [0.62, -0.75], yaw: -1.0, ears: 0.35, tail: 0.3, onPage: true }],   // full-size camel standing on the page beside the disc
 };
 
 class Companion {

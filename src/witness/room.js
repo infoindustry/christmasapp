@@ -6,9 +6,9 @@ export function initRoom({ stage, $ }) {
   const fx = stage.roomFx;
   $('panel').insertAdjacentHTML('afterbegin', `<div id="rpanel"><div id="rsub">Коснись камина, ёлки, лампы или собаки</div><div id="rctl"><button id="rpeek" class="primary">👀 Заглянуть внутрь</button><button id="rsnd">🔊 Звук</button></div></div>`);
   const say = t => { $('rsub').textContent = t; };
-  const SND = { fire: '/audio/room/fire-burst.mp3', tree: '/audio/room/jingle.mp3', lamp: '/audio/room/chime.mp3', dog: '/audio/room/woof.mp3', lantern: '/audio/room/bell.mp3' };
+  const SND = { fire: 'audio/room/fire-burst.mp3', tree: 'audio/room/jingle.mp3', lamp: 'audio/room/chime.mp3', dog: 'audio/room/woof.mp3', lantern: 'audio/room/bell.mp3' };
   const SAY = { fire: 'Огонь вспыхнул ярче!', tree: 'Огоньки побежали вверх по ёлке', dog: 'Гав! Он проснулся', lantern: 'Звонкий колокольчик' };
-  let sound = true; const amb = new Audio('/audio/room/fire-loop.mp3'); amb.loop = true; amb.volume = 0.35;
+  let sound = true; const amb = new Audio('audio/room/fire-loop.mp3'); amb.loop = true; amb.volume = 0.35;
   const sfx = f => { if (!sound) return; const a = new Audio(f); a.volume = 0.8; a.play().catch(() => {}); };
   const startAmb = () => { if (sound && amb.paused) amb.play().catch(() => {}); };
   $('rsnd').onclick = () => { sound = !sound; $('rsnd').textContent = sound ? '🔊 Звук' : '🔇 Звук'; if (sound) amb.play().catch(() => {}); else amb.pause(); };

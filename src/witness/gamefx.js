@@ -57,7 +57,7 @@ export async function buildGame(loader, discTop, hooks = {}) {
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, TRACK_L / 0.8); t.anisotropy = 4; return t; })();
   const track = new THREE.Mesh(new THREE.PlaneGeometry(0.8, TRACK_L).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: trackTex, roughness: 0.9 })); track.position.set(0, discTop + 0.002, -TRACK_L / 2 + 0.35); track.receiveShadow = true; track.visible = false; root.add(track);
   const decor = []; const treeM = new THREE.MeshStandardMaterial({ color: 0x2f9e5a, roughness: 0.8 }), snowTop = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }), trunkM = new THREE.MeshStandardMaterial({ color: 0x7a4a24 });
-  for (let i = 0; i < 14; i++) { const real = TPL.tree && (i % 3 !== 2) ? inst('tree') : (TPL.cane && i % 3 === 2 ? inst('cane') : null); if (real) { real.scale.setScalar(rnd(1.0, 1.4)); real.position.set((i % 2 ? 1 : -1) * rnd(0.5, 0.62), discTop, -(i >> 1) * (TRACK_L / 7) + 0.3); real.visible = false; root.add(real); decor.push(real); continue; } const t = new THREE.Group(); const sz = rnd(0.9, 1.25); for (let k = 0; k < 3; k++) { const cone = new THREE.Mesh(new THREE.ConeGeometry(0.09 - k * 0.02, 0.12, 10), treeM); cone.position.y = 0.09 + k * 0.07; t.add(cone); } const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 6), trunkM); tr.position.y = 0.03; t.add(tr); const top = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 6), snowTop); top.position.y = 0.3; t.add(top); t.scale.setScalar(sz); t.position.set((i % 2 ? 1 : -1) * rnd(0.5, 0.62), discTop, -(i >> 1) * (TRACK_L / 7) + 0.3); t.visible = false; t.userData.side = i % 2; root.add(t); decor.push(t); }
+  for (let i = 0; i < 8; i++) { const real = TPL.tree && (i % 3 !== 2) ? inst('tree') : (TPL.cane && i % 3 === 2 ? inst('cane') : null); if (real) { real.scale.setScalar(rnd(1.0, 1.4)); real.position.set((i % 2 ? 1 : -1) * rnd(0.56, 0.68), discTop, -(i >> 1) * (TRACK_L / 4) + 0.3); real.visible = false; root.add(real); decor.push(real); continue; } const t = new THREE.Group(); const sz = rnd(0.9, 1.25); for (let k = 0; k < 3; k++) { const cone = new THREE.Mesh(new THREE.ConeGeometry(0.09 - k * 0.02, 0.12, 10), treeM); cone.position.y = 0.09 + k * 0.07; t.add(cone); } const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 6), trunkM); tr.position.y = 0.03; t.add(tr); const top = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 6), snowTop); top.position.y = 0.3; t.add(top); t.scale.setScalar(sz); t.position.set((i % 2 ? 1 : -1) * rnd(0.56, 0.68), discTop, -(i >> 1) * (TRACK_L / 4) + 0.3); t.visible = false; t.userData.side = i % 2; root.add(t); decor.push(t); }
   const RUN = { on: false, dist: 0, speed: 0.6, lane: 1, jump: 0, row: 0, obs: [], pick: [] };
   const giftM = [0xd93a3a, 0x2f9e5a, 0x3a7be0].map(col => new THREE.MeshStandardMaterial({ color: col, roughness: 0.5 })), ribbonM = new THREE.MeshStandardMaterial({ color: 0xffe27a, metalness: 0.5, roughness: 0.4 });
   const iceM = new THREE.MeshStandardMaterial({ color: 0xcfeaff, roughness: 0.15, metalness: 0.2, emissive: 0x7fbfff, emissiveIntensity: 0.25, transparent: true, opacity: 0.92 });
@@ -70,12 +70,14 @@ export async function buildGame(loader, discTop, hooks = {}) {
   };
   const POOL = ['star', 'ornament', 'lollipop', 'cane', 'ornament']; let pi = 0;
   const addStar = (lane, z, high = false) => { const m = collectible(POOL[pi++ % POOL.length]); m.position.set(LANES[lane], discTop + (high ? 0.2 : 0.03), z); root.add(m); RUN.pick.push({ mesh: m, lane, z, high }); };
+  let lastHard = false;
   const spawnRow = () => {
-    const z = -TRACK_L + 0.4, r = Math.random(), lane = (Math.random() * 3) | 0, other = (lane + 1 + ((Math.random() * 2) | 0)) % 3;
-    if (r < 0.3) { for (let k = 0; k < 4; k++) addStar(lane, z - k * 0.12); }
-    else if (r < 0.58) { addObs('ball', lane, z); for (let k = 0; k < 3; k++) addStar(other, z - k * 0.12); }
-    else if (r < 0.8) { for (const l of [0, 1, 2]) addObs('ice', l, z); for (let k = -1; k <= 1; k++) addStar(1, z + k * 0.1, true); }
-    else { for (let l = 0; l < 3; l++) if (l !== lane) addObs('gift', l, z); for (let k = 0; k < 3; k++) addStar(lane, z - k * 0.12); }
+    const z = -TRACK_L + 0.4, lane = (Math.random() * 3) | 0, other = (lane + 1 + ((Math.random() * 2) | 0)) % 3, third = 3 - lane - other;
+    let r = Math.random(); if (lastHard) r = r * 0.35;   // after an obstacle: a calm row of candies first
+    if (r < 0.35) { const n = 3; for (let k = 0; k < n; k++) addStar(lane, z - k * 0.14); lastHard = false; }
+    else if (r < 0.65) { addObs(Math.random() < 0.5 ? 'ball' : 'gift', lane, z); for (let k = 0; k < 2; k++) addStar(other, z - k * 0.14); lastHard = true; }   // one block, candies in another lane
+    else if (r < 0.85) { const full = Math.random() < 0.4; for (const l of (full ? [0, 1, 2] : [lane])) addObs('ice', l, z); for (let k = -1; k <= 1; k++) addStar(full ? 1 : lane, z + k * 0.1, true); lastHard = true; }   // spikes: jump (the candies are up in the air)
+    else { addObs('ball', lane, z); addObs('gift', other, z); addStar(third, z - 0.07); lastHard = true; }   // two blocks, one free lane
   };
   const clearRun = () => { for (const o of RUN.obs) root.remove(o.mesh); for (const p of RUN.pick) root.remove(p.mesh); RUN.obs.length = 0; RUN.pick.length = 0; };
 
@@ -140,7 +142,7 @@ export async function buildGame(loader, discTop, hooks = {}) {
     mixer.update(0);   // (mixer was advanced above)
     if (lock > 0) { lock -= dt; if (lock <= 0) { lock = 0; cur = null; play('run'); } }
     S.inv = Math.max(0, S.inv - dt); model.visible = !(S.inv > 0 && Math.floor(t * 12) % 2 === 0);
-    if (RUN.on) { RUN.speed = Math.min(1.5, 0.6 + RUN.dist * 0.006); }
+    if (RUN.on) { RUN.speed = Math.min(1.25, 0.55 + RUN.dist * 0.0035); }
     const v = RUN.on ? RUN.speed : 0.18;   // the track scrolls toward the camera
     if (RUN.on) RUN.dist += v * dt * 1.0;
     trackTex.offset.y += (v * dt) / 0.8;
@@ -150,7 +152,7 @@ export async function buildGame(loader, discTop, hooks = {}) {
     if (RUN.jump > 0) { RUN.jump -= dt; const k = 1 - Math.max(0, RUN.jump) / 0.75; gb.position.y = discTop + 0.2 * Math.sin(Math.PI * Math.min(1, k)); if (RUN.jump <= 0) gb.position.y = discTop; }
     const air = gb.position.y - discTop;
     if (RUN.on) {
-      RUN.row -= v * dt; if (RUN.row <= 0) { spawnRow(); RUN.row = rnd(0.6, 0.95); }
+      RUN.row -= v * dt; if (RUN.row <= 0) { spawnRow(); RUN.row = rnd(1.05, 1.45); }
       for (let i = RUN.obs.length - 1; i >= 0; i--) {
         const o = RUN.obs[i]; o.z += v * dt; o.mesh.position.z = o.z; if (o.kind === 'ball') o.mesh.rotation.x += v * dt * 14;
         if (S.inv <= 0 && Math.abs(o.z - gb.position.z) < 0.07 && Math.abs(o.mesh.position.x - gb.position.x) < 0.11 && !(o.kind === 'ice' && air > 0.07)) {
@@ -173,12 +175,13 @@ export async function buildGame(loader, discTop, hooks = {}) {
   return {
     group: root, model: gb, update, S, items, on: f => listeners.push(f),
     setMode, get mode() { return mode; },
+    get runInfo() { return { obs: RUN.obs.length, pick: RUN.pick.length, speed: +RUN.speed.toFixed(2), dist: +RUN.dist.toFixed(1) }; },
     // the quiz host: the gingerbread reacts to answers
     react(kind) { if (kind === 'ok') { once('cheer', 2.2); burst(new THREE.Vector3(gb.position.x, discTop + 0.22, gb.position.z), 26, true); } else if (kind === 'no') { once('fall', 1.4); } else if (kind === 'win') { once('cheer', 3); burst(new THREE.Vector3(gb.position.x, discTop + 0.22, gb.position.z), 40, true); setTimeout(() => play('dance'), 3000); } else if (kind === 'idle') { play('idle'); } else if (kind === 'think') { once('wave', 1.6); } },
     // runner controls
     lane(d) { RUN.lane = Math.max(0, Math.min(2, RUN.lane + d)); },
     jump() { if (RUN.jump <= 0 && RUN.on) { RUN.jump = 0.75; once('jump', 0.75); emit('jump'); } },
-    startRun() { setMode('run'); for (const it of items) root.remove(it.mesh); items.length = 0; clearRun(); Object.assign(S, { playing: true, score: 0, hearts: 3, inv: 0, air: 0, collected: 0 }); Object.assign(RUN, { on: true, dist: 0, speed: 0.6, lane: 1, jump: 0, row: 0.4 }); gb.position.set(0, discTop, 0.1); target = null; model.visible = true; cur = null; play('run'); emit('start'); },
+    startRun() { setMode('run'); for (const it of items) root.remove(it.mesh); items.length = 0; clearRun(); Object.assign(S, { playing: true, score: 0, hearts: 3, inv: 0, air: 0, collected: 0 }); lastHard = false; Object.assign(RUN, { on: true, dist: 0, speed: 0.55, lane: 1, jump: 0, row: 1.2 }); gb.position.set(0, discTop, 0.1); target = null; model.visible = true; cur = null; play('run'); emit('start'); },
     start() { setMode('collect'); clearRun(); RUN.on = false; for (const it of items) root.remove(it.mesh); items.length = 0; Object.assign(S, { playing: true, score: 0, left: S.total, collected: 0, idle: 0, hearts: 3, inv: 0, air: 0 }); for (const o of balls) { root.remove(o.mesh); root.remove(o.warn); } balls.length = 0; ballT = 3; model.visible = true; gb.position.set(0, discTop, 0.12); target = null; cur = null; play('idle'); once('jump', 1.0); spawnT = 0; emit('start'); },
     tap(worldPoint, obj) {   // a tap on the gingerbread tickles it; a tap on the board sends it there
       let o = obj, onGb = false; while (o) { if (o === gb) { onGb = true; break; } o = o.parent; }

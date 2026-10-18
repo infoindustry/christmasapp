@@ -43,7 +43,8 @@ const R = new Float32Array(9);
 function setR() { const m = new THREE.Matrix4().makeRotationFromQuaternion(cam).elements; R.set([m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]]); }
 const P = [0, 0, 0];
 function proj(x, y, z) { P[0] = R[0] * x + R[1] * y + R[2] * z; P[1] = R[3] * x + R[4] * y + R[5] * z; P[2] = R[6] * x + R[7] * y + R[8] * z; return P[2] < -0.02; }
-const sx = () => W / 2 + P[0] / -P[2] * F, sy = () => H / 2 - P[1] / -P[2] * F;
+let CY = 0;   // the screen row of the view centre: higher than the middle on the star map, so the bottom sheet does not cover the planets
+const sx = () => W / 2 + P[0] / -P[2] * F, sy = () => CY - P[1] / -P[2] * F;
 const forward = () => { const m = new THREE.Matrix4().makeRotationFromQuaternion(cam).elements; return [-m[8], -m[9], -m[10]]; };
 const lookAt = v => { const f = forward(); return sepDeg(f, v); };
 // goto an object when there is no gyroscope
@@ -68,7 +69,7 @@ function drawStars(alpha, lines) {
   const S = sky.stars, M = sky.mags, buckets = [[], [], [], [], [], []];
   for (let i = 0; i < M.length; i++) { if (!proj(S[i * 3], S[i * 3 + 1], S[i * 3 + 2])) continue; const x = sx(), y = sy(); if (x < -5 || x > W + 5 || y < -5 || y > H + 5) continue; buckets[Math.max(0, Math.min(5, Math.floor(M[i] + 1)))].push(x, y); }
   buckets.forEach((b, k) => { const r = Math.max(.7, (5.2 - k) * .62) * Math.min(1.6, F / 700 + .4); g.fillStyle = `rgba(255,248,235,${Math.min(1, (0.45 + (5 - k) * .13)) * alpha})`; g.beginPath(); for (let i = 0; i < b.length; i += 2) { g.moveTo(b[i] + r, b[i + 1]); g.arc(b[i], b[i + 1], r, 0, 7); } g.fill(); });
-  if (lines) for (const c of sky.lines) { const hot = lines === 'psc' && c.id === 'Psc'; if (!hot) continue; g.strokeStyle = `rgba(240,200,110,${.85 * alpha})`; g.lineWidth = hot ? 2.2 : 1; g.beginPath(); for (const part of c.parts) { let pen = false; for (const v of part) { if (proj(v[0], v[1], v[2])) { const x = sx(), y = sy(); pen ? g.lineTo(x, y) : g.moveTo(x, y); pen = true; } else pen = false; } } g.stroke(); }
+  if (lines) for (const c of sky.lines) { const hot = lines && c.id === lines; if (!hot) continue; g.strokeStyle = `rgba(240,200,110,${.85 * alpha})`; g.lineWidth = hot ? 2.2 : 1; g.beginPath(); for (const part of c.parts) { let pen = false; for (const v of part) { if (proj(v[0], v[1], v[2])) { const x = sx(), y = sy(); pen ? g.lineTo(x, y) : g.moveTo(x, y); pen = true; } else pen = false; } } g.stroke(); }
 }
 function label(text, x, y, size, color, dx = 0) { g.font = `${size}px -apple-system, "Segoe UI", sans-serif`; g.fillStyle = color; g.textAlign = dx ? 'left' : 'center'; g.fillText(text, x + dx, y); }
 function glow(x, y, r, c0, c1 = 'rgba(255,255,255,0)') { const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c0); gr.addColorStop(1, c1); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
@@ -83,9 +84,9 @@ function drawGround(hill, houses) {
   if (houses) for (const h of houses) { const v = dirOf(hill(h.az) + .15, h.az); if (!proj(...v)) continue; const x = sx(), y = sy(), w = h.w * D * F; g.fillStyle = '#03040c'; g.fillRect(x - w / 2, y - w * .55, w, w * .55); g.beginPath(); g.moveTo(x - w * .6, y - w * .55); g.lineTo(x, y - w * 1.05); g.lineTo(x + w * .6, y - w * .55); g.fill(); if (h.lit) { g.fillStyle = 'rgba(255,205,110,.95)'; g.fillRect(x - w * .12, y - w * .38, w * .24, w * .2); } }
 }
 function arrowTo(v, text) {
-  const a = $('arrow'); if (!proj(...v)) { /* behind */ } const x = P[0], y = P[1], z = P[2]; let sxp = W / 2 + x / -z * F, syp = H / 2 - y / -z * F; const inside = z < -0.02 && sxp > 30 && sxp < W - 30 && syp > 60 && syp < H - 30;
+  const a = $('arrow'); if (!proj(...v)) { /* behind */ } const x = P[0], y = P[1], z = P[2]; let sxp = W / 2 + x / -z * F, syp = CY - y / -z * F; const inside = z < -0.02 && sxp > 30 && sxp < W - 30 && syp > 60 && syp < H - 30;
   if (inside) { a.hidden = true; return; } a.hidden = false; let ang = Math.atan2(-y, x); if (z >= -0.02) ang = Math.atan2(-y, x || 1);
-  const rx = W / 2 - 40, ry = H / 2 - 90, k = 1 / Math.max(Math.abs(Math.cos(ang)) / rx, Math.abs(Math.sin(ang)) / ry); a.style.transform = `translate(${W / 2 + Math.cos(ang) * k - 19}px,${H / 2 + 20 + Math.sin(ang) * k * .98 - 19}px) rotate(${ang}rad)`;
+  const rx = W / 2 - 40, ry = (mode === 'magi' ? H * .3 : H / 2) - 90, k = 1 / Math.max(Math.abs(Math.cos(ang)) / rx, Math.abs(Math.sin(ang)) / ry); a.style.transform = `translate(${W / 2 + Math.cos(ang) * k - 19}px,${CY + 20 + Math.sin(ang) * k * .98 - 19}px) rotate(${ang}rad)`;
 }
 
 // ---------- Bethlehem ----------
@@ -135,30 +136,35 @@ function drawBeth(t, dt) {
 
 // ---------- the sky of the Magi ----------
 const MP = [
-  { n: '1. Май', g: [-6, 5, 27], t: 'Две яркие звезды рядом: это Юпитер и Сатурн. Они встретились в созвездии Рыбы.' },
-  { n: '2. Октябрь', g: [-6, 10, 1], t: 'Они разошлись и встретились снова.' },
-  { n: '3. Декабрь', g: [-6, 12, 3], t: 'Третья встреча за один год. Это очень редко!' },
-  { n: 'Сейчас', now: true, t: 'Так выглядит небо над тобой сейчас. Найди Юпитер и Сатурн.' },
+  { n: 'Май', g: [-6, 5, 27], f: s => s.bodies.Jupiter.v, lab: ['Jupiter', 'Saturn'], hot: 'Psc', a: 'm1', t: 'Две яркие звезды рядом: это Юпитер и Сатурн. Они встретились в созвездии Рыбы.' },
+  { n: 'Октябрь', g: [-6, 10, 1], f: s => s.bodies.Jupiter.v, lab: ['Jupiter', 'Saturn'], hot: 'Psc', a: 'm1', t: 'Они разошлись и встретились снова.' },
+  { n: 'Декабрь', g: [-6, 12, 3], f: s => s.bodies.Jupiter.v, lab: ['Jupiter', 'Saturn'], hot: 'Psc', a: 'm1', t: 'Третья встреча за один год. Это очень редко!' },
+  { n: 'Парад планет', g: [-5, 2, 19], f: s => s.bodies.Jupiter.v, lab: ['Mars', 'Jupiter', 'Saturn', 'Moon'], hot: 'Psc', a: 'm2', t: 'Весна, на следующий год. В Рыбах собрались Марс, Юпитер, Сатурн и молодая Луна.' },
+  { n: 'Луна и Юпитер', g: [-5, 4, 15], hour: 5.5, f: s => s.bodies.Jupiter.v, lab: ['Moon', 'Jupiter'], hot: 'Ari', a: 'm3', t: 'Луна подошла к Юпитеру почти вплотную. Утром он взошёл на востоке, в созвездии Овна.' },
+  { n: 'Новая звезда', g: [-4, 3, 23], f: s => s.nova, lab: [], hot: 'Cap', nova: true, a: 'm4', t: 'Китайские астрономы записали новую яркую звезду в созвездии Козерога. Она светила около 70 дней.' },
+  { n: 'Комета', g: [-4, 3, 28], f: s => s.comet.head, lab: [], hot: 'Cap', comet: true, a: 'm5', t: 'В те же месяцы летописи рассказывают о «хвостатой звезде»: так назвали комету.' },
+  { n: 'Сейчас', now: true, f: s => s.bodies.Jupiter.v, lab: ['Jupiter', 'Saturn', 'Moon'], hot: null, a: 'm1', t: 'Так выглядит небо над тобой сейчас. Найди Юпитер и Сатурн.' },
 ];
 const MS = { p: 0, days: 0, hour: 22, loc: PERSIA };
 function magiDate(p) { if (p.now) return new Date(Date.now() + MS.days * 864e5); const [y, m, d] = p.g; return makeDate(y, m, d + MS.days, MS.hour, MS.loc.lon); }
-let magiSky = null, dirty = true, target = 'Jupiter';
+let magiSky = null, dirty = true, target = null;
 function bestHour(p) {
-  let best = { h: 22, alt: -99 }; const [y, m, d] = p.g, empty = { stars: [], lines: [], cons: [], named: [] };
-  for (let h = 0; h < 24; h += .25) { const s = skyAt(makeDate(y, m, d, h, MS.loc.lon), MS.loc.lat, MS.loc.lon, empty), j = altAz(s.bodies.Jupiter.v).alt; if (s.sunAlt < -6 && j > best.alt) best = { h, alt: j }; }
+  if (p.hour != null) return p.hour;
+  let best = { h: 22, alt: -99 }; const [y, m, d] = p.g;
+  for (let h = 0; h < 24; h += .25) { const s = skyAt(makeDate(y, m, d, h, MS.loc.lon), MS.loc.lat, MS.loc.lon, { stars: [], lines: [], cons: [], named: [] }), al = altAz(p.f(s)).alt; if (s.sunAlt < -6 && al > best.alt) best = { h, alt: al }; }
   return best.h;
 }
 function pickPreset(i) {
   MS.p = i; MS.days = 0; const p = MP[i]; MS.hour = p.now ? localHours(new Date(), MS.loc.lon) : bestHour(p);
   $('hour').value = MS.hour; [...$('presets').children].forEach((b, k) => b.classList.toggle('on', k === i)); dirty = true;
-  setTimeout(() => { if (magiSky && !sens.on) { target = 'Jupiter'; turnTo(magiSky.bodies.Jupiter.v); } }, 80);
+  setTimeout(() => { if (magiSky && !sens.on) turnTo(MP[MS.p].f(magiSky)); }, 80);
 }
 function refreshMagi() {
   const p = MP[MS.p], date = magiDate(p); magiSky = sky = skyAt(date, MS.loc.lat, MS.loc.lon, cat);
   const lh = localHours(date, MS.loc.lon), tm = Math.round(lh * 60) % 1440, h = Math.floor(tm / 60), mn = tm % 60;
   $('mdate').textContent = p.now ? date.toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' }) : julianText(date).replace(/^(\d+ \S+) (\d+) г\. до н\. э\./, '$1, $2 год до Рождества');
   $('hlab').textContent = `${String(h).padStart(2, '0')}:${String(mn).padStart(2, '0')}`; $('hour').value = lh;
-  const ja = altAz(sky.bodies.Jupiter.v); $('minfo').textContent = p.t + (ja.alt < 0 ? ' Сейчас они под горизонтом: подвинь час в «Ещё».' : '');
+  const ja = altAz(p.f(sky)); $('minfo').textContent = p.t + (ja.alt < 0 ? ' Сейчас это под горизонтом: подвинь час в «Ещё».' : '');
   dirty = false;
 }
 function startMagi() {
@@ -166,32 +172,48 @@ function startMagi() {
   $('magi').hidden = false; $('hint').textContent = ''; zoomed = false; FOV = 65; resize(); $('presets').innerHTML = MP.map((p, i) => `<button data-i="${i}">${p.n}</button>`).join('');
   pickPreset(0);
 }
-$('presets').onclick = async e => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.i; if (MP[i].now) await new Promise(r => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => { MS.loc = { lat: p.coords.latitude, lon: p.coords.longitude }; r(); }, () => r(), { timeout: 4000 }) : r()); else MS.loc = PERSIA; pickPreset(i); };
+$('presets').onclick = async e => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.i; if (MP[i].now) await new Promise(r => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => { MS.loc = { lat: p.coords.latitude, lon: p.coords.longitude }; r(); }, () => r(), { timeout: 4000 }) : r()); else MS.loc = PERSIA; target = null; pickPreset(i); };
 $('hour').oninput = e => { MS.hour = +e.target.value; dirty = true; };
 document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { MS.days += +b.dataset.d; dirty = true; });
-$('findj').onclick = () => { if (magiSky) { target = 'Jupiter'; turnTo(magiSky.bodies.Jupiter.v); } }; $('finds').onclick = () => { if (magiSky) { target = 'Saturn'; turnTo(magiSky.bodies.Saturn.v); } };
-let zoomed = false; $('zoom').onclick = () => { zoomed = !zoomed; FOV = zoomed ? 16 : 65; resize(); $('zoom').textContent = zoomed ? '🔍 Отдалить' : '🔍 Приблизить'; if (zoomed && magiSky && !sens.on) turnTo(magiSky.bodies.Jupiter.v); };
-$('tell').onclick = () => speak('audio/sky/m1.mp3');
+$('findj').onclick = () => { if (magiSky) { target = magiSky.bodies.Jupiter.v; turnTo(target); } }; $('finds').onclick = () => { if (magiSky) { target = magiSky.bodies.Saturn.v; turnTo(target); } };
+let zoomed = false; $('zoom').onclick = () => { zoomed = !zoomed; FOV = zoomed ? 16 : 65; resize(); $('zoom').textContent = zoomed ? '🔍 Отдалить' : '🔍 Приблизить'; if (zoomed && magiSky && !sens.on) turnTo(MP[MS.p].f(magiSky)); };
+$('tell').onclick = () => speak(`audio/sky/${MP[MS.p].a}.mp3`);
+function moonAt(x, y, mv) {
+  const sv = sky.bodies.Sun.v, cosE = mv[0] * sv[0] + mv[1] * sv[1] + mv[2] * sv[2], ci = -cosE, r = 12;   // i = phase angle = 180 - elongation
+  // screen direction toward the Sun
+  const dd = cosE, tx = sv[0] - mv[0] * dd, ty = sv[1] - mv[1] * dd, tz = sv[2] - mv[2] * dd, tl = Math.hypot(tx, ty, tz) || 1; const m2 = [mv[0] + tx / tl * .02, mv[1] + ty / tl * .02, mv[2] + tz / tl * .02]; let ang = 0;
+  if (proj(...m2)) { const x2 = sx(), y2 = sy(); ang = Math.atan2(y2 - y, x2 - x); }
+  glow(x, y, 34, 'rgba(230,236,255,.35)'); g.save(); g.translate(x, y); g.rotate(ang); g.fillStyle = '#2a3150'; g.beginPath(); g.arc(0, 0, r, 0, 7); g.fill();
+  g.fillStyle = '#f1f3fb'; g.beginPath(); g.arc(0, 0, r, -Math.PI / 2, Math.PI / 2); g.fill(); g.fillStyle = ci > 0 ? '#f1f3fb' : '#2a3150'; g.beginPath(); g.ellipse(0, 0, Math.abs(ci) * r, r, 0, 0, 7); g.fill(); g.restore();
+}
+// the records of the Han court astronomers: a new star and a comet in Capricornus (the place is approximate)
+function extras(pp, t) {
+  if (pp.nova && proj(...sky.nova)) { const x = sx(), y = sy(), pu = 1 + Math.sin(t * 2.4) * .1; glow(x, y, 70 * pu, 'rgba(255,240,190,.75)'); g.fillStyle = '#fff'; g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); g.strokeStyle = 'rgba(255,248,215,.9)'; g.lineWidth = 2; g.beginPath(); g.moveTo(x - 34 * pu, y); g.lineTo(x + 34 * pu, y); g.moveTo(x, y - 34 * pu); g.lineTo(x, y + 34 * pu); g.stroke(); label('Новая звезда', x, y + 62, 20, '#ffe9b0'); }
+  if (pp.comet) { const c = sky.comet; if (proj(...c.head)) { const hx = sx(), hy = sy(); const pts = []; for (let k = 0; k <= 24; k++) { const th = k / 24 * 14 * D, cs = Math.cos(th), sn = Math.sin(th); pts.push(proj(c.head[0] * cs + c.away[0] * sn, c.head[1] * cs + c.away[1] * sn, c.head[2] * cs + c.away[2] * sn) ? [sx(), sy()] : null); }
+      const end = pts.filter(Boolean).pop() || [hx, hy], gr = g.createLinearGradient(hx, hy, end[0], end[1]); gr.addColorStop(0, 'rgba(210,235,255,.9)'); gr.addColorStop(1, 'rgba(210,235,255,0)'); const nx = -(end[1] - hy), ny = end[0] - hx, nl = Math.hypot(nx, ny) || 1, w = 16; g.fillStyle = gr; g.beginPath(); g.moveTo(hx + nx / nl * 5, hy + ny / nl * 5); g.lineTo(end[0] + nx / nl * w, end[1] + ny / nl * w); g.lineTo(end[0] - nx / nl * w, end[1] - ny / nl * w); g.lineTo(hx - nx / nl * 5, hy - ny / nl * 5); g.fill(); glow(hx, hy, 30, 'rgba(235,245,255,.9)'); g.fillStyle = '#fff'; g.beginPath(); g.arc(hx, hy, 5, 0, 7); g.fill(); label('Хвостатая звезда', hx, hy - 24, 20, '#ffe9b0'); } }
+}
+let t0n = 0;
 function drawMagi() {
   const sa = sky.sunAlt, dark = Math.max(0, Math.min(1, (-sa - 1) / 14)), day = Math.max(0, Math.min(1, (sa + 4) / 10));
   if (!useCam) { const top = `rgb(${Math.round(1 + 50 * day)},${Math.round(2 + 110 * day + 6 * (1 - dark))},${Math.round(10 + 190 * day + 20 * (1 - dark))})`, bot = `rgb(${Math.round(8 + 190 * day)},${Math.round(14 + 150 * day)},${Math.round(40 + 120 * day)})`; const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, top); gr.addColorStop(1, bot); g.fillStyle = gr; g.fillRect(0, 0, W, H); } else g.clearRect(0, 0, W, H);
-  drawStars(Math.max(0.05, dark) * (useCam ? .85 : 1), 'psc');
-  for (const c of sky.cons) if (c.id === 'Psc' && proj(...c.v)) { const x = sx(), y = sy(); if (x > 0 && x < W && y > 50 && y < H - 160) label(c.ru, x, y, 20, `rgba(245,210,120,${.95 * dark})`); }
+  const pp = MP[MS.p]; drawStars(Math.max(0.05, dark) * (useCam ? .85 : 1), pp.hot);
+  for (const c of sky.cons) if (c.id === pp.hot && proj(...c.v)) { const x = sx(), y = sy(); if (x > 0 && x < W && y > 50 && y < H - 160) label(c.ru, x, y, 20, `rgba(245,210,120,${.95 * dark})`); }
   if (!useCam) drawGround(() => 0, null);
-  for (const [id] of BODIES) { const b = sky.bodies[id]; if (!proj(...b.v)) continue; const x = sx(), y = sy(); if (altAz(b.v).alt < -1 && !useCam) continue; const big = id === 'Jupiter' || id === 'Saturn';
+  for (const [id] of BODIES) { const b = sky.bodies[id]; if (!proj(...b.v)) continue; const x = sx(), y = sy(); if (altAz(b.v).alt < -1 && !useCam) continue; const big = pp.lab.includes(id);
     if (id === 'Sun') { glow(x, y, 60, 'rgba(255,230,150,.9)'); g.fillStyle = '#fff6c8'; g.beginPath(); g.arc(x, y, 14, 0, 7); g.fill(); label('Солнце', x, y + 34, 12, '#fff'); continue; }
-    if (id === 'Moon') { glow(x, y, 30, 'rgba(230,236,255,.45)'); g.fillStyle = '#e9edf8'; g.beginPath(); g.arc(x, y, 9, 0, 7); g.fill(); label('Луна', x, y + 24, 12, '#dfe6ff'); continue; }
+    if (id === 'Moon') { moonAt(x, y, b.v); if (pp.lab.includes('Moon')) label('Луна', x, y + 30, 20, '#dfe6ff'); continue; }
     const col = { Jupiter: '#ffe6a8', Saturn: '#ead9a2', Venus: '#ffffff', Mars: '#ff9b78', Mercury: '#cfd3dc' }[id], r = big ? 5.5 : 4; glow(x, y, big ? 26 : 16, col + '88', col + '00'); g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
-    if (big) label(b.ru, x, y + (id === 'Saturn' ? 30 : -20), 20, '#ffe9b0'); }
-  const tg = sky.bodies[target]; if (tg) arrowTo(tg.v);
+    if (big) label(b.ru, x, y + (id === 'Saturn' || id === 'Mars' ? 30 : -20), 20, '#ffe9b0'); }
+  extras(pp, t0n);
+  arrowTo(target || pp.f(sky));
   if (!useCam) for (const [az, tx] of [[0, 'С'], [90, 'В'], [180, 'Ю'], [270, 'З']]) if (proj(...dirOf(1.2, az))) label(tx, sx(), sy() - 6, 22, '#f3d48a');
 }
 
 // ---------- start / loop ----------
 let last = performance.now();
 function loop(now) {
-  const dt = Math.min(.1, (now - last) / 1000); last = now; g.setTransform(DPR, 0, 0, DPR, 0, 0); updateCam(); setR();
-  if (mode === 'magi') { if (dirty) refreshMagi(); drawMagi(); } else if (mode === 'beth') drawBeth(now / 1000, dt);
+  const dt = Math.min(.1, (now - last) / 1000); last = now; CY = mode === 'magi' ? H * .3 : H / 2; g.setTransform(DPR, 0, 0, DPR, 0, 0); updateCam(); setR();
+  if (mode === 'magi') { t0n = now / 1000; if (dirty) refreshMagi(); drawMagi(); } else if (mode === 'beth') drawBeth(now / 1000, dt);
   requestAnimationFrame(loop);
 }
 async function begin(m) {

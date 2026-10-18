@@ -36,6 +36,9 @@ export function skyAt(date, lat, lon, cat) {
   sky.cons = cat.cons.map(c => ({ id: c.id, ru: c.ru, v: eqj(c.ra, c.dec) }));
   sky.named = cat.named.map(n => ({ ru: n[0], v: eqj(n[1], n[2]) }));
   for (const [id, ru] of BODIES) { const v = A.GeoVector(id, t, true); sky.bodies[id] = { id, ru, v: toWorld(v.x, v.y, v.z) }; }
+  // records of Chinese court astronomers (Han shu), spring 5 BC: a new star / a comet in Capricornus (Qian Niu, near Dabih). The place is approximate.
+  sky.nova = eqj(305.5, -13.5); const c = eqj(303.0, -11.0), sv = sky.bodies.Sun.v, d = c[0] * sv[0] + c[1] * sv[1] + c[2] * sv[2], aw = [c[0] * d - sv[0], c[1] * d - sv[1], c[2] * d - sv[2]], L = Math.hypot(...aw) || 1;
+  sky.comet = { head: c, away: aw.map(x => x / L) };
   sky.sunAlt = Math.asin(sky.bodies.Sun.v[1]) / D;
   return sky;
 }

@@ -10,6 +10,10 @@ const star = (outer, inner, depth) => {
 
 export async function buildGame(loader, discTop, hooks = {}) {
   const gltf = await loader.loadAsync('game/gingerbread.glb'); const model = gltf.scene;
+  // the candy models (Meshy): normalised to a target size, standing on y = 0
+  const SIZES = { marshmallow: 0.13, tree: 0.2, snowflake: 0.12, ornament: 0.075, cane: 0.11, lollipop: 0.11 }, TPL = {};
+  await Promise.all(Object.entries(SIZES).map(async ([k, h]) => { try { const g = (await loader.loadAsync(`game/items/${k}.glb`)).scene; const bb = new THREE.Box3().setFromObject(g), sz = bb.getSize(new THREE.Vector3()), kk = h / Math.max(sz.x, sz.y, sz.z); g.scale.setScalar(kk); g.updateMatrixWorld(true); const b2 = new THREE.Box3().setFromObject(g), c = b2.getCenter(new THREE.Vector3()); const wrap = new THREE.Group(); g.position.set(-c.x, -b2.min.y, -c.z); wrap.add(g); g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } }); TPL[k] = wrap; } catch (e) { console.warn('item model missing', k); } }));
+  const inst = k => TPL[k] ? TPL[k].clone(true) : null;
   const b = new THREE.Box3().setFromObject(model), sz = b.getSize(new THREE.Vector3()); model.scale.setScalar(0.24 / sz.y); model.updateMatrixWorld(true);
   const b2 = new THREE.Box3().setFromObject(model), c = b2.getCenter(new THREE.Vector3()); model.position.set(-c.x, -b2.min.y, -c.z);
   model.traverse(o => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } });
@@ -30,12 +34,12 @@ export async function buildGame(loader, discTop, hooks = {}) {
   const white = new THREE.MeshStandardMaterial({ color: 0xfff6c8, emissive: 0xffe9a0, emissiveIntensity: 1.1, metalness: 0.3, roughness: 0.3 });
   const ballCols = [0xe03a3a, 0x3a7be0, 0x3ac26a, 0xd94fd0].map(col => new THREE.MeshStandardMaterial({ color: col, metalness: 0.7, roughness: 0.25, emissive: col, emissiveIntensity: 0.18 }));
   const starG = star(0.05, 0.022, 0.014), bigG = star(0.085, 0.036, 0.02), ballG = new THREE.SphereGeometry(0.03, 20, 14);
+  const collectible = type => { const k = type === 'big' ? 'snowflake' : type; let m = type === 'star' ? null : inst(k); if (!m) { const st = new THREE.Mesh(type === 'big' ? bigG : starG, type === 'big' ? white : gold); st.castShadow = true; st.position.y = type === 'big' ? 0.08 : 0.055; m = new THREE.Group(); m.add(st); } m.userData.type = type; return m; };   // stars are drawn centred, the candies stand on y = 0
   const items = []; let spawnT = 0;
   const spawn = () => {
     let x, z, tries = 0; do { const a = Math.random() * 6.283, r = Math.sqrt(Math.random()) * BOARD; x = Math.cos(a) * r; z = Math.sin(a) * r; tries++; } while (tries < 12 && (Math.hypot(x - gb.position.x, z - gb.position.z) < 0.15 || items.some(i => Math.hypot(i.x - x, i.z - z) < 0.1)));
-    const roll = Math.random(), type = roll < 0.07 ? 'big' : roll < 0.3 ? 'ball' : 'star';
-    const mesh = new THREE.Mesh(type === 'big' ? bigG : type === 'ball' ? ballG : starG, type === 'big' ? white : type === 'ball' ? ballCols[(Math.random() * 4) | 0] : gold);
-    mesh.castShadow = true; mesh.position.set(x, discTop + 0.07, z); mesh.scale.setScalar(0.01); root.add(mesh);
+    const roll = Math.random(), type = roll < 0.08 ? 'big' : roll < 0.3 ? 'star' : roll < 0.5 ? 'ornament' : roll < 0.75 ? 'lollipop' : 'cane';
+    const mesh = collectible(type); mesh.position.set(x, discTop + 0.02, z); mesh.scale.setScalar(0.01); root.add(mesh);
     items.push({ mesh, type, x, z, ph: Math.random() * 6, born: 0 });
   };
   // sparkles
@@ -53,17 +57,19 @@ export async function buildGame(loader, discTop, hooks = {}) {
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, TRACK_L / 0.8); t.anisotropy = 4; return t; })();
   const track = new THREE.Mesh(new THREE.PlaneGeometry(0.8, TRACK_L).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: trackTex, roughness: 0.9 })); track.position.set(0, discTop + 0.002, -TRACK_L / 2 + 0.35); track.receiveShadow = true; track.visible = false; root.add(track);
   const decor = []; const treeM = new THREE.MeshStandardMaterial({ color: 0x2f9e5a, roughness: 0.8 }), snowTop = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }), trunkM = new THREE.MeshStandardMaterial({ color: 0x7a4a24 });
-  for (let i = 0; i < 14; i++) { const t = new THREE.Group(); const sz = rnd(0.9, 1.25); for (let k = 0; k < 3; k++) { const cone = new THREE.Mesh(new THREE.ConeGeometry(0.09 - k * 0.02, 0.12, 10), treeM); cone.position.y = 0.09 + k * 0.07; t.add(cone); } const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 6), trunkM); tr.position.y = 0.03; t.add(tr); const top = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 6), snowTop); top.position.y = 0.3; t.add(top); t.scale.setScalar(sz); t.position.set((i % 2 ? 1 : -1) * rnd(0.5, 0.62), discTop, -(i >> 1) * (TRACK_L / 7) + 0.3); t.visible = false; t.userData.side = i % 2; root.add(t); decor.push(t); }
+  for (let i = 0; i < 14; i++) { const real = TPL.tree && (i % 3 !== 2) ? inst('tree') : (TPL.cane && i % 3 === 2 ? inst('cane') : null); if (real) { real.scale.setScalar(rnd(1.0, 1.4)); real.position.set((i % 2 ? 1 : -1) * rnd(0.5, 0.62), discTop, -(i >> 1) * (TRACK_L / 7) + 0.3); real.visible = false; root.add(real); decor.push(real); continue; } const t = new THREE.Group(); const sz = rnd(0.9, 1.25); for (let k = 0; k < 3; k++) { const cone = new THREE.Mesh(new THREE.ConeGeometry(0.09 - k * 0.02, 0.12, 10), treeM); cone.position.y = 0.09 + k * 0.07; t.add(cone); } const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 6), trunkM); tr.position.y = 0.03; t.add(tr); const top = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 6), snowTop); top.position.y = 0.3; t.add(top); t.scale.setScalar(sz); t.position.set((i % 2 ? 1 : -1) * rnd(0.5, 0.62), discTop, -(i >> 1) * (TRACK_L / 7) + 0.3); t.visible = false; t.userData.side = i % 2; root.add(t); decor.push(t); }
   const RUN = { on: false, dist: 0, speed: 0.6, lane: 1, jump: 0, row: 0, obs: [], pick: [] };
   const giftM = [0xd93a3a, 0x2f9e5a, 0x3a7be0].map(col => new THREE.MeshStandardMaterial({ color: col, roughness: 0.5 })), ribbonM = new THREE.MeshStandardMaterial({ color: 0xffe27a, metalness: 0.5, roughness: 0.4 });
   const iceM = new THREE.MeshStandardMaterial({ color: 0xcfeaff, roughness: 0.15, metalness: 0.2, emissive: 0x7fbfff, emissiveIntensity: 0.25, transparent: true, opacity: 0.92 });
   const addObs = (kind, lane, z) => {
-    let mesh; if (kind === 'ball') { mesh = new THREE.Mesh(snowG, snowM); mesh.scale.setScalar(1.15); mesh.position.set(LANES[lane], discTop + 0.058, z); }
+    let mesh; if (kind === 'ball') { mesh = inst('marshmallow') || new THREE.Mesh(snowG, snowM); mesh.scale.setScalar(1.15); mesh.position.set(LANES[lane], discTop, z); }
+    else if (kind === 'gift' && TPL.tree) { mesh = inst('tree'); mesh.position.set(LANES[lane], discTop, z); }
     else if (kind === 'gift') { mesh = new THREE.Group(); const box = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), giftM[(Math.random() * 3) | 0]); box.position.y = 0.06; const rb = new THREE.Mesh(new THREE.BoxGeometry(0.125, 0.125, 0.026), ribbonM); rb.position.y = 0.06; mesh.add(box, rb); mesh.position.set(LANES[lane], discTop, z); }
     else { mesh = new THREE.Group(); for (let k = 0; k < 3; k++) { const c = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.1, 8), iceM); c.position.set((k - 1) * 0.045, 0.05, 0); mesh.add(c); } mesh.position.set(LANES[lane], discTop, z); }
     mesh.castShadow = true; root.add(mesh); RUN.obs.push({ kind, lane, mesh, z });
   };
-  const addStar = (lane, z, high = false) => { const m = new THREE.Mesh(starG, gold); m.castShadow = true; m.position.set(LANES[lane], discTop + (high ? 0.2 : 0.075), z); root.add(m); RUN.pick.push({ mesh: m, lane, z, high }); };
+  const POOL = ['star', 'ornament', 'lollipop', 'cane', 'ornament']; let pi = 0;
+  const addStar = (lane, z, high = false) => { const m = collectible(POOL[pi++ % POOL.length]); m.position.set(LANES[lane], discTop + (high ? 0.2 : 0.03), z); root.add(m); RUN.pick.push({ mesh: m, lane, z, high }); };
   const spawnRow = () => {
     const z = -TRACK_L + 0.4, r = Math.random(), lane = (Math.random() * 3) | 0, other = (lane + 1 + ((Math.random() * 2) | 0)) % 3;
     if (r < 0.3) { for (let k = 0; k < 4; k++) addStar(lane, z - k * 0.12); }
@@ -83,7 +89,7 @@ export async function buildGame(loader, discTop, hooks = {}) {
   const spawnBall = () => {
     const a = Math.random() * 6.283, sp = 0.3 + 0.2 * (1 - S.left / S.total) + Math.random() * 0.08;
     const sx = Math.cos(a) * (R - 0.04), sz = Math.sin(a) * (R - 0.04), aim = (Math.random() - 0.5) * 0.9, tx = Math.cos(a + Math.PI + aim) * (R - 0.04), tz = Math.sin(a + Math.PI + aim) * (R - 0.04), d = Math.hypot(tx - sx, tz - sz);
-    const mesh = new THREE.Mesh(snowG, snowM); mesh.castShadow = true; mesh.position.set(sx, discTop + 0.05, sz); mesh.visible = false; root.add(mesh);
+    const mesh = inst('marshmallow') || new THREE.Mesh(snowG, snowM); mesh.castShadow = true; mesh.position.set(sx, discTop, sz); mesh.visible = false; root.add(mesh);
     const warn = new THREE.Sprite(new THREE.SpriteMaterial({ map: warnTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); warn.position.set(sx * 0.93, discTop + 0.04, sz * 0.93); warn.scale.setScalar(0.16); root.add(warn);
     balls.push({ mesh, warn, x: sx, z: sz, vx: (tx - sx) / d * sp, vz: (tz - sz) / d * sp, wait: 0.9, life: d / sp + 0.2 });
   };
@@ -114,7 +120,7 @@ export async function buildGame(loader, discTop, hooks = {}) {
     }
     // items bob and spin; collect on touch
     for (let i = items.length - 1; i >= 0; i--) {
-      const it = items[i]; it.born += dt; const sc = Math.min(1, it.born * 4) * (it.type === 'big' ? 1 : 1); it.mesh.scale.setScalar(Math.max(0.01, sc)); it.mesh.position.y = discTop + 0.075 + Math.sin(t * 2.2 + it.ph) * 0.012; it.mesh.rotation.y += dt * 1.6;
+      const it = items[i]; it.born += dt; const sc = Math.min(1, it.born * 4); it.mesh.scale.setScalar(Math.max(0.01, sc)); it.mesh.position.y = discTop + 0.02 + Math.abs(Math.sin(t * 2.2 + it.ph)) * 0.02; it.mesh.rotation.y += dt * 1.6;
       if (S.playing && Math.hypot(it.x - gb.position.x, it.z - gb.position.z) < (it.type === 'big' ? 0.11 : 0.085)) {
         const pts = it.type === 'big' ? 5 : 1; S.score += pts; S.collected++; burst(it.mesh.position, it.type === 'big' ? 30 : 14, it.type === 'big'); root.remove(it.mesh); items.splice(i, 1);
         if (S.collected % 5 === 0) once('jump', 1.1);

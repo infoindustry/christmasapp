@@ -1,5 +1,6 @@
 // The diorama of Bethlehem: day turns into night, the windows light up (found automatically from the texture), the Bethlehem star shines over the manger.
 import * as THREE from 'three';
+import { buildFamily } from './familyfx.js';
 
 export const MANGER = [0.28, -0.08, 0.6];   // the thatched shelter at the front (model units: x ±0.62, y ±0.36, z ±0.95)
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -31,6 +32,9 @@ export async function buildBethlehem(loader, { debug = false } = {}) {
   const gltf = await loader.loadAsync('bethlehem/bethlehem.glb'); const model = gltf.scene; let mesh; model.traverse(o => { if (o.isMesh) mesh = o; });
   const mat = mesh.material; mat.emissive = new THREE.Color(0xffffff); mat.emissiveMap = mat.map; mat.emissiveIntensity = 0.5; mat.roughness = 0.95; mat.metalness = 0; mesh.frustumCulled = false;
   const group = new THREE.Group(); group.add(model); const fx = new THREE.Group(); group.add(fx);
+  // the Holy Family: appears in front of the manger shelter when you come close ("К яслям")
+  const fam = await buildFamily(loader), FS = 0.4; fam.group.position.set(MANGER[0], -0.26 + 0.95 * FS, MANGER[2] + 0.12); fam.group.scale.setScalar(0.001); fam.group.visible = false; group.add(fam.group);
+  const famState = { k: 0, target: 0 }; const inFamily = o => { while (o) { if (o === fam.group) return true; o = o.parent; } return false; };
   const state = { night: 0, target: 0, flash: 0 };
   const DAY = new THREE.Color(0xffffff), NIGHT = new THREE.Color(0x8e9ed6), EDAY = new THREE.Color(0xffffff).multiplyScalar(0.5), ENIGHT = new THREE.Color(0xa6b6f0).multiplyScalar(0.24);   // night: bluish, but you can still see the houses
 
@@ -59,10 +63,12 @@ export async function buildBethlehem(loader, { debug = false } = {}) {
   if (debug) { const m = new THREE.Mesh(new THREE.SphereGeometry(0.02), new THREE.MeshBasicMaterial({ color: 0xff0000, depthTest: false })); m.position.set(...MANGER); fx.add(m); console.log('windows found:', wins.length); }
 
   function update(t, dt) {
+    // pk = how far we are "inside the manger" (the town dims while the Family shows)
+    famState.k += (famState.target - famState.k) * Math.min(1, dt * 2.6); const pk = famState.k; const fk = Math.min(1, famState.k), pop = fk < 0.98 ? fk * (1 + (1 - fk) * 0.25) : 1; fam.group.visible = fk > 0.01; fam.group.scale.setScalar(Math.max(0.001, FS * pop)); if (fam.group.visible) fam.update(t, dt);
     state.night += (state.target - state.night) * Math.min(1, dt * 1.6); const n = state.night;
-    mat.color.lerpColors(DAY, NIGHT, n); mat.emissive.lerpColors(EDAY, ENIGHT, n); mat.emissiveIntensity = 1;
+    mat.color.lerpColors(DAY, NIGHT, n).multiplyScalar(1 - 0.72 * pk); mat.emissive.lerpColors(EDAY, ENIGHT, n).multiplyScalar(1 - 0.85 * pk); mat.emissiveIntensity = 1;   // the town dims while you look at the Family
     // windows come on one after another as it gets dark
-    for (const L of lights) { const k = Math.min(1, Math.max(0, (n - 0.25) / 0.55 - L.on * 0.6)), fl = 0.85 + 0.15 * Math.sin(t * 7 + L.ph) * Math.sin(t * 2.3 + L.ph * 2); const o = k * fl + state.flash * Math.exp(-((L.w.p.x - state.fx) ** 2 + (L.w.p.z - state.fz) ** 2) * 18); L.s.material.opacity = Math.min(1, o) * 0.95; L.core.material.opacity = Math.min(1, o); }
+    for (const L of lights) { const k = Math.min(1, Math.max(0, (n - 0.25) / 0.55 - L.on * 0.6)), fl = 0.85 + 0.15 * Math.sin(t * 7 + L.ph) * Math.sin(t * 2.3 + L.ph * 2); const o = k * fl + state.flash * Math.exp(-((L.w.p.x - state.fx) ** 2 + (L.w.p.z - state.fz) ** 2) * 18); L.s.material.opacity = Math.min(1, o) * 0.95 * (1 - 0.55 * pk); L.core.material.opacity = Math.min(1, o) * (1 - 0.55 * pk); }
     state.flash = Math.max(0, state.flash - dt * 1.4);
     // star + beam
     const sk = Math.max(0, (n - 0.5) / 0.5), pulse = 1 + Math.sin(t * 2.4) * 0.06; star.material.opacity = sk * 0.95; star.scale.setScalar(0.34 * pulse); rays.material.opacity = sk * 0.8; rays.scale.setScalar(0.62 * pulse); rays.material.rotation = t * 0.12; core.material.opacity = sk; beam.material.opacity = sk * 0.55;
@@ -79,6 +85,9 @@ export async function buildBethlehem(loader, { debug = false } = {}) {
     setNight(on) { state.target = on ? 1 : 0; },
     isNight: () => state.target > 0.5,
     flashAt(p) { state.fx = p.x; state.fz = p.z; state.flash = 1.2; },
+    family: fam, inFamily,
+    showFamily(on) { famState.target = on ? 1 : 0; if (on) fam.glow(); },
+    familyShown: () => famState.target > 0.5,
     isManger: p => Math.hypot(p.x - MANGER[0], p.z - MANGER[2]) < 0.22 && p.y < 0.15,
   };
 }

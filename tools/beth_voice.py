@@ -3,9 +3,9 @@ import json,urllib.request,urllib.error,os,subprocess,importlib.util
 spec=importlib.util.spec_from_file_location('f','tools/film_src.py'); f=importlib.util.module_from_spec(spec); spec.loader.exec_module(f)
 env=dict(l.split('=',1) for l in open('/Users/alex/WebstormProjects/gospel-context/.env.local').read().split('\n') if '=' in l and not l.startswith('#'))
 K=env['ELEVENLABS_API_KEY'].strip().strip('"\'')
-L={'n0':'[warmly] Это Вифлеем, маленький город, где родился Иисус. Нажми «Ночь» и посмотри, что будет.',
+L={'n0':'[warmly] Это Вифлеем, маленький город, где родился Иисус. Нажми «Ночь», а потом загляни в ясли.',
    'n1':'[softly] Вот ночь над Вифлеемом. В окнах зажигаются огоньки, а над маленьким домом сияет особенная звезда.',
-   'n2':'[reverently] Здесь, в простом доме, родился Иисус, Сын Божий и наш Спаситель. Он пришёл, чтобы быть рядом с каждым из нас.',
+   'n2':'[reverently] Когда Иосиф и Мария пришли сюда на перепись, для них не нашлось места в жилых комнатах. Здесь родился Иисус, и Мария положила Его в ясли, в кормушку для скота.',
    'n3':'[warmly] В каждом окошке живут люди. Но в ту ночь самую большую радость получили пастухи и все, кто искал Спасителя.'}
 for k,t in L.items():
     out=f'public/audio/beth/{k}.mp3'

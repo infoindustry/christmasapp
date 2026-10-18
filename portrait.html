@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
-const ids = (await fetch('/data/witnesses.json').then(r => r.json())).filter(w => !w.type).map(w => w.id).concat(['game', 'family']);   // + the gingerbread (card picture)
+const ids = (await fetch('/data/witnesses.json').then(r => r.json())).filter(w => !w.type).map(w => w.id).concat(['game']);   // + the gingerbread (card picture)
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), alpha: true, antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(512, 512, false); renderer.toneMapping = THREE.ACESFilmicToneMapping;
 const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);

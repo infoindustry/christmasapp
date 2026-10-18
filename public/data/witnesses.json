@@ -1614,16 +1614,6 @@
   "lines": []
  },
  {
-  "id": "family",
-  "name": "Святое семейство",
-  "type": "room",
-  "voiceId": "",
-  "voiceName": "",
-  "model": "",
-  "scripture": "Лк 2:1–20",
-  "lines": []
- },
- {
   "id": "bethlehem",
   "name": "Вифлеем",
   "type": "room",

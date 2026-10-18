@@ -178,3 +178,9 @@ body.quiz #sub, body.quiz #dots, body.quiz #controls { display: none; }
 .card.game { background: linear-gradient(160deg, #5b8def33, #ee8c2e22) !important; box-shadow: inset 0 0 0 1px #ffffff22, 0 8px 24px #0004; }
 .card.game small::before { content: '🎮 '; }
 #pwa { margin: 22px auto 40px; }
+
+/* the diorama of Bethlehem */
+body.beth #sub, body.beth #dots, body.beth #controls { display: none; }
+#bpanel { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 9px; font-family: var(--sys); }
+#bsub { min-height: 2.6em; display: flex; align-items: center; text-align: center; font-family: Georgia, serif; font-size: clamp(14px, 3.6vw, 17px); text-shadow: 0 1px 8px #000; }
+#bctl { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }

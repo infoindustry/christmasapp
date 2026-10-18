@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import { OfflineCompiler } from 'locus-ar';
 
-const ids = JSON.parse(fs.readFileSync('public/data/witnesses.json', 'utf8')).filter(w => w.type !== 'game').map(w => w.id)   // the gingerbread game has no medallion;
+const ids = JSON.parse(fs.readFileSync('public/data/witnesses.json', 'utf8')).filter(w => w.type !== 'game' && !w.nomarker).map(w => w.id)   // the gingerbread game has no medallion;
 fs.mkdirSync('public/targets', { recursive: true });
 const load = async id => {
   // flatten onto a neutral paper colour so the transparent corners are not read as black features

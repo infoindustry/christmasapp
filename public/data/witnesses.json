@@ -1614,6 +1614,17 @@
   "lines": []
  },
  {
+  "id": "bethlehem",
+  "name": "Вифлеем",
+  "type": "room",
+  "nomarker": true,
+  "voiceId": "",
+  "voiceName": "",
+  "model": "",
+  "scripture": "Ночь в Вифлееме",
+  "lines": []
+ },
+ {
   "id": "room",
   "name": "Рождественская комната",
   "type": "room",

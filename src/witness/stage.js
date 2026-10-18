@@ -7,6 +7,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { loadCompanions } from './companions.js';
 import { buildRoom } from './roomfx.js';
 import { buildGame } from './gamefx.js';
+import { buildBethlehem } from './bethfx.js';
 
 const DISC_R = 0.5, DISC_H = 0.035, FIGURE_H = 1.18;
 const UPPER = /Spine|Neck|Head|Shoulder|Arm|Hand|headfront/i, LOWER = /Leg|Foot|Toe|Hips/i;
@@ -103,12 +104,13 @@ export class Stage {
     const t = new THREE.CanvasTexture(c); this.anchor.add(this.dust = new THREE.Points(g, new THREE.PointsMaterial({ map: t, size: 0.028, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.75 })));
   }
   async load(id, onProgress) {
-    const [tex] = await Promise.all([id === 'game' || id === 'quiz' ? this._boardTexture() : new THREE.TextureLoader().loadAsync(`medallions/${id}.webp`)]);   // the game board is drawn here, it is not a medallion
+    const [tex] = await Promise.all([id === 'game' || id === 'quiz' ? this._boardTexture() : id === 'bethlehem' ? this._plateTexture() : new THREE.TextureLoader().loadAsync(`medallions/${id}.webp`)]);   // the game board is drawn here, it is not a medallion
     tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.center.set(0.5, 0.5); tex.rotation = Math.PI; // name reads from the viewer's side
     const gold = new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.85, roughness: 0.32 });
     const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.12 });
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_H, 128), [gold, top, gold]); disc.position.y = DISC_H / 2; disc.castShadow = disc.receiveShadow = true; this.disc = disc; this.anchor.add(disc);
     if (id === 'game' || id === 'quiz') { await this._game(id); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
+    if (id === 'bethlehem') { await this._beth(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'room') { await this._room(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'word') { onProgress?.(1); this._book(); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
@@ -159,6 +161,13 @@ export class Stage {
   }
   bow() { if (this.actions.bow) { this._play('bow', 0.4, true); this.actions.bow.getMixer().addEventListener('finished', () => this._play('idle', 0.6), { once: true }); } }
   // keep the soles on the disc: the baked clips lift the feet (idle/talk sway), so measure the lowest foot bone and drop the figure to match
+  /** a dark pedestal with a golden ring under the diorama of Bethlehem (it has no printed medallion) */
+  _plateTexture() {
+    const c = document.createElement('canvas'); c.width = c.height = 1024; const x = c.getContext('2d'); const g = x.createRadialGradient(512, 512, 40, 512, 512, 512); g.addColorStop(0, '#3a2a5a'); g.addColorStop(1, '#171030'); x.fillStyle = g; x.fillRect(0, 0, 1024, 1024); x.translate(512, 512);
+    x.strokeStyle = '#e3b445'; x.lineWidth = 10; x.beginPath(); x.arc(0, 0, 470, 0, 7); x.stroke(); x.lineWidth = 3; x.beginPath(); x.arc(0, 0, 440, 0, 7); x.stroke();
+    let r = 5; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647; x.fillStyle = '#fff3c0'; for (let i = 0; i < 90; i++) { const a = rnd() * 6.283, d = 80 + Math.sqrt(rnd()) * 360; x.globalAlpha = 0.3 + rnd() * 0.7; x.beginPath(); x.arc(Math.cos(a) * d, Math.sin(a) * d, 1.5 + rnd() * 3, 0, 7); x.fill(); } x.globalAlpha = 1;
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  }
   /** a snowy festive plate for the gingerbread game (no printed marker is needed for it) */
   _boardTexture() {
     const c = document.createElement('canvas'); c.width = c.height = 1024; const x = c.getContext('2d');
@@ -186,6 +195,14 @@ export class Stage {
     if (run) { this.camera.position.set(0, 0.68, 1.3); this.controls.target.set(0, 0.06, -0.85); this.fitHeight = 0.5; }
     else { this.camera.position.set(0, 1.0, 1.65); this.controls.target.set(0, 0.06, 0); this.fitHeight = 0.55; }
     this.controls.update(); this._viewOffset();
+  }
+  /** the diorama of Bethlehem on the medallion: it turns from day into night */
+  async _beth() {
+    const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+    const b = await buildBethlehem(loader, { debug: new URLSearchParams(location.search).has('debug') });
+    const S = 0.5, hold = new THREE.Group(); b.group.scale.setScalar(S); b.group.position.y = DISC_H + 0.36 * S + 0.004; hold.add(b.group); this.anchor.add(hold);
+    this.figure = hold; this.model = hold; this.fixedFacing = true; this.bethFx = b; this.pickRoots = [b.model]; this.fitHeight = 0.7;
+    this.camera.position.set(0.35, 0.78, 1.85); this.controls.target.set(0, 0.2, 0.05); Object.assign(this.controls, { minDistance: 0.5, maxDistance: 3.5 }); this.controls.update();
   }
   /** the Christmas room: a diorama on the medallion with a living fire, twinkling tree lights, falling snow ... */
   async _room() {
@@ -256,6 +273,7 @@ export class Stage {
     this.mixer?.update(dt);
     if (this.roomFx) this.roomFx.update(t, dt, this.speaking);
     if (this.gameFx) this.gameFx.update(t, dt);
+    if (this.bethFx) this.bethFx.update(t, dt);
     if (this.book) { const B = this.book, k = this.speaking; B.g.position.y = B.baseY + Math.sin(t * 1.1) * 0.012; B.mat.emissiveIntensity = 0.12 + k * 0.28 + Math.sin(t * 2.2) * 0.04 * k; B.glow.intensity = 0.5 + k * 1.1; B.beam.material.opacity = 0.22 + k * 0.4; B.R.rotation.z = Math.sin(t * 0.9) * 0.012 * (0.4 + k); B.L.rotation.z = -Math.sin(t * 0.9 + 1) * 0.012 * (0.4 + k); }
     this._groundLock();
     this.speaking += (this.speakTarget - this.speaking) * Math.min(1, dt * 6);

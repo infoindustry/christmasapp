@@ -19,6 +19,7 @@ for w in m.W:
     total+=sum(len(re.sub(r'\[[^\]]*\]','',l['text'])) for l in lines)
     out.append(dict(id=w['id'],name=w['name'],voiceId=vid,voiceName=w['voiceName'],model=w['model'],scripture=w['intro'],lines=lines))
 out.append(dict(id='word',name='Слово Божье',type='book',voiceId='',voiceName='аудиокнига',model='',scripture='Лк 1–2; Мф 1–2; Ин 1:14',lines=[]))
+out.append(dict(id='bethlehem',name='Вифлеем',type='room',nomarker=True,voiceId='',voiceName='',model='',scripture='Ночь в Вифлееме',lines=[]))
 out.append(dict(id='room',name='Рождественская комната',type='room',voiceId='',voiceName='',model='',scripture='Загляни внутрь',lines=[]))
 out.append(dict(id='quiz',name='Викторина',type='game',voiceId='',voiceName='',model='',scripture='Правда или нет',lines=[]))
 out.append(dict(id='game',name='Пряничек',type='game',voiceId='',voiceName='',model='',scripture='Игра: собери звёзды',lines=[]))

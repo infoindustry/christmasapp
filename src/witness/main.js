@@ -84,17 +84,21 @@ $('questions').onclick = e => {
 const pokes = w.lines.filter(l => l.kind === 'poke'); let pokeI = 0, soundI = {};
 const play = (el, f) => { try { el.src = f; el.currentTime = 0; el.play().catch(() => {}); } catch (e) {} };
 const animalAudio = new Audio();
+// what a tap on something in the scene does (the same on the screen and in WebXR AR)
+function onHit(hit) {
+  if (hit.companion) {
+    const n = hit.companion.cfg.sound; if (n) { soundI[n] = ((soundI[n] ?? -1) + 1) % 2; play(animalAudio, `audio/animals/${n}-${soundI[n] + 1}.mp3`); }
+    hit.companion.react();
+  } else if (BETH) { window.__w.beth?.tap(hit.point, hit.object); } else if (QUIZ) { /* the quiz is answered with the buttons */ } else if (GAME) { game?.tap(hit); } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
+}
+stage.onHit = onHit;
 const cv = $('c'); let down = null;
 cv.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 cv.addEventListener('pointerup', e => {
   if (!down || $('start')) return;   // not before the start screen is gone
   const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null;
   if (moved > 8 || dt > 500) return;   // a drag turns the view, it is not a tap
-  const hit = stage.pick(e.clientX, e.clientY); if (!hit) return;
-  if (hit.companion) {
-    const n = hit.companion.cfg.sound; if (n) { soundI[n] = ((soundI[n] ?? -1) + 1) % 2; play(animalAudio, `audio/animals/${n}-${soundI[n] + 1}.mp3`); }
-    hit.companion.react();
-  } else if (BETH) { window.__w.beth?.tap(hit.point, hit.object); } else if (QUIZ) { /* the quiz is answered with the buttons */ } else if (GAME) { game?.tap(hit); } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
+  const hit = stage.pick(e.clientX, e.clientY); if (hit) onHit(hit);
 });
 
 // the first screen asks HOW to look (in the magazine / on the table / on the phone) and explains it; that tap also unlocks the sound

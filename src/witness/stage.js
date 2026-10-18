@@ -53,9 +53,15 @@ export class Stage {
     if (!this.model) return null;
     const r = this.renderer.domElement.getBoundingClientRect(); this._ndc = this._ndc || new THREE.Vector2(); this._ray = this._ray || new THREE.Raycaster();
     this._ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1); this._ray.setFromCamera(this._ndc, this.camera);
+    return this._pickWith();
+  }
+  /** the same, for a ray in world space (a tap in WebXR comes as a ray, not as a screen point) */
+  pickRay(origin, dir) { if (!this.model) return null; this._ray = this._ray || new THREE.Raycaster(); this._ray.set(origin, dir); return this._pickWith(); }
+  _pickWith() {
     let best = null, bd = 1e9;
     const test = (obj, res) => { const h = this._ray.intersectObject(obj, true); if (h.length && h[0].distance < bd) { bd = h[0].distance; best = { ...res, point: h[0].point.clone(), object: h[0].object }; } };
-    for (const root of this.pickRoots || [this.roomFx ? this.roomFx.model : this.model]) test(root, { figure: true });   // the room: only its mesh counts (not the sprites / snow on top); the game: the board and the gingerbread for (const c of this.companions || []) test(c.root, { companion: c });
+    for (const root of this.pickRoots || [this.roomFx ? this.roomFx.model : this.model]) test(root, { figure: true });   // the room: only its mesh counts (not the sprites / snow on top); the game: the board and the gingerbread
+    for (const c of this.companions || []) test(c.root, { companion: c });
     return best;
   }
   _layoutCompanions() {
@@ -81,11 +87,11 @@ export class Stage {
     this.camera.updateProjectionMatrix();
   }
   _lights() {
-    const L = this.anchor; L.add(new THREE.HemisphereLight(0xdfe6ff, 0x4a3a28, 0.95));
+    const L = this.anchor, hemi = new THREE.HemisphereLight(0xdfe6ff, 0x4a3a28, 0.95); L.add(hemi);
     const key = new THREE.DirectionalLight(0xffe2b8, 2.4); key.position.set(-1.6, 2.6, 2.2); key.castShadow = true;
     key.shadow.mapSize.set(this.phone ? 1024 : 2048, this.phone ? 1024 : 2048); Object.assign(key.shadow.camera, { left: -1.6, right: 1.6, top: 2, bottom: -1, near: 0.5, far: 8 }); key.shadow.bias = -0.0004; key.shadow.radius = 4;
     L.add(key, key.target);
-    const rim = new THREE.DirectionalLight(0x9db4ff, 1.1); rim.position.set(1.8, 1.8, -2); L.add(rim);
+    const rim = new THREE.DirectionalLight(0x9db4ff, 1.1); rim.position.set(1.8, 1.8, -2); L.add(rim); this.lightRefs = [hemi, key, rim];
     // in AR the real surface shows through: only the shadows are drawn on it
     const sh = new THREE.Mesh(new THREE.PlaneGeometry(3, 3).rotateX(-Math.PI / 2), new THREE.ShadowMaterial({ opacity: 0.35 })); sh.receiveShadow = true; sh.position.y = 0.001; sh.visible = false; L.add(sh); this.shadowCatcher = sh;
   }

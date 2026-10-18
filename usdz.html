@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><title>usdz</title><body style="background:#222;color:#fff;font:14px system-ui"><div id="log"></div>
+<script type="module">
+// Dev tool: bakes every witness in a standing pose and exports it as USDZ (Apple AR Quick Look on iPhone).
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { USDZExporter } from 'three/examples/jsm/exporters/USDZExporter.js';
+const log = t => (document.getElementById('log').textContent += t + ' ');
+const ids = (await fetch('/data/witnesses.json').then(r => r.json())).filter(w => !w.type).map(w => w.id);
+const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+const toPng = tex => { const img = tex.image, c = document.createElement('canvas'); const k = Math.min(1, 1024 / Math.max(img.width, img.height)); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); const t = new THREE.CanvasTexture(c); t.colorSpace = tex.colorSpace; t.flipY = tex.flipY; t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; };
+for (const id of ids) {
+  const g = await loader.loadAsync(`/witnesses/${id}/model.glb`), root = g.scene;
+  const clip = g.animations.find(a => /Idle/.test(a.name)) || g.animations.find(a => /Talk/.test(a.name)); const mixer = new THREE.AnimationMixer(root); if (clip) mixer.clipAction(clip).play(); mixer.setTime(clip ? Math.min(0.4, clip.duration * 0.2) : 0); root.updateMatrixWorld(true);
+  // normalise to 1.0 m tall, feet on the floor
+  const bb = new THREE.Box3().setFromObject(root), sz = bb.getSize(new THREE.Vector3()), k = 1 / sz.y; root.scale.multiplyScalar(k); root.updateMatrixWorld(true);
+  const b2 = new THREE.Box3().setFromObject(root), c = b2.getCenter(new THREE.Vector3()); root.position.set(-c.x, -b2.min.y, -c.z); root.updateMatrixWorld(true);
+  const out = new THREE.Scene(), holder = new THREE.Group(); out.add(holder);
+  root.traverse(o => {
+    if (!o.isMesh) return; const geo = new THREE.BufferGeometry(), P = o.geometry.attributes.position, pos = new Float32Array(P.count * 3), v = new THREE.Vector3();
+    for (let i = 0; i < P.count; i++) { if (o.isSkinnedMesh) o.getVertexPosition(i, v); else v.fromBufferAttribute(P, i); v.applyMatrix4(o.matrixWorld); pos.set([v.x, v.y, v.z], i * 3); }   // the pose is baked into the vertices, in world units
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); if (o.geometry.attributes.uv) geo.setAttribute('uv', o.geometry.attributes.uv); if (o.geometry.index) geo.setIndex(o.geometry.index); geo.computeVertexNormals();
+    const m = o.material, mat = new THREE.MeshStandardMaterial({ map: m.map ? toPng(m.map) : null, color: m.color, roughness: 0.85, metalness: 0, side: THREE.DoubleSide, alphaTest: m.alphaTest, transparent: false });
+    holder.add(new THREE.Mesh(geo, mat));
+  });
+  const data = await new USDZExporter().parseAsync(out, { ar: { anchoring: { type: 'plane' }, planeAnchoring: { alignment: 'horizontal' } } });
+  await fetch(`http://localhost:5176/?id=${id}`, { method: 'POST', body: data }); log(`${id}(${(data.byteLength / 1048576).toFixed(1)}MB)`);
+}
+log('DONE'); window.__done = true;
+</script>

@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { Controller } from 'locus-ar';
 import { PoseSmoother } from '../smooth.js';
+import { XREstimatedLight } from 'three/examples/jsm/webxr/XREstimatedLight.js';
 
 const $ = id => document.getElementById(id);
 const DEG = Math.PI / 180;
@@ -97,31 +98,38 @@ export class AR {
     s.arRoot.visible = false; const game = s.gameFx, SCALE = game ? 0.8 : 0.4; s.arRoot.scale.setScalar(SCALE);   // the game: no plate, the whole table is the playground
     if (game) { s.disc.visible = false; game.setArena(0.88); }   // 0.88 local units * 0.8 = a 70 cm radius around the first tap
     r.xr.enabled = true; r.xr.setReferenceSpaceType('local');
-    const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: document.body } });
+    // light estimation: the figure is lit like the real room (when the phone supports it)
+    const est = new XREstimatedLight(r), dim = f => s.lightRefs.forEach(l => { l.userData.i0 ??= l.intensity; l.intensity = f ? l.userData.i0 * 0.3 : l.userData.i0; });
+    est.addEventListener('estimationstart', () => { s.scene.add(est); if (est.environment) s.scene.environment = est.environment; dim(true); });
+    est.addEventListener('estimationend', () => { s.scene.remove(est); s.scene.environment = null; dim(false); });
+    const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay', 'light-estimation', 'anchors'], domOverlay: { root: document.body } });
     await r.xr.setSession(session);
     const viewer = await session.requestReferenceSpace('viewer'), src = await session.requestHitTestSource({ space: viewer });
     const ref = r.xr.getReferenceSpace();
     const ret = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.08, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xe8c46a })); ret.matrixAutoUpdate = false; ret.visible = false; s.scene.add(ret);
-    let placed = false, last = null; this.ui.hint(game ? 'Наведи на стол и коснись, чтобы поставить пряничка' : 'Наведи на стол или пол и коснись экрана');
+    let placed = false, last = null, lastHit = null, anchor = null; const scaleM = new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE), poseM = new THREE.Matrix4(); this.ui.hint(game ? 'Наведи на стол и коснись, чтобы поставить пряничка' : 'Наведи на стол или пол и коснись экрана');
     // taps on the page UI (buttons, panel) must not count as taps on the table
     for (const sel of ['#panel', '#modes', '#back', '#head', '#hud']) document.querySelector(sel)?.addEventListener('beforexrselect', ev => ev.preventDefault());
     const ray = new THREE.Raycaster(), tmpM = new THREE.Matrix4(), O = new THREE.Vector3(), D = new THREE.Vector3(), P = new THREE.Vector3();
     session.addEventListener('select', e => {
       if (!placed) {   // the first tap puts the world on the table; after that the world stays where it is
-        if (!last) return; s.arRoot.matrixAutoUpdate = false; s.arRoot.matrix.copy(last).multiply(new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; placed = true; ret.visible = false; this.ui.hint(''); return;
+        if (!last) return; s.arRoot.matrixAutoUpdate = false; s.arRoot.matrix.copy(last).multiply(new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; placed = true; ret.visible = false; this.ui.hint(''); if (lastHit?.createAnchor) lastHit.createAnchor().then(a => { anchor = a; }).catch(() => {}); return;   // an anchor keeps the figure glued to the table as tracking improves
       }
-      if (!game || !e.frame) return;   // the game: a tap sends the gingerbread there (or makes him jump if you touch him)
+      if (!e.frame) return;
       const pose = e.frame.getPose(e.inputSource.targetRaySpace, ref); if (!pose) return;
       tmpM.fromArray(pose.transform.matrix); O.setFromMatrixPosition(tmpM); D.set(0, 0, -1).transformDirection(tmpM);
+      if (!game) { const h = s.pickRay(O.clone(), D.clone()); if (h) s.onHit?.(h); return; }   // a tap on the witness (a joke, a sound ...) works in AR just like on the screen
       ray.set(O, D); const hit = ray.intersectObject(game.model, true)[0]; if (hit) { game.tap(hit.point, hit.object); return; }
       const y = P.setFromMatrixPosition(s.arRoot.matrixWorld).y; if (D.y > -0.01) return; const t = (y - O.y) / D.y; game.tap(O.clone().addScaledVector(D, t), null);
     });
     s.onFrame = (t, dt, frame) => {
-      if (!frame || placed) return; const hits = frame.getHitTestResults(src);
-      if (hits.length) { const pose = hits[0].getPose(ref); last = new THREE.Matrix4().fromArray(pose.transform.matrix); ret.matrix.copy(last); ret.visible = true; } else { ret.visible = false; last = null; }
+      if (!frame) return;
+      if (placed) { if (anchor) { const p = frame.getPose(anchor.anchorSpace, ref); if (p) { poseM.fromArray(p.transform.matrix); s.arRoot.matrix.copy(poseM).multiply(scaleM); s.arRoot.matrixWorldNeedsUpdate = true; } } return; }
+      const hits = frame.getHitTestResults(src);
+      if (hits.length) { lastHit = hits[0]; const pose = hits[0].getPose(ref); last = new THREE.Matrix4().fromArray(pose.transform.matrix); ret.matrix.copy(last); ret.visible = true; } else { ret.visible = false; last = null; lastHit = null; }
     };
     const end = () => { this.stop(); this.ui.exited?.(); }; session.addEventListener('end', end);
-    this.cleanup.push(() => { src.cancel?.(); s.scene.remove(ret); r.xr.enabled = false; try { session.removeEventListener('end', end); session.end(); } catch (e) {} r.setAnimationLoop((t, f) => s._frame(f)); });
+    this.cleanup.push(() => { src.cancel?.(); est.dispose?.(); dim(false); s.scene.environment = null; s.scene.remove(ret); r.xr.enabled = false; try { session.removeEventListener('end', end); session.end(); } catch (e) {} r.setAnimationLoop((t, f) => s._frame(f)); });
   }
 
   async _gyro() {

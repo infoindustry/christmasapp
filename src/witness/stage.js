@@ -6,6 +6,7 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { loadCompanions } from './companions.js';
 import { buildRoom } from './roomfx.js';
+import { buildGame } from './gamefx.js';
 
 const DISC_R = 0.5, DISC_H = 0.035, FIGURE_H = 1.18;
 const UPPER = /Spine|Neck|Head|Shoulder|Arm|Hand|headfront/i, LOWER = /Leg|Foot|Toe|Hips/i;
@@ -52,8 +53,8 @@ export class Stage {
     const r = this.renderer.domElement.getBoundingClientRect(); this._ndc = this._ndc || new THREE.Vector2(); this._ray = this._ray || new THREE.Raycaster();
     this._ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1); this._ray.setFromCamera(this._ndc, this.camera);
     let best = null, bd = 1e9;
-    const test = (obj, res) => { const h = this._ray.intersectObject(obj, true); if (h.length && h[0].distance < bd) { bd = h[0].distance; best = { ...res, point: h[0].point.clone() }; } };
-    test(this.roomFx ? this.roomFx.model : this.model, { figure: true });   // for the room only its mesh counts (not the sprites / snow on top) for (const c of this.companions || []) test(c.root, { companion: c });
+    const test = (obj, res) => { const h = this._ray.intersectObject(obj, true); if (h.length && h[0].distance < bd) { bd = h[0].distance; best = { ...res, point: h[0].point.clone(), object: h[0].object }; } };
+    for (const root of this.pickRoots || [this.roomFx ? this.roomFx.model : this.model]) test(root, { figure: true });   // the room: only its mesh counts (not the sprites / snow on top); the game: the board and the gingerbread for (const c of this.companions || []) test(c.root, { companion: c });
     return best;
   }
   _layoutCompanions() {
@@ -73,7 +74,7 @@ export class Stage {
   _viewOffset() {
     const w = innerWidth, h = innerHeight, top = this.topInset || 0, bot = this.insetCur || 0;
     const free = Math.max(120, h - top - bot);
-    const D = this.camera.position.distanceTo(this.controls.target), px = (1.4 / (2 * D * Math.tan(this.camera.fov * Math.PI / 360))) * h;   // the tallest figure + disc is ~1.4 high
+    const D = this.camera.position.distanceTo(this.controls.target), px = ((this.fitHeight || 1.4) / (2 * D * Math.tan(this.camera.fov * Math.PI / 360))) * h;   // the tallest figure + disc is ~1.4 high
     this.camera.zoom = Math.min(1, (0.94 * free) / px);
     if (bot > 1 || top > 1) this.camera.setViewOffset(w, h, 0, (bot - top) / 2, w, h); else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
@@ -102,11 +103,12 @@ export class Stage {
     const t = new THREE.CanvasTexture(c); this.anchor.add(this.dust = new THREE.Points(g, new THREE.PointsMaterial({ map: t, size: 0.028, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.75 })));
   }
   async load(id, onProgress) {
-    const [tex] = await Promise.all([new THREE.TextureLoader().loadAsync(`medallions/${id}.webp`)]);
+    const [tex] = await Promise.all([id === 'game' ? this._boardTexture() : new THREE.TextureLoader().loadAsync(`medallions/${id}.webp`)]);   // the game board is drawn here, it is not a medallion
     tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.center.set(0.5, 0.5); tex.rotation = Math.PI; // name reads from the viewer's side
     const gold = new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.85, roughness: 0.32 });
     const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.12 });
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_H, 128), [gold, top, gold]); disc.position.y = DISC_H / 2; disc.castShadow = disc.receiveShadow = true; this.disc = disc; this.anchor.add(disc);
+    if (id === 'game') { await this._game(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'room') { await this._room(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'word') { onProgress?.(1); this._book(); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
@@ -157,6 +159,34 @@ export class Stage {
   }
   bow() { if (this.actions.bow) { this._play('bow', 0.4, true); this.actions.bow.getMixer().addEventListener('finished', () => this._play('idle', 0.6), { once: true }); } }
   // keep the soles on the disc: the baked clips lift the feet (idle/talk sway), so measure the lowest foot bone and drop the figure to match
+  /** a snowy festive plate for the gingerbread game (no printed marker is needed for it) */
+  _boardTexture() {
+    const c = document.createElement('canvas'); c.width = c.height = 1024; const x = c.getContext('2d');
+    const g = x.createRadialGradient(512, 512, 40, 512, 512, 512); g.addColorStop(0, '#fffdf6'); g.addColorStop(0.7, '#e6f1fb'); g.addColorStop(1, '#c9dff2'); x.fillStyle = g; x.fillRect(0, 0, 1024, 1024);
+    x.translate(512, 512);
+    x.lineCap = 'round'; for (let i = 0; i < 60; i++) { x.save(); x.rotate(i / 60 * Math.PI * 2); x.strokeStyle = i % 2 ? '#d93a3a' : '#ffffff'; x.lineWidth = 16; x.beginPath(); x.moveTo(470, -6); x.lineTo(470, 6); x.stroke(); x.restore(); }   // candy-cane rim
+    x.strokeStyle = '#2f9e5a'; x.lineWidth = 8; x.beginPath(); x.arc(0, 0, 440, 0, 7); x.stroke(); x.strokeStyle = '#d93a3a'; x.lineWidth = 4; x.beginPath(); x.arc(0, 0, 424, 0, 7); x.stroke();
+    let r = 11; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
+    x.fillStyle = '#ffffff'; for (let i = 0; i < 140; i++) { const a = rnd() * 6.283, d = Math.sqrt(rnd()) * 400; x.globalAlpha = 0.5 + rnd() * 0.5; x.beginPath(); x.arc(Math.cos(a) * d, Math.sin(a) * d, 3 + rnd() * 7, 0, 7); x.fill(); } x.globalAlpha = 1;
+    x.strokeStyle = '#9fc4e6'; x.lineWidth = 5; for (const [px, py] of [[-230, -150], [250, -190], [-120, 250], [210, 230], [0, -300]]) { x.save(); x.translate(px, py); for (let k = 0; k < 6; k++) { x.rotate(Math.PI / 3); x.beginPath(); x.moveTo(0, 0); x.lineTo(0, 46); x.moveTo(0, 26); x.lineTo(13, 38); x.moveTo(0, 26); x.lineTo(-13, 38); x.stroke(); } x.restore(); }
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  }
+  /** the gingerbread game: a small board on the medallion, so the camera comes closer */
+  async _game() {
+    const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+    this.gameFx = await buildGame(loader, DISC_H, { setView: m => this._gameView(m) }); this.anchor.add(this.gameFx.group);
+    this.figure = this.gameFx.group; this.model = this.gameFx.group; this.fixedFacing = true; this.pickRoots = [this.disc, this.gameFx.model]; this.fitHeight = 0.55;
+    this.camera.position.set(0, 1.0, 1.65); this.controls.target.set(0, 0.06, 0); Object.assign(this.controls, { minDistance: 0.6, maxDistance: 3 }); this.controls.update();
+  }
+  /** the runner looks along the track from behind; the collecting game looks down at the plate */
+  _gameView(m) {
+    const run = m === 'run'; if (this.disc) this.disc.visible = !run;
+    if (this.mode !== 'scene') return;   // in AR the phone is the camera
+    this.controls.enabled = !run;
+    if (run) { this.camera.position.set(0, 0.68, 1.3); this.controls.target.set(0, 0.06, -0.85); this.fitHeight = 0.5; }
+    else { this.camera.position.set(0, 1.0, 1.65); this.controls.target.set(0, 0.06, 0); this.fitHeight = 0.55; }
+    this.controls.update(); this._viewOffset();
+  }
   /** the Christmas room: a diorama on the medallion with a living fire, twinkling tree lights, falling snow ... */
   async _room() {
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
@@ -225,6 +255,7 @@ export class Stage {
     this.insetCur ??= 0; this.insetTarget ??= 0; if (this.mode === 'scene' && this.insetCur !== this.insetTarget) { this.insetCur += (this.insetTarget - this.insetCur) * Math.min(1, dt * 8); if (Math.abs(this.insetTarget - this.insetCur) < 0.5) this.insetCur = this.insetTarget; this._viewOffset(); }
     this.mixer?.update(dt);
     if (this.roomFx) this.roomFx.update(t, dt, this.speaking);
+    if (this.gameFx) this.gameFx.update(t, dt);
     if (this.book) { const B = this.book, k = this.speaking; B.g.position.y = B.baseY + Math.sin(t * 1.1) * 0.012; B.mat.emissiveIntensity = 0.12 + k * 0.28 + Math.sin(t * 2.2) * 0.04 * k; B.glow.intensity = 0.5 + k * 1.1; B.beam.material.opacity = 0.22 + k * 0.4; B.R.rotation.z = Math.sin(t * 0.9) * 0.012 * (0.4 + k); B.L.rotation.z = -Math.sin(t * 0.9 + 1) * 0.012 * (0.4 + k); }
     this._groundLock();
     this.speaking += (this.speakTarget - this.speaking) * Math.min(1, dt * 6);

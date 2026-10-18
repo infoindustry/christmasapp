@@ -1,7 +1,7 @@
 // Builds the print package for the designer: work/pack/ (zip it afterwards)
 import sharp from 'sharp'; import fs from 'node:fs'; import QRCode from 'qrcode';
 const SITE = 'https://ar.nativity.top';
-const data = JSON.parse(fs.readFileSync('public/data/witnesses.json', 'utf8'));
+const data = JSON.parse(fs.readFileSync('public/data/witnesses.json', 'utf8')).filter(w => w.type !== 'game');   // the gingerbread game has no medallion
 const out = 'work/pack'; fs.rmSync(out, { recursive: true, force: true });
 for (const d of ['medallions-png', 'medallions-svg', 'qr']) fs.mkdirSync(`${out}/${d}`, { recursive: true });
 const meds = {};

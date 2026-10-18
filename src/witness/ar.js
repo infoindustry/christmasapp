@@ -93,7 +93,7 @@ export class AR {
 
   async _xr() {
     const s = this.stage, r = s.renderer; this.kind = 'xr'; s.setAR(true); s.controls.enabled = false;
-    s.arRoot.visible = false; const SCALE = 0.4; s.arRoot.scale.setScalar(SCALE);
+    s.arRoot.visible = false; const SCALE = s.gameFx ? 0.85 : 0.4;   // the game board fills the table s.arRoot.scale.setScalar(SCALE);
     r.xr.enabled = true; r.xr.setReferenceSpaceType('local');
     const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay'], domOverlay: { root: document.body } });
     await r.xr.setSession(session);
@@ -116,7 +116,7 @@ export class AR {
     try { if (window.__gyroPerm) await window.__gyroPerm; else if (typeof DeviceOrientationEvent.requestPermission === 'function') await DeviceOrientationEvent.requestPermission(); } catch (e) { console.warn('gyro not available', e.message); }
     await this._camera(); s.setAR(true); s.controls.enabled = false;
     s.camera.fov = 60; s.camera.position.set(0, 0, 0); s.camera.rotation.order = 'YXZ'; s.camera.updateProjectionMatrix();
-    const DIST = 2.2; s.arRoot.scale.setScalar(0.7); s.arRoot.position.set(0, -1.0, -DIST); s.arRoot.visible = true;   // stands in front of you right away; tap to put it somewhere else
+    const DIST = 2.2; s.arRoot.scale.setScalar(s.gameFx ? 1.1 : 0.7); s.arRoot.position.set(0, -1.0, -DIST); s.arRoot.visible = true;   // stands in front of you right away; tap to put it somewhere else
     const q = new THREE.Quaternion(), e = new THREE.Euler(), q0 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), q1 = new THREE.Quaternion();
     let orient = null, heading0 = null;
     const on = ev => { if (ev.alpha == null) return; orient = ev; };

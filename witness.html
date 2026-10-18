@@ -7,7 +7,7 @@
   (function () {
     var id = new URLSearchParams(location.search).get('id') || 'zechariah', h = document.head, add = function (href, as, type) { var l = document.createElement('link'); l.rel = 'preload'; l.href = href; l.as = as; if (type) l.type = type; if (as === 'fetch') l.crossOrigin = ''; h.appendChild(l); };
     if (id !== 'word' && id !== 'room') add('witnesses/' + id + '/model.glb', 'fetch'); if (id === 'room') add('room/room.glb', 'fetch');
-    add('medallions/' + id + '.webp', 'image'); add('data/witnesses.json', 'fetch'); add('data/witnesses-audio.json', 'fetch');
+    if (id !== 'game') add('medallions/' + id + '.webp', 'image'); if (id === 'game') add('game/gingerbread.glb', 'fetch'); add('data/witnesses.json', 'fetch'); add('data/witnesses-audio.json', 'fetch');
   })();
 </script>
 </head>
@@ -30,6 +30,13 @@
   </div>
   <div id="questions" hidden></div>
 </div>
-<div id="start"><img id="startImg" alt=""><h2 id="startName"></h2><p>…</p><button id="go" class="primary">Поехали!</button></div>
+<div id="start"><div class="sbg"></div>
+  <main class="sheet">
+    <header class="shead"><img id="startImg" alt=""><div class="stitle"><h2 id="startName"></h2><span id="startRef" class="chip"></span></div></header>
+    <section class="sec"><h3 id="startQ">Как будем смотреть?</h3><div id="opts"></div></section>
+    <section class="sec how"><h3>Как это работает</h3><ol id="how"></ol><p id="tip"></p></section>
+  </main>
+  <footer class="sfoot"><button id="go" class="primary">Поехали!</button></footer>
+</div>
 <script type="module" src="/src/witness/main.js"></script>
 </body></html>

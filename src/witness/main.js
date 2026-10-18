@@ -4,10 +4,12 @@ import { Stage } from './stage.js';
 import { AR } from './ar.js';
 import { initWord } from './word.js';
 import { initRoom } from './room.js';
+import { initGame } from './game.js';
 import { chooseMode } from './start.js';
 
 const $ = id => document.getElementById(id);
 const id = new URLSearchParams(location.search).get('id') || 'zechariah';
+const GAME = new URLSearchParams(location.search).get('id') === 'game';   // the gingerbread game
 const ROOM = new URLSearchParams(location.search).get('id') === 'room';   // the Christmas room
 const BOOK = new URLSearchParams(location.search).get('id') === 'word';   // the twelfth "witness" is the audiobook
 const [all, audioMan] = await Promise.all([fetch('data/witnesses.json').then(r => r.json()), fetch('data/witnesses-audio.json').then(r => r.json())]);
@@ -34,7 +36,7 @@ let mode = 'idle', idx = 0, paused = false, timer = null, token = 0;
 const setSub = (t, hint = false) => { $('sub').textContent = t; $('sub').classList.toggle('hint', hint); };
 const showDots = () => dots.forEach((d, i) => { d.className = i < idx ? 'done' : (i === idx && mode === 'story' ? 'now' : ''); });
 const fileOf = l => audioMan[w.id][l.id].file;
-let word = null, room = null;
+let word = null, room = null, game = null;
 
 function playLine(line, onEnd) {
   const my = ++token; clearTimeout(timer);
@@ -83,14 +85,15 @@ cv.addEventListener('pointerup', e => {
   if (hit.companion) {
     const n = hit.companion.cfg.sound; if (n) { soundI[n] = ((soundI[n] ?? -1) + 1) % 2; play(animalAudio, `audio/animals/${n}-${soundI[n] + 1}.mp3`); }
     hit.companion.react();
-  } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
+  } else if (GAME) { game?.tap(hit); } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
 });
 
 // the first screen asks HOW to look (in the magazine / on the table / on the phone) and explains it; that tap also unlocks the sound
-const startMode = chooseMode({ $, kind: ROOM ? 'room' : BOOK ? 'word' : 'witness', name: w.name, preset: new URLSearchParams(location.search).get('mode') });
+const startMode = chooseMode({ $, kind: GAME ? 'game' : ROOM ? 'room' : BOOK ? 'word' : 'witness', name: w.name, ref: w.scripture.split(';')[0], preset: new URLSearchParams(location.search).get('mode') });
 (async () => {
   const mode = await startMode;
   $('go').disabled = true; await loading; $('start').remove();
+  if (GAME) { game = initGame({ stage, $ }); window.__w.game = game; if (mode !== 'scene') setMode(mode); return; }
   if (ROOM) { room = initRoom({ stage, $ }); window.__w.room = room; if (mode !== 'scene') setMode(mode); return; }
   if (BOOK) { word = await initWord({ stage, $ }); window.__w.word = word; if (mode !== 'scene') setMode(mode); return; }
   audio.src = fileOf(story[0]); audio.volume = 0; audio.play().then(() => { audio.pause(); audio.volume = 1; }).catch(() => { audio.volume = 1; }); // unlock audio on this tap
@@ -110,6 +113,7 @@ const ar = new AR(stage, w.id, {
   exited: () => setMode('scene', true),
 });
 const sup = await AR.support(); for (const b of document.querySelectorAll('#modes button[data-mode]')) if (b.dataset.mode !== 'scene') b.hidden = !sup[b.dataset.mode];
+if (GAME) document.querySelector('#modes button[data-mode=marker]').hidden = true;   // no printed medallion for the game
 if (document.querySelectorAll('#modes button:not([hidden])').length < 2) $('modes').hidden = true;
 fit();
 let busy = false;

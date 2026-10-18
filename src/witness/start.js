@@ -19,19 +19,23 @@ const HOW = {
     tip: 'Вопросы можно задать кнопкой «Спросить».',
   },
 };
-const GO = { witness: 'Рассказать', word: 'Слушать', room: 'Заглянуть внутрь' };
+const GAME_HOW = { surface: [['🪑', 'Найди стол или пол и наведи на него камеру.'], ['👆', 'Коснись экрана: на столе появится большая тарелка с пряничком.'], ['🌟', 'Касайся стола: пряничек побежит и соберёт звёздочки.'], ['⛄', 'Берегись снежков! Коснись пряничка, и он перепрыгнет.']], scene: [['🔊', 'Включи звук.'], ['👆', 'Нажми «Играть».'], ['🌟', 'Касайся тарелки: пряничек побежит и соберёт звёздочки.'], ['⛄', 'Берегись снежков! Коснись пряничка, и он перепрыгнет.']] };
+const GO = { witness: 'Рассказать', word: 'Слушать', room: 'Заглянуть внутрь', game: 'Играть' };
 
-export async function chooseMode({ $, kind = 'witness', name, preset }) {
-  const sup = await AR.support();
-  const el = $('start'); const can = { marker: sup.marker, surface: sup.surface, scene: true };
+export async function chooseMode({ $, kind = 'witness', name, preset, ref }) {
+  const sup = await AR.support(); const HIDE = kind === 'game' ? ['marker'] : [];   // the game needs no printed medallion
+  const el = $('start'); $('startRef').textContent = ref || ''; const can = { marker: sup.marker, surface: sup.surface, scene: true };
   const why = { marker: 'нужна камера и защищённое соединение', surface: 'нужна камера и защищённое соединение' };
   let saved = null; try { saved = localStorage.getItem('viewMode'); } catch (e) {}
-  let mode = [preset, saved, 'marker', 'scene'].find(m => m && can[m]) || 'scene';
+  let mode = [preset, saved, ...(kind === 'game' ? ['surface'] : ['marker', 'surface']), 'scene'].find(m => m && can[m] && !HIDE.includes(m)) || 'scene';
   const goWord = GO[kind] || GO.witness;
-  el.querySelector('p').outerHTML = `<p id="startQ">Как будем смотреть?</p><div id="opts">${Object.entries(HOW).map(([k, h]) => `<button class="opt${can[k] ? '' : ' off'}" data-m="${k}" ${can[k] ? '' : 'disabled'}><span class="oi">${h.icon}</span><span><b>${h.title}</b><small>${can[k] ? h.sub : why[k]}</small></span></button>`).join('')}</div><ol id="how"></ol><p id="tip"></p>`;
+  const ACC = { zechariah: '#9b6fe0', mary: '#4f86e0', elizabeth: '#d9677f', joseph: '#c28a4e', micah: '#3fb0b0', shepherd: '#6cc04a', simeon: '#6f8ae8', anna: '#bd70cc', wiseman: '#7068e8', herod: '#d9535b', word: '#dcae3c', room: '#3fa862', game: '#ee8c2e' };
+  el.style.setProperty('--acc', ACC[new URLSearchParams(location.search).get('id')] || '#e8c46a');
+  const ICON = { marker: '#8e6bff', surface: '#3d9bff', scene: '#3ec57a' };
+  el.querySelector('#opts').innerHTML = Object.entries(HOW).filter(([k]) => !HIDE.includes(k)).map(([k, h]) => `<button class="opt${can[k] ? '' : ' off'}" data-m="${k}" ${can[k] ? '' : 'disabled'}><span class="oi" style="background:${ICON[k]}">${h.icon}</span><span class="ot"><b>${h.title}</b><small>${can[k] ? h.sub : why[k]}</small></span><i class="ck"></i></button>`).join('');
   const render = () => {
     for (const b of el.querySelectorAll('.opt')) b.classList.toggle('on', b.dataset.m === mode);
-    const h = HOW[mode]; el.querySelector('#how').innerHTML = h.steps.map(([i, t]) => `<li><span>${i}</span><div>${t.replace('{go}', goWord)}</div></li>`).join(''); el.querySelector('#tip').textContent = h.tip;
+    const h = HOW[mode]; const steps = (kind === 'game' && GAME_HOW[mode]) || h.steps; el.querySelector('#how').innerHTML = steps.map(([i, t], n) => `<li><span>${i}</span><div>${t.replace('{go}', goWord)}</div></li>`).join(''); el.querySelector('#tip').textContent = h.tip;
   };
   el.querySelector('#opts').onclick = e => { const b = e.target.closest('.opt'); if (!b || b.disabled) return; mode = b.dataset.m; render(); };
   render(); $('go').textContent = 'Поехали!';

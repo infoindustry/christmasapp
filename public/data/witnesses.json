@@ -1622,5 +1622,15 @@
   "model": "",
   "scripture": "Загляни внутрь",
   "lines": []
+ },
+ {
+  "id": "game",
+  "name": "Пряничек",
+  "type": "game",
+  "voiceId": "",
+  "voiceName": "",
+  "model": "",
+  "scripture": "Игра: собери звёзды",
+  "lines": []
  }
 ]

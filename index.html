@@ -10,6 +10,10 @@
 <script type="module">
   const data = await fetch('data/witnesses.json').then(r => r.json());
   document.getElementById('grid').innerHTML = data.map(w => `
-    <a class="card" href="witness.html?id=${w.id}"><img src="medallions/${w.id}.png" alt="" loading="lazy"><b>${w.name}</b><small>${w.scripture.split(';')[0]}</small></a>`).join('');
+    <a class="card" href="witness.html?id=${w.id}"><img src="medallions/thumb/${w.id}.webp" alt="" loading="lazy"><b>${w.name}</b><small>${w.scripture.split(';')[0]}</small></a>`).join('');
+  // warm the cache for the card you are about to open
+  const warm = e => { const a = e.target.closest('.card'); if (!a || a.dataset.w) return; a.dataset.w = 1; const id = new URL(a.href).searchParams.get('id'); const f = id === 'room' ? 'room/room.glb' : id === 'word' ? '' : `witnesses/${id}/model.glb`; if (f) fetch(f).catch(() => {}); };
+  document.getElementById('grid').addEventListener('pointerdown', warm); document.getElementById('grid').addEventListener('pointerover', warm);
+  if (location.hostname !== 'localhost' && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body></html>

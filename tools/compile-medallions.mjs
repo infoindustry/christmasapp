@@ -8,7 +8,7 @@ const ids = JSON.parse(fs.readFileSync('public/data/witnesses.json', 'utf8')).ma
 fs.mkdirSync('public/targets', { recursive: true });
 const load = async id => {
   // flatten onto a neutral paper colour so the transparent corners are not read as black features
-  const { data, info } = await sharp(`public/medallions/${id}.png`).flatten({ background: '#f4ecd8' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(`art/medallions/${id}.png`).flatten({ background: '#f4ecd8' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   return { width: info.width, height: info.height, data: new Uint8Array(data) };
 };
 for (const id of ids) {

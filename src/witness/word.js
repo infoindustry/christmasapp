@@ -46,7 +46,7 @@ export async function initWord({ stage, $ }) {
     $('tm').textContent = `${fmt(audio.currentTime)} / ${fmt(total())}`; if (was) audio.play().catch(() => {});
   };
   if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: 'Рождество: от Захарии до Назарета', artist: 'Слово Божье', album: 'Свидетели Рождества', artwork: [{ src: 'medallions/word.png', sizes: '1024x1024', type: 'image/png' }] });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: 'Рождество: от Захарии до Назарета', artist: 'Слово Божье', album: 'Свидетели Рождества', artwork: [{ src: 'medallions/word.webp', sizes: '1024x1024', type: 'image/webp' }] });
     navigator.mediaSession.setActionHandler('play', play); navigator.mediaSession.setActionHandler('pause', () => audio.pause());
     navigator.mediaSession.setActionHandler('seekbackward', () => seekTo(audio.currentTime - 15)); navigator.mediaSession.setActionHandler('seekforward', () => seekTo(audio.currentTime + 15));
   }

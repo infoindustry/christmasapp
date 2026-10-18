@@ -62,7 +62,10 @@ for (const [id, name, [dark, mid, gold]] of W) {
   { const chars = [...name], step = Math.min(10.5, 74 / chars.length * 1.9); chars.forEach((ch, i) => { const ang = (i - (chars.length - 1) / 2) * step;
       o.push(`<text transform="translate(${C} ${C}) rotate(${f(ang)}) translate(0 -403)" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="50" font-weight="700" fill="${dark}" stroke="${dark}" stroke-width="5" stroke-linejoin="round">${ch}</text>`);
       o.push(`<text transform="translate(${C} ${C}) rotate(${f(ang)}) translate(0 -403)" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="50" font-weight="700" fill="url(#gd)">${ch}</text>`); }); }
-  fs.writeFileSync(`public/medallions/${id}.svg`, `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">${o.join('')}</svg>`);
-  await sharp(Buffer.from(fs.readFileSync(`public/medallions/${id}.svg`))).png({ compressionLevel: 9, palette: true, quality: 92 }).toFile(`public/medallions/${id}.png`);
+  fs.mkdirSync('art/medallions', { recursive: true }); fs.mkdirSync('public/medallions/thumb', { recursive: true });
+  fs.writeFileSync(`art/medallions/${id}.svg`, `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">${o.join('')}</svg>`);
+  await sharp(Buffer.from(fs.readFileSync(`art/medallions/${id}.svg`))).png({ compressionLevel: 9 }).toFile(`art/medallions/${id}.png`);   // print source (not published)
+  await sharp(`art/medallions/${id}.png`).webp({ quality: 86 }).toFile(`public/medallions/${id}.webp`);                  // the disc texture on the 3D stage
+  await sharp(`art/medallions/${id}.png`).resize(256, 256).webp({ quality: 82 }).toFile(`public/medallions/thumb/${id}.webp`);   // cards, start screen
   console.log('medallion', id);
 }

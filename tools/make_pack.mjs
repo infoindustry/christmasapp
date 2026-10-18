@@ -6,8 +6,8 @@ const out = 'work/pack'; fs.rmSync(out, { recursive: true, force: true });
 for (const d of ['medallions-png', 'medallions-svg', 'qr']) fs.mkdirSync(`${out}/${d}`, { recursive: true });
 const meds = {};
 for (const w of data) {
-  fs.copyFileSync(`public/medallions/${w.id}.svg`, `${out}/medallions-svg/${w.id}.svg`);
-  await sharp(fs.readFileSync(`public/medallions/${w.id}.svg`), { density: 288 }).resize(2000, 2000).png({ compressionLevel: 9 }).toFile(`${out}/medallions-png/${w.id}.png`);   // 2000 px: 6 cm at 850 dpi, 10 cm at 500 dpi. Vector SVGs are there for any larger size
+  fs.copyFileSync(`art/medallions/${w.id}.svg`, `${out}/medallions-svg/${w.id}.svg`);
+  await sharp(fs.readFileSync(`art/medallions/${w.id}.svg`), { density: 288 }).resize(2000, 2000).png({ compressionLevel: 9 }).toFile(`${out}/medallions-png/${w.id}.png`);   // 2000 px: 6 cm at 850 dpi, 10 cm at 500 dpi. Vector SVGs are there for any larger size
   await QRCode.toFile(`${out}/qr/${w.id}.png`, `${SITE}/witness.html?id=${w.id}`, { width: 1000, margin: 2, color: { dark: '#14102a', light: '#ffffff' } });
   meds[w.id] = await sharp(`${out}/medallions-png/${w.id}.png`).resize(709, 709).png().toBuffer();   // 6.0 cm at 300 dpi
 }

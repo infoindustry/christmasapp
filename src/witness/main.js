@@ -17,13 +17,14 @@ const tagOf = t => (t.match(/^\[([^\]]*)\]/) || [, ''])[1];
 const plain = t => t.replace(/\[[^\]]*\]/g, '').replace(/\s+/g, ' ').trim();
 
 document.title = `${w.name} — свидетель Рождества`;
-$('name').textContent = w.name; $('ref').textContent = w.scripture.split(';')[0]; $('startName').textContent = w.name; $('startImg').src = `medallions/${w.id}.png`;
+$('name').textContent = w.name; $('ref').textContent = w.scripture.split(';')[0]; $('startName').textContent = w.name; $('startImg').src = `medallions/thumb/${w.id}.webp`;
 $('dots').innerHTML = story.map(() => '<i></i>').join('');
 $('questions').innerHTML = answers.map(a => `<button data-id="${a.id}">${a.question}</button>`).join('');
 const dots = [...$('dots').children];
 const fit = () => stage.setInset($('panel').offsetHeight, ($('modes').hidden ? $('head') : $('modes')).getBoundingClientRect().bottom + 8);   // the UI never covers the figure: the 3D scene is framed in what is left
 new ResizeObserver(fit).observe($('panel')); addEventListener('resize', fit);
 
+if (import.meta.env.PROD && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 const stage = new Stage($('c'));
 const loading = stage.load(w.id, p => { $('loadbar').style.width = `${Math.round(p * 100)}%`; }).then(() => { $('loadbar').style.width = '100%'; setTimeout(() => ($('loadbar').style.opacity = 0), 400); });
 
@@ -102,8 +103,8 @@ let hintTimer = null;
 const ar = new AR(stage, w.id, {
   // hint(text, hideAfterMs, offerAfterMs): a floating note; after offerAfterMs it also offers to stand the witness anywhere, without the medallion
   hint: (t, hide = 0, offer = 0) => {
-    clearTimeout(hintTimer); const el = $('arhint'); el.hidden = !t; const pic = offer ? `<img src="medallions/${w.id}.png" alt="">` : ''; el.innerHTML = pic; el.append(t);   // while looking for the medallion: show what to look for
-    if (t && offer) hintTimer = setTimeout(() => { el.innerHTML = `<img src="medallions/${w.id}.png" alt="">`; el.append(t + ' '); const b = Object.assign(document.createElement('button'), { textContent: 'Нет медальона? Поставить здесь' }); b.onclick = () => setMode('surface'); el.append(document.createElement('br'), b); }, offer);
+    clearTimeout(hintTimer); const el = $('arhint'); el.hidden = !t; const pic = offer ? `<img src="medallions/thumb/${w.id}.webp" alt="">` : ''; el.innerHTML = pic; el.append(t);   // while looking for the medallion: show what to look for
+    if (t && offer) hintTimer = setTimeout(() => { el.innerHTML = `<img src="medallions/thumb/${w.id}.webp" alt="">`; el.append(t + ' '); const b = Object.assign(document.createElement('button'), { textContent: 'Нет медальона? Поставить здесь' }); b.onclick = () => setMode('surface'); el.append(document.createElement('br'), b); }, offer);
     if (t && hide) hintTimer = setTimeout(() => (el.hidden = true), hide);
   },
   exited: () => setMode('scene', true),

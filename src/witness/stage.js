@@ -18,7 +18,8 @@ export class Stage {
   constructor(canvas) {
     this.canvas = canvas;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    const phone = matchMedia('(pointer: coarse)').matches || innerWidth < 800;   // phones: lighter rendering (a lower pixel ratio and smaller shadow map keep it smooth and cool)
+    this.phone = phone; this.renderer.setPixelRatio(Math.min(devicePixelRatio, phone ? 1.75 : 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.05;
     this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.scene = new THREE.Scene();
@@ -80,7 +81,7 @@ export class Stage {
   _lights() {
     const L = this.anchor; L.add(new THREE.HemisphereLight(0xdfe6ff, 0x4a3a28, 0.95));
     const key = new THREE.DirectionalLight(0xffe2b8, 2.4); key.position.set(-1.6, 2.6, 2.2); key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -1.6, right: 1.6, top: 2, bottom: -1, near: 0.5, far: 8 }); key.shadow.bias = -0.0004; key.shadow.radius = 4;
+    key.shadow.mapSize.set(this.phone ? 1024 : 2048, this.phone ? 1024 : 2048); Object.assign(key.shadow.camera, { left: -1.6, right: 1.6, top: 2, bottom: -1, near: 0.5, far: 8 }); key.shadow.bias = -0.0004; key.shadow.radius = 4;
     L.add(key, key.target);
     const rim = new THREE.DirectionalLight(0x9db4ff, 1.1); rim.position.set(1.8, 1.8, -2); L.add(rim);
     // in AR the real surface shows through: only the shadows are drawn on it
@@ -101,7 +102,7 @@ export class Stage {
     const t = new THREE.CanvasTexture(c); this.anchor.add(this.dust = new THREE.Points(g, new THREE.PointsMaterial({ map: t, size: 0.028, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.75 })));
   }
   async load(id, onProgress) {
-    const [tex] = await Promise.all([new THREE.TextureLoader().loadAsync(`medallions/${id}.png`)]);
+    const [tex] = await Promise.all([new THREE.TextureLoader().loadAsync(`medallions/${id}.webp`)]);
     tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.center.set(0.5, 0.5); tex.rotation = Math.PI; // name reads from the viewer's side
     const gold = new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.85, roughness: 0.32 });
     const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.12 });

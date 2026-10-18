@@ -166,3 +166,15 @@ body.quiz #sub, body.quiz #dots, body.quiz #controls { display: none; }
 #qans .ans.right { background: #3ec57a; color: #082010; } #qans .ans.wrong { background: #ff6b6b; color: #2a0808; } #qans .ans:disabled { opacity: .85; }
 #qexp { font-size: 14px; line-height: 1.4; text-align: center; opacity: .95; max-width: 520px; }
 #qctl { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; } #qctl .primary { font-size: 17px; padding: 12px 28px; } #qctl .alt { background: #5b8def; color: #fff; }
+
+/* home sections */
+#home { max-width: 980px; margin: 0 auto; padding: 8px 18px 10px; display: flex; flex-direction: column; gap: 26px; }
+.blk .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 14px; }
+.sec-title { margin: 10px 2px 12px; font-family: Georgia, serif; font-size: 24px; letter-spacing: .02em; }
+.sec-title small { display: block; margin-top: 4px; font-family: var(--sys); font-size: 13px; font-weight: 400; letter-spacing: 0; opacity: .65; line-height: 1.35; }
+.blk #film { width: 100%; margin: 0 0 14px; }
+.blk.games { padding-top: 8px; border-top: 1px dashed #ffffff26; }
+.blk.games .sec-title { font-family: var(--sys); font-size: 20px; }
+.card.game { background: linear-gradient(160deg, #5b8def33, #ee8c2e22) !important; box-shadow: inset 0 0 0 1px #ffffff22, 0 8px 24px #0004; }
+.card.game small::before { content: '🎮 '; }
+#pwa { margin: 22px auto 40px; }

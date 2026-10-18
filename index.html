@@ -9,18 +9,24 @@
 <link rel="stylesheet" href="/src/witness/style.css">
 </head>
 <body class="home">
-<header><h1>Свидетели Рождества</h1><p>Выбери свидетеля. Он расскажет, как всё было.</p></header>
-<a id="film" href="film.html"><img src="film/poster.jpg" alt=""><span><b>Мультфильм «История Рождества»</b><small>От сада Эдема до двенадцатилетнего Иисуса в храме · 4,5 минуты</small></span></a>
+<header><h1>Свидетели Рождества</h1><p>История рождения Иисуса: услышь, увидь и поиграй.</p></header>
+<main id="home"></main>
 <section id="pwa" hidden>
   <div class="pwa-row"><img src="icons/icon-192.png" alt=""><div><b>Поставь на телефон</b><small id="pwaSub">Откроется как обычное приложение, без адресной строки.</small></div><button id="pwaInstall" hidden>Установить</button></div>
   <ol id="iosHow" hidden><li>Нажми значок <b>«Поделиться»</b> <span class="shr">⬆︎</span> внизу Safari.</li><li>Выбери <b>«На экран „Домой“»</b>.</li><li>Нажми <b>«Добавить»</b>: значок-звезда появится среди приложений.</li></ol>
   <div class="pwa-off"><button id="offBtn">⬇ Скачать для работы без интернета</button><div id="offBar" hidden><i></i></div><small id="offTxt"></small></div>
 </section>
-<main id="grid"></main>
+
 <script type="module">
   const data = await fetch('data/witnesses.json').then(r => r.json());
-  document.getElementById('grid').innerHTML = data.map(w => `
-    <a class="card" href="witness.html?id=${w.id}"><img src="medallions/thumb/${w.id}.webp" alt="" loading="lazy"><b>${w.name}</b><small>${w.scripture.split(';')[0]}</small></a>`).join('');
+  const card = w => `<a class="card ${w.type === 'game' ? 'game' : ''}" href="witness.html?id=${w.id}"><img src="medallions/thumb/${w.id}.webp" alt="" loading="lazy"><b>${w.name}</b><small>${w.scripture.split(';')[0]}</small></a>`;
+  const witnesses = data.filter(w => !w.type), listen = data.filter(w => w.type === 'book' || w.type === 'room'), games = data.filter(w => w.type === 'game').sort((a, b) => (a.id === 'game' ? -1 : 1));
+  document.getElementById('home').innerHTML = `
+    <section class="blk"><h2 class="sec-title">Свидетели<small>Люди, которые видели всё своими глазами. Выбери свидетеля: он расскажет, как всё было.</small></h2><div class="grid">${witnesses.map(card).join('')}</div></section>
+    <section class="blk"><h2 class="sec-title">Слушать и смотреть<small>Рассказ из Евангелия и рождественская комната.</small></h2>
+      <a id="film" href="film.html"><img src="film/poster.jpg" alt=""><span><b>Мультфильм «История Рождества»</b><small>От сада Эдема до двенадцатилетнего Иисуса в храме · 4,5 минуты</small></span></a>
+      <div class="grid">${listen.map(card).join('')}</div></section>
+    <section class="blk games"><h2 class="sec-title">Игры<small>Весёлые игры для детей. Пряничек придуман для игры, а не из Библии.</small></h2><div class="grid">${games.map(card).join('')}</div></section>`;
   // ---- install as an app + offline copy
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone, isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const $p = id => document.getElementById(id); let deferred = null;
@@ -41,8 +47,8 @@
     };
   } catch (e) { $p('pwa').hidden = true; }
   // warm the cache for the card you are about to open
-  const warm = e => { const a = e.target.closest('.card'); if (!a || a.dataset.w) return; a.dataset.w = 1; const id = new URL(a.href).searchParams.get('id'); const f = id === 'room' ? 'room/room.glb' : id === 'word' ? '' : `witnesses/${id}/model.glb`; if (f) fetch(f).catch(() => {}); };
-  document.getElementById('grid').addEventListener('pointerdown', warm); document.getElementById('grid').addEventListener('pointerover', warm);
+  const warm = e => { const a = e.target.closest('.card'); if (!a || a.dataset.w) return; a.dataset.w = 1; const id = new URL(a.href).searchParams.get('id'); const f = id === 'room' ? 'room/room.glb' : id === 'word' ? '' : (id === 'game' || id === 'quiz') ? 'game/gingerbread.glb' : `witnesses/${id}/model.glb`; if (f) fetch(f).catch(() => {}); };
+  document.getElementById('home').addEventListener('pointerdown', warm); document.getElementById('home').addEventListener('pointerover', warm);
   if (location.hostname !== 'localhost' && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body></html>

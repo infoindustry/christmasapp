@@ -37,7 +37,7 @@ export class Stage {
     this.renderer.setAnimationLoop((t, frame) => this._frame(frame));
   }
   resize() {
-    if (this.arView) { const { vw, vh } = this.arView, k = Math.max(innerWidth / vw, innerHeight / vh), st = this.canvas.style; this.renderer.setSize(vw, vh, false); st.width = vw * k + 'px'; st.height = vh * k + 'px'; st.left = (innerWidth - vw * k) / 2 + 'px'; st.top = (innerHeight - vh * k) / 2 + 'px'; st.inset = 'auto'; return; }
+    if (this.arView) { const { vw, vh } = this.arView, k = Math.max(innerWidth / vw, innerHeight / vh), st = this.canvas.style; this.renderer.setSize(vw, vh, false); st.width = vw * k + 'px'; st.height = vh * k + 'px'; st.left = (innerWidth - vw * k) / 2 + 'px'; st.top = (innerHeight - vh * k) / 2 + 'px'; st.right = 'auto'; st.bottom = 'auto'; return; }   // (left/top above centre the cover-cropped canvas on the video)
     this.canvas.style.cssText = '';
     const w = innerWidth, h = innerHeight; this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
@@ -105,7 +105,7 @@ export class Stage {
     tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.center.set(0.5, 0.5); tex.rotation = Math.PI; // name reads from the viewer's side
     const gold = new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.85, roughness: 0.32 });
     const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.12 });
-    const disc = new THREE.Mesh(new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_H, 128), [gold, top, gold]); disc.position.y = DISC_H / 2; disc.castShadow = disc.receiveShadow = true; this.anchor.add(disc);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_H, 128), [gold, top, gold]); disc.position.y = DISC_H / 2; disc.castShadow = disc.receiveShadow = true; this.disc = disc; this.anchor.add(disc);
     if (id === 'room') { await this._room(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'word') { onProgress?.(1); this._book(); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
@@ -199,6 +199,7 @@ export class Stage {
   setAR(on) {
     this.mode = on ? 'ar' : 'scene'; if (on) { this.camera.zoom = 1; this.camera.clearViewOffset(); this.camera.updateProjectionMatrix(); }
     for (const o of [this.page, this.dust]) if (o) o.visible = !on;
+    if (this.disc) this.disc.visible = true;
     this.shadowCatcher.visible = on; this.scene.background = null;
     document.body.classList.toggle('ar', on);
     if (!on) { this.arRoot.matrixAutoUpdate = true; this.arRoot.position.set(0, 0, 0); this.arRoot.quaternion.identity(); this.arRoot.scale.setScalar(1); this.arRoot.visible = true; this.anchor.rotation.set(0, 0, 0); this.camera.matrixAutoUpdate = true; this.camera.fov = innerWidth / innerHeight < 0.8 ? 44 : 34; this.camera.position.copy(this.baseCam || this.camera.position); this.camera.quaternion.identity(); this.arView = null; this.resize(); this._layoutCompanions(); }

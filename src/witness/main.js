@@ -1,3 +1,5 @@
+// the camera works only on https: send an insecure visitor to the secure address (not for localhost / the local network)
+if (location.protocol === 'http:' && !/^(localhost|127\.|192\.168\.|10\.|172\.)/.test(location.hostname)) location.replace('https:' + location.href.slice(5));
 import { Stage } from './stage.js';
 import { AR } from './ar.js';
 import { initWord } from './word.js';

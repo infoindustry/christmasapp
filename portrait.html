@@ -16,7 +16,7 @@ for (const id of ids) {
   const b2 = new THREE.Box3().setFromObject(m); m.position.set(-(b2.min.x + b2.max.x) / 2, -b2.min.y, -(b2.min.z + b2.max.z) / 2); m.updateMatrixWorld(true);
   let head = null; m.traverse(o => { if (o.isBone && /Head$/.test(o.name) && !/End|Top/.test(o.name)) head = o; });
   const hp = new THREE.Vector3(); (head || m).getWorldPosition(hp);
-  const cam = new THREE.PerspectiveCamera(16, 1, 0.1, 10); const cy = hp.y + 0.05;
+  const cam = new THREE.PerspectiveCamera(12.5, 1, 0.1, 10); const top = new THREE.Box3().setFromObject(m).max.y, cy = top - 0.125;   // framed from the top of the head: every face lands at the same size
   cam.position.set(0, cy, 2.2); cam.lookAt(0, cy, 0);
   renderer.setClearColor(0x000000, 0); renderer.render(scene, cam);
   await fetch(`http://localhost:5175/?id=${id}`, { method: 'POST', body: renderer.domElement.toDataURL('image/png') });

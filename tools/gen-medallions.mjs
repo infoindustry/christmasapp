@@ -47,7 +47,17 @@ for (const [id, name, [dark, mid, gold]] of W) {
   for (let i = 0; i < 260; i++) { const a = R() * 6.283, rr = 70 + R() * 405, [x, y] = pol(rr, a), big = R() < .12; o.push(`<circle cx="${f(x)}" cy="${f(y)}" r="${f(big ? 3 + R() * 4 : 0.8 + R() * 2)}" fill="${R() < .6 ? gold : '#fff'}" fill-opacity="${f(.25 + R() * .6)}"/>`); }
   for (let i = 0; i < 14; i++) { const a = R() * 6.283, rr = 100 + R() * 330, [x, y] = pol(rr, a), [x2, y2] = pol(rr + 20 + R() * 40, a + (R() - .5) * .5); o.push(`<line x1="${f(x)}" y1="${f(y)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${gold}" stroke-opacity=".5" stroke-width="1.6" stroke-linecap="round"/>`); }
   o.push(`<filter id="nz" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="4" seed="${1 + Math.floor(R() * 900)}"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.6 -0.55"/></filter><clipPath id="nzc"><circle cx="${C}" cy="${C}" r="470"/></clipPath><circle cx="${C}" cy="${C}" r="470" filter="url(#nz)" opacity=".30" clip-path="url(#nzc)"/>`);
-  o.push(`<circle cx="${C}" cy="${C}" r="64" fill="${dark}" stroke="url(#gd)" stroke-width="5"/><circle cx="${C}" cy="${C}" r="48" fill="none" stroke="${gold}" stroke-width="2" stroke-dasharray="3 7"/>`);
+  // the face of the witness (rendered from the 3D model by portrait.html) in the middle: it is also the strongest, most unique thing for the tracker
+  const pf = `work/portraits/${id}.png`;
+  if (fs.existsSync(pf)) {
+    const R0 = 196, b64 = fs.readFileSync(pf).toString('base64');
+    o.push(`<radialGradient id="pb" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="${mid}"/><stop offset="1" stop-color="${dark}"/></radialGradient><clipPath id="pc"><circle cx="${C}" cy="${C}" r="${R0}"/></clipPath>`);
+    o.push(`<circle cx="${C}" cy="${C}" r="${R0 + 9}" fill="url(#gd)"/><circle cx="${C}" cy="${C}" r="${R0 + 3}" fill="${dark}"/><circle cx="${C}" cy="${C}" r="${R0}" fill="url(#pb)"/>`);
+    o.push(`<image href="data:image/png;base64,${b64}" x="${C - R0 * 1.08}" y="${C - R0 * 1.08}" width="${R0 * 2.16}" height="${R0 * 2.16}" clip-path="url(#pc)"/>`);
+    o.push(`<circle cx="${C}" cy="${C}" r="${R0}" fill="none" stroke="url(#gd)" stroke-width="3"/>`);
+  } else {
+    o.push(`<circle cx="${C}" cy="${C}" r="64" fill="${dark}" stroke="url(#gd)" stroke-width="5"/><circle cx="${C}" cy="${C}" r="48" fill="none" stroke="${gold}" stroke-width="2" stroke-dasharray="3 7"/>`);
+  }
   // name along the petal ring: letter by letter (textPath is not supported by the SVG renderer)
   { const chars = [...name], step = Math.min(10.5, 74 / chars.length * 1.9); chars.forEach((ch, i) => { const ang = (i - (chars.length - 1) / 2) * step;
       o.push(`<text transform="translate(${C} ${C}) rotate(${f(ang)}) translate(0 -403)" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="50" font-weight="700" fill="${dark}" stroke="${dark}" stroke-width="5" stroke-linejoin="round">${ch}</text>`);

@@ -42,6 +42,7 @@ export class AR {
   async startMarker() {
     const s = this.stage, v = await this._camera(), vw = v.videoWidth, vh = v.videoHeight;
     this.kind = 'marker'; s.setAR(true);
+    if (s.disc) s.disc.visible = false;   // the printed medallion itself is the pedestal
     // the camera image is the video element (CSS cover); the canvas is cropped the same way so the tracker's projection lines up
     s.arView = { vw, vh }; s.resize();
     s.controls.enabled = false;
@@ -49,7 +50,7 @@ export class AR {
     s.arRoot.matrixAutoUpdate = false; s.arRoot.visible = false;
     s.anchor.rotation.set(Math.PI / 2, 0, 0);   // the stage's up (y) becomes the page's normal (+z, out of the paper)
 
-    const ids = await fetch('data/medallions.json').then(r => r.json()), taar = new URLSearchParams(location.search).get('taar'), mine = taar ? 0 : ids.indexOf(this.id);   // ?taar= : test with another tracking file
+    const taar = new URLSearchParams(location.search).get('taar'), mine = 0;   // each witness has its own small tracking file (?taar= : test with another one)
     const P = new THREE.Matrix4(), wm = new THREE.Matrix4(), v4 = new THREE.Vector4();
     const corners = [[-.5, .5], [.5, .5], [.5, -.5], [-.5, -.5]];
     const plausible = arr => {   // geometry of the found medallion must be believable: in front of the camera, convex, a sensible size
@@ -69,7 +70,7 @@ export class AR {
       },
     });
     s.camera.projectionMatrix.fromArray(controller.getProjectionMatrix()); s.camera.projectionMatrixInverse.copy(s.camera.projectionMatrix).invert();
-    await controller.addImageTargetsFromBuffer(await (await fetch(taar || 'medallions.taar')).arrayBuffer());
+    await controller.addImageTargetsFromBuffer(await (await fetch(taar || `targets/${this.id}.taar`)).arrayBuffer());
 
     const feed = document.createElement('canvas'); feed.width = vw; feed.height = vh;
     const fg = feed.getContext('2d', { willReadFrequently: true });

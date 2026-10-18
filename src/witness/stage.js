@@ -8,6 +8,7 @@ import { loadCompanions } from './companions.js';
 import { buildRoom } from './roomfx.js';
 import { buildGame } from './gamefx.js';
 import { buildBethlehem } from './bethfx.js';
+import { buildFamily } from './familyfx.js';
 
 const DISC_R = 0.5, DISC_H = 0.035, FIGURE_H = 1.18;
 const UPPER = /Spine|Neck|Head|Shoulder|Arm|Hand|headfront/i, LOWER = /Leg|Foot|Toe|Hips/i;
@@ -110,6 +111,7 @@ export class Stage {
     const top = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.12 });
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(DISC_R, DISC_R, DISC_H, 128), [gold, top, gold]); disc.position.y = DISC_H / 2; disc.castShadow = disc.receiveShadow = true; this.disc = disc; this.anchor.add(disc);
     if (id === 'game' || id === 'quiz') { await this._game(id); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
+    if (id === 'family') { await this._family(id, tex); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'bethlehem') { await this._beth(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'room') { await this._room(); onProgress?.(1); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
     if (id === 'word') { onProgress?.(1); this._book(); this.companions = []; this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions(); return { clips: [], companions: [] }; }
@@ -196,6 +198,12 @@ export class Stage {
     else { this.camera.position.set(0, 1.0, 1.65); this.controls.target.set(0, 0.06, 0); this.fitHeight = 0.55; }
     this.controls.update(); this._viewOffset();
   }
+  /** the Holy Family standing on the medallion */
+  async _family() {
+    const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+    const f = await buildFamily(loader); const S = 0.56, hold = new THREE.Group(); f.group.scale.setScalar(S); f.group.position.y = DISC_H + 0.95 * S + 0.004; hold.add(f.group); this.anchor.add(hold);
+    this.figure = hold; this.model = hold; this.familyFx = f; this.pickRoots = [f.model];
+  }
   /** the diorama of Bethlehem on the medallion: it turns from day into night */
   async _beth() {
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
@@ -274,6 +282,7 @@ export class Stage {
     if (this.roomFx) this.roomFx.update(t, dt, this.speaking);
     if (this.gameFx) this.gameFx.update(t, dt);
     if (this.bethFx) this.bethFx.update(t, dt);
+    if (this.familyFx) this.familyFx.update(t, dt);
     if (this.book) { const B = this.book, k = this.speaking; B.g.position.y = B.baseY + Math.sin(t * 1.1) * 0.012; B.mat.emissiveIntensity = 0.12 + k * 0.28 + Math.sin(t * 2.2) * 0.04 * k; B.glow.intensity = 0.5 + k * 1.1; B.beam.material.opacity = 0.22 + k * 0.4; B.R.rotation.z = Math.sin(t * 0.9) * 0.012 * (0.4 + k); B.L.rotation.z = -Math.sin(t * 0.9 + 1) * 0.012 * (0.4 + k); }
     this._groundLock();
     this.speaking += (this.speakTarget - this.speaking) * Math.min(1, dt * 6);

@@ -7,10 +7,12 @@ import { initRoom } from './room.js';
 import { initGame } from './game.js';
 import { initQuiz } from './quiz.js';
 import { initBethlehem } from './bethlehem.js';
+import { initFamily } from './family.js';
 import { chooseMode } from './start.js';
 
 const $ = id => document.getElementById(id);
 const id = new URLSearchParams(location.search).get('id') || 'zechariah';
+const FAMILY = new URLSearchParams(location.search).get('id') === 'family';   // the Holy Family
 const BETH = new URLSearchParams(location.search).get('id') === 'bethlehem';   // the diorama of Bethlehem
 const QUIZ = new URLSearchParams(location.search).get('id') === 'quiz';   // the Christmas quiz (true or false)
 const GAME = new URLSearchParams(location.search).get('id') === 'game';   // the gingerbread game
@@ -89,14 +91,15 @@ cv.addEventListener('pointerup', e => {
   if (hit.companion) {
     const n = hit.companion.cfg.sound; if (n) { soundI[n] = ((soundI[n] ?? -1) + 1) % 2; play(animalAudio, `audio/animals/${n}-${soundI[n] + 1}.mp3`); }
     hit.companion.react();
-  } else if (BETH) { window.__w.beth?.tap(hit.point); } else if (QUIZ) { /* the quiz is answered with the buttons */ } else if (GAME) { game?.tap(hit); } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
+  } else if (FAMILY) { window.__w.family?.tap(hit.point); } else if (BETH) { window.__w.beth?.tap(hit.point); } else if (QUIZ) { /* the quiz is answered with the buttons */ } else if (GAME) { game?.tap(hit); } else if (ROOM) { room?.tap(hit.point); } else if (pokes.length) { aside(pokes[pokeI++ % pokes.length]); }
 });
 
 // the first screen asks HOW to look (in the magazine / on the table / on the phone) and explains it; that tap also unlocks the sound
-const startMode = chooseMode({ $, kind: BETH ? 'room' : QUIZ ? 'quiz' : GAME ? 'game' : ROOM ? 'room' : BOOK ? 'word' : 'witness', name: w.name, ref: w.scripture.split(';')[0], preset: new URLSearchParams(location.search).get('mode') });
+const startMode = chooseMode({ $, kind: BETH ? 'room' : FAMILY ? 'room' : QUIZ ? 'quiz' : GAME ? 'game' : ROOM ? 'room' : BOOK ? 'word' : 'witness', name: w.name, ref: w.scripture.split(';')[0], preset: new URLSearchParams(location.search).get('mode') });
 (async () => {
   const mode = await startMode;
   $('go').disabled = true; await loading; $('start').remove();
+  if (FAMILY) { window.__w.family = initFamily({ stage, $ }); if (mode !== 'scene') setMode(mode); return; }
   if (BETH) { window.__w.beth = initBethlehem({ stage, $ }); if (mode !== 'scene') setMode(mode); return; }
   if (QUIZ) { window.__w.quiz = await initQuiz({ stage, $ }); if (mode !== 'scene') setMode(mode); return; }
   if (GAME) { game = initGame({ stage, $ }); window.__w.game = game; if (mode !== 'scene') setMode(mode); return; }

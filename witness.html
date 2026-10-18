@@ -11,7 +11,7 @@
   // start downloading the big files right away, in parallel with the page script (the model, the medallion texture, the first words)
   (function () {
     var id = new URLSearchParams(location.search).get('id') || 'zechariah', h = document.head, add = function (href, as, type) { var l = document.createElement('link'); l.rel = 'preload'; l.href = href; l.as = as; if (type) l.type = type; if (as === 'fetch') l.crossOrigin = ''; h.appendChild(l); };
-    if (id === 'bethlehem') add('bethlehem/bethlehem.glb', 'fetch'); if (id !== 'word' && id !== 'room' && id !== 'bethlehem' && id !== 'game' && id !== 'quiz') add('witnesses/' + id + '/model.glb', 'fetch'); if (id === 'room') add('room/room.glb', 'fetch');
+    if (id === 'bethlehem') add('bethlehem/bethlehem.glb', 'fetch'); if (id === 'family') add('family/family.glb', 'fetch'); if (id !== 'word' && id !== 'room' && id !== 'bethlehem' && id !== 'family' && id !== 'game' && id !== 'quiz') add('witnesses/' + id + '/model.glb', 'fetch'); if (id === 'room') add('room/room.glb', 'fetch');
     if (id !== 'game' && id !== 'quiz' && id !== 'bethlehem') add('medallions/' + id + '.webp', 'image'); if (id === 'game' || id === 'quiz') add('game/gingerbread.glb', 'fetch'); add('data/witnesses.json', 'fetch'); add('data/witnesses-audio.json', 'fetch');
   })();
 </script>

@@ -34,13 +34,9 @@ function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.asp
 })();
 door.scale.y = 0.001;
 
-// the field begins in front of the doorway: a soft patch of ground (and a glowing threshold), so the arch stands on the ground and does not hang in the air
+// a soft glowing threshold at the foot of the doorway
 {
-  const fieldTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'), r = x.createRadialGradient(128, 128, 10, 128, 128, 128); r.addColorStop(0, 'rgba(26,44,30,.95)'); r.addColorStop(.65, 'rgba(24,40,28,.8)'); r.addColorStop(1, 'rgba(24,40,28,0)'); x.fillStyle = r; x.fillRect(0, 0, 256, 256); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
-  const field = new THREE.Mesh(new THREE.CircleGeometry(2.3, 48).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: fieldTex, transparent: true, depthWrite: false })); field.position.set(0, 0.004, 1.15); field.renderOrder = 1; P.add(field);
-  const sill = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.9).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const x = c.getContext('2d'), g = x.createRadialGradient(128, 64, 4, 128, 64, 120); g.addColorStop(0, 'rgba(255,214,120,.8)'); g.addColorStop(1, 'rgba(255,200,90,0)'); x.fillStyle = g; x.fillRect(0, 0, 256, 128); return new THREE.CanvasTexture(c); })(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sill.position.set(0, 0.008, 0.22); sill.renderOrder = 2; P.add(sill);
-  const tufts = new THREE.InstancedMesh(new THREE.ConeGeometry(0.03, 0.2, 4), new THREE.MeshBasicMaterial({ color: 0x35553a }), 160), mm = new THREE.Matrix4(), qq = new THREE.Quaternion(), vv = new THREE.Vector3(), ss = new THREE.Vector3(); let sd = 5; const rr = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 160; i++) { const a = rr() * Math.PI, r = 0.5 + rr() * 1.8; vv.set(Math.cos(a) * r, 0.09, 0.25 + Math.sin(a) * r * 0.95); ss.setScalar(0.3 + rr() * 0.4); qq.setFromEuler(new THREE.Euler((rr() - .5) * .3, rr() * 6, (rr() - .5) * .3)); mm.compose(vv, qq, ss); tufts.setMatrixAt(i, mm); } tufts.renderOrder = 1; P.add(tufts);
+  const sill = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.8).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const x = c.getContext('2d'), g = x.createRadialGradient(128, 64, 4, 128, 64, 120); g.addColorStop(0, 'rgba(255,214,120,.7)'); g.addColorStop(1, 'rgba(255,200,90,0)'); x.fillStyle = g; x.fillRect(0, 0, 256, 128); return new THREE.CanvasTexture(c); })(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sill.position.set(0, 0.008, 0.2); sill.renderOrder = 2; P.add(sill);
 }
 // ---------- the night world ----------
 const cat = await fetch('sky/sky.json').then(r => r.json());

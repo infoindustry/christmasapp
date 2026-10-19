@@ -46,8 +46,8 @@
     const done = () => { $p('offBtn').hidden = true; $p('offTxt').textContent = '✓ Всё сохранено: приложение работает без интернета.'; };
     if (localStorage.getItem('offlineDone') === pc.version) done(); else $p('offTxt').textContent = `Голоса, модели и мультфильм (около ${mb} МБ). Лучше качать по Wi-Fi.`;
     $p('offBtn').onclick = async () => {
-      $p('offBtn').disabled = true; $p('offBar').hidden = false; const cache = await caches.open('nativity-media-v1'); let n = 0, fail = 0; const list = pc.media;
-      const work = async () => { while (list.length) { const u = list.shift(); try { const res = await fetch(u); if (res.ok) await cache.put(new Request(new URL(u, location.href).href), res); else fail++; } catch (e) { fail++; } n++; $p('offBar').firstElementChild.style.width = `${Math.round(n / pc.media.length * 100)}%`; $p('offTxt').textContent = `Сохраняю… ${Math.round(n / pc.media.length * 100)}%`; } };
+      $p('offBtn').disabled = true; $p('offBar').hidden = false; const cache = await caches.open('nativity-media-v1'); let n = 0, fail = 0; const total = pc.media.length, list = [...pc.media], pct = () => Math.min(100, Math.round(n / total * 100));
+      const work = async () => { while (list.length) { const u = list.shift(); try { const res = await fetch(u); if (res.ok) await cache.put(new Request(new URL(u, location.href).href), res); else fail++; } catch (e) { fail++; } n++; $p('offBar').firstElementChild.style.width = `${pct()}%`; $p('offTxt').textContent = `Сохраняю… ${pct()}%`; } };
       await Promise.all([work(), work(), work()]);
       if (!fail) { localStorage.setItem('offlineDone', pc.version); done(); $p('offBar').hidden = true; } else { $p('offTxt').textContent = `Не всё сохранилось (${fail}). Проверь интернет и нажми ещё раз.`; $p('offBtn').disabled = false; }
     };

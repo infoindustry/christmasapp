@@ -34,6 +34,14 @@ function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.asp
 })();
 door.scale.y = 0.001;
 
+// the field begins in front of the doorway: a soft patch of ground (and a glowing threshold), so the arch stands on the ground and does not hang in the air
+{
+  const fieldTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'), r = x.createRadialGradient(128, 128, 10, 128, 128, 128); r.addColorStop(0, 'rgba(26,44,30,.95)'); r.addColorStop(.65, 'rgba(24,40,28,.8)'); r.addColorStop(1, 'rgba(24,40,28,0)'); x.fillStyle = r; x.fillRect(0, 0, 256, 256); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  const field = new THREE.Mesh(new THREE.CircleGeometry(2.3, 48).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: fieldTex, transparent: true, depthWrite: false })); field.position.set(0, 0.004, 1.15); field.renderOrder = 1; P.add(field);
+  const sill = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.9).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const x = c.getContext('2d'), g = x.createRadialGradient(128, 64, 4, 128, 64, 120); g.addColorStop(0, 'rgba(255,214,120,.8)'); g.addColorStop(1, 'rgba(255,200,90,0)'); x.fillStyle = g; x.fillRect(0, 0, 256, 128); return new THREE.CanvasTexture(c); })(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sill.position.set(0, 0.008, 0.22); sill.renderOrder = 2; P.add(sill);
+  const tufts = new THREE.InstancedMesh(new THREE.ConeGeometry(0.03, 0.2, 4), new THREE.MeshBasicMaterial({ color: 0x35553a }), 160), mm = new THREE.Matrix4(), qq = new THREE.Quaternion(), vv = new THREE.Vector3(), ss = new THREE.Vector3(); let sd = 5; const rr = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 160; i++) { const a = rr() * Math.PI, r = 0.5 + rr() * 1.8; vv.set(Math.cos(a) * r, 0.09, 0.25 + Math.sin(a) * r * 0.95); ss.setScalar(0.3 + rr() * 0.4); qq.setFromEuler(new THREE.Euler((rr() - .5) * .3, rr() * 6, (rr() - .5) * .3)); mm.compose(vv, qq, ss); tufts.setMatrixAt(i, mm); } tufts.renderOrder = 1; P.add(tufts);
+}
 // ---------- the night world ----------
 const cat = await fetch('sky/sky.json').then(r => r.json());
 const dotTex = canvasTex(64, 64, x => { const r = x.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = r; x.fillRect(0, 0, 64, 64); });
@@ -183,16 +191,18 @@ async function startWindow() {
 let xrHit = null;
 async function startXR() {
   mode = 'xr'; renderer.xr.enabled = true; renderer.xr.setReferenceSpaceType('local');
-  session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay', 'local-floor'], domOverlay: { root: document.body } });
+  session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'], optionalFeatures: ['dom-overlay', 'local-floor', 'anchors'], domOverlay: { root: document.body } });
   await renderer.xr.setSession(session); const ref = renderer.xr.getReferenceSpace(), viewer = await session.requestReferenceSpace('viewer'), src = await session.requestHitTestSource({ space: viewer });
   const ret = new THREE.Mesh(new THREE.RingGeometry(0.1, 0.13, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xe8c46a })); ret.matrixAutoUpdate = false; ret.visible = false; scene.add(ret); let last = null;
   for (const sel of ['#bar', '#hud']) document.querySelector(sel)?.addEventListener('beforexrselect', e => e.preventDefault());
   hint('Наведи камеру на пол и коснись экрана: откроется портал'); placed = false;
-  xrHit = f => { if (placed) return; const h = f.getHitTestResults(src); if (h.length) { const p = h[0].getPose(ref); last = new THREE.Matrix4().fromArray(p.transform.matrix); ret.matrix.copy(last); ret.visible = true; } else { ret.visible = false; last = null; } };
-  session.addEventListener('select', () => { if (placed || !last) return; const pos = new THREE.Vector3().setFromMatrixPosition(last), c = camWorld(), cp = new THREE.Vector3().setFromMatrixPosition(c.matrixWorld); P.position.copy(pos); P.rotation.set(0, Math.atan2(cp.x - pos.x, cp.z - pos.z), 0); placed = true; openT = 0; prevZ = 1; ret.visible = false; setInside(false); hint('Подойди к порталу и шагни внутрь'); });
-  session.addEventListener('end', () => { xrHit = null; renderer.xr.enabled = false; scene.remove(ret); placed = false; inside = false; stopAll(); }); $('hud').hidden = false; $('start').hidden = true;
+  let lastHit = null, anchor = null, yawM = new THREE.Matrix4();
+  xrHit = f => { if (placed) { if (anchor) { const p = f.getPose(anchor.anchorSpace, ref); if (p) { P.matrix.fromArray(p.transform.matrix).multiply(yawM); P.matrixWorldNeedsUpdate = true; } } return; } const h = f.getHitTestResults(src); if (h.length) { lastHit = h[0]; const p = h[0].getPose(ref); last = new THREE.Matrix4().fromArray(p.transform.matrix); ret.matrix.copy(last); ret.visible = true; } else { ret.visible = false; last = null; lastHit = null; } };
+  session.addEventListener('select', () => { if (placed || !last) return; const pos = new THREE.Vector3().setFromMatrixPosition(last), c = camWorld(), cp = new THREE.Vector3().setFromMatrixPosition(c.matrixWorld); const yaw = Math.atan2(cp.x - pos.x, cp.z - pos.z); yawM.makeRotationY(yaw); P.matrixAutoUpdate = false; P.matrix.copy(last).multiply(yawM); P.matrixWorldNeedsUpdate = true; if (lastHit?.createAnchor) lastHit.createAnchor().then(a => { anchor = a; }).catch(() => { }); placed = true; openT = 0; prevZ = 1; ret.visible = false; setInside(false); hint('Подойди к порталу и шагни внутрь'); });
+  session.addEventListener('end', () => { xrHit = null; P.matrixAutoUpdate = true; renderer.xr.enabled = false; scene.remove(ret); placed = false; inside = false; stopAll(); }); $('hud').hidden = false; $('start').hidden = true;
 }
 function stopAll() { voice.pause(); amb.pause(); choir.stop(0); $('hud').hidden = true; $('start').hidden = false; $('cam').classList.remove('on'); try { $('cam').srcObject?.getTracks().forEach(t => t.stop()); } catch { } placed = false; mode = null; setInside(false); P.visible = true; $('enter').hidden = $('leave').hidden = true; }
+$('back').onclick = e => { if (session) { e.preventDefault(); try { session.end(); } catch { } setTimeout(() => { location.href = './'; }, 350); } };
 $('stop').onclick = () => { if (session) { try { session.end(); } catch { } session = null; } else stopAll(); };
 
 // ---------- start ----------

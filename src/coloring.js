@@ -16,7 +16,7 @@ let done = {}, subs = false, brush = 0;
 try { done = JSON.parse(localStorage.getItem('col') || '{}'); subs = localStorage.getItem('subs') === '1'; } catch { }
 $('cc').classList.toggle('on', subs); $('cc').onclick = () => { subs = !subs; try { localStorage.setItem('subs', subs ? '1' : '0'); } catch { } $('cc').classList.toggle('on', subs); if (cur) $('story').textContent = subs && won ? cur.s : ''; };
 const voice = new Audio(), sfx = f => { const a = new Audio(f); a.volume = .5; a.play().catch(() => { }); };
-function menu() { $('menu').hidden = false; $('game').hidden = true; voice.pause(); cur = null; $('grid').innerHTML = PICS.map((p, i) => `<button data-i="${i}" class="${done[p.id] ? 'ok' : ''}" aria-label="${p.t}"><img src="puzzle/t${p.id.slice(1)}.webp" alt="" loading="lazy"></button>`).join(''); }
+function menu() { $('menu').hidden = false; $('game').hidden = true; voice.pause(); cur = null; $('grid').innerHTML = PICS.map((p, i) => `<button data-i="${i}" class="${done[p.id] ? 'ok' : ''}" aria-label="${p.t}"><img src="${done[p.id] ? 'puzzle' : 'coloring'}/t${p.id.slice(1)}.webp" alt="" loading="lazy"></button>`).join(''); }
 $('grid').onclick = e => { const b = e.target.closest('button'); if (b) open(+b.dataset.i); };
 $('menuB').onclick = menu; $('back').onclick = e => { if (!$('game').hidden) { e.preventDefault(); menu(); } }; $('next').onclick = () => open((idx + 1) % PICS.length);
 $('pal').innerHTML = COLORS.map(([t, c], i) => `<button data-i="${i}" style="background:${c || 'conic-gradient(#ff4d4d,#ffd93d,#3ecf6e,#3da5ff,#b06cff,#ff4d4d)'}" aria-label="цвет">${t}</button>`).join('');
@@ -24,12 +24,12 @@ const mark = () => [...$('pal').children].forEach((b, i) => b.classList.toggle('
 $('pal').onclick = e => { const b = e.target.closest('button'); if (b) { brush = +b.dataset.i; mark(); } };
 // ----- canvases -----
 const cv = $('cv'), g = cv.getContext('2d'), mk = () => document.createElement('canvas');
-let cur = null, idx = 0, gray = null, color = null, IW = 720, IH = 1080, mask = mk(), paint = mk(), comp = mk(), won = false, dirty = true, drag = null, cells = null, cols = 16, rows = 24, bx = 0, by = 0, bw = 0, bh = 0, revealT = 0, sparks = [], last = null;
+let cur = null, idx = 0, gray = null, color = null, wash = null, IW = 720, IH = 1080, mask = mk(), paint = mk(), comp = mk(), won = false, dirty = true, drag = null, cells = null, cols = 16, rows = 24, bx = 0, by = 0, bw = 0, bh = 0, revealT = 0, sparks = [], last = null;
 const ld = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.src = src; });
 function layout() { const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1); cv.width = r.width * dpr; cv.height = r.height * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); const ar = IW / IH; bh = Math.min(r.height, r.width / ar); bw = bh * ar; bx = (r.width - bw) / 2; by = (r.height - bh) / 2; dirty = true; }
 async function open(i) {
   idx = i; cur = PICS[i]; voice.pause(); $('menu').hidden = true; $('game').hidden = false; $('done').hidden = true; $('pal').hidden = false; won = false; revealT = 0; sparks = [];
-  [gray, color] = await Promise.all([ld(`coloring/g${cur.id.slice(1)}.webp`), ld(`coloring/c${cur.id.slice(1)}.webp`)]); IW = gray.width; IH = gray.height;
+  [gray, color, wash] = await Promise.all([ld(`coloring/o${cur.id.slice(1)}.webp`), ld(`coloring/c${cur.id.slice(1)}.webp`), ld(`coloring/cb${cur.id.slice(1)}.webp`)]); IW = gray.width; IH = gray.height;   // gray = the line drawing
   for (const c of [mask, paint, comp]) { c.width = IW; c.height = IH; } mask.getContext('2d').clearRect(0, 0, IW, IH); paint.getContext('2d').clearRect(0, 0, IW, IH); cells = new Uint8Array(cols * rows); layout();
 }
 addEventListener('resize', () => { if (cur) layout(); });
@@ -52,10 +52,10 @@ function finish() {
   $('story').textContent = subs ? cur.s : ''; $('done').hidden = false; setTimeout(() => { voice.src = `audio/puzzle/${cur.id}.mp3`; voice.play().catch(() => { }); }, 1200);
 }
 function compose() {
-  const c = comp.getContext('2d'); c.globalCompositeOperation = 'source-over'; c.clearRect(0, 0, IW, IH); c.drawImage(gray, 0, 0, IW, IH);
-  // the true colours show only where the magic brush went
-  const t = compose.t ||= mk(); t.width = IW; t.height = IH; const tc = t.getContext('2d'); tc.drawImage(mask, 0, 0); tc.globalCompositeOperation = 'source-in'; tc.drawImage(color, 0, 0, IW, IH); c.drawImage(t, 0, 0);
-  c.globalCompositeOperation = 'color'; c.globalAlpha = .85; c.drawImage(paint, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+  // white paper; the true colours where the magic brush went; the chosen colours; then the black lines on top of everything
+  const c = comp.getContext('2d'); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1; c.fillStyle = '#fff'; c.fillRect(0, 0, IW, IH);
+  const t = compose.t ||= mk(); t.width = IW; t.height = IH; const tc = t.getContext('2d'); tc.drawImage(mask, 0, 0); tc.globalCompositeOperation = 'source-in'; tc.drawImage(wash, 0, 0, IW, IH); c.drawImage(t, 0, 0);
+  c.globalAlpha = .9; c.drawImage(paint, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = 'multiply'; c.drawImage(gray, 0, 0, IW, IH); c.globalCompositeOperation = 'source-over';
 }
 let lt = performance.now();
 function frame(now) {

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b1140">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Колокольчики ангелов</title>
+<link rel="stylesheet" href="/src/bells.css">
+</head>
+<body>
+<canvas id="cv"></canvas>
+<a id="back" href="./">‹</a>
+<div id="hud" hidden><span id="score">⭐ 0</span><span id="combo"></span></div>
+<div id="start"><div class="box"><h1>Колокольчики ангелов</h1><p>Звёздочки падают на колокольчики. Нажми на колокольчик, когда звёздочка до него долетит. Чем больше попал, тем громче поют ангелы!</p><button id="play" class="primary">▶ Играть</button><a href="./" class="home">‹ На главную</a></div></div>
+<div id="end" hidden><div class="box"><h2 id="stars"></h2><p id="msg"></p><button id="again" class="primary">↻ Ещё раз</button><a href="sing.html" class="btn">🎵 Петь песню</a><a href="./" class="home">‹ На главную</a></div></div>
+<script type="module" src="/src/bells.js"></script>
+</body></html>

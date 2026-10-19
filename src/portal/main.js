@@ -77,7 +77,17 @@ const logs = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 0.12, 8), lit(0
 // the shepherd and his sheep (the same models as in the app)
 const mixers = [], sheep = [], loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
 const fit = (obj, h) => { const b = new THREE.Box3().setFromObject(obj), s = b.getSize(new THREE.Vector3()), k = h / s.y; obj.scale.setScalar(k); const b2 = new THREE.Box3().setFromObject(obj), c = b2.getCenter(new THREE.Vector3()); obj.position.set(-c.x, -b2.min.y, -c.z); };
-loader.loadAsync('witnesses/shepherd/model.glb').then(g => { const h = new THREE.Group(); h.add(g.scene); fit(g.scene, 1.65); h.position.set(FIRE.x - 1.1, 0, FIRE.z + 0.6); h.rotation.y = 0.5; nightTree(h); W.add(h); const talk = g.animations.find(a => /Talk/.test(a.name)), idle = g.animations.find(a => /Idle/.test(a.name)) || (talk && THREE.AnimationUtils.subclip(talk, 'idleFromTalk', 0, 2, 30)); if (idle) { const m = new THREE.AnimationMixer(g.scene); m.clipAction(idle).play(); mixers.push(m); } }).catch(() => { });
+const shepherd = { acts: {}, cur: null, timer: 0 };
+loader.loadAsync('witnesses/shepherd/model.glb').then(g => {
+  const h = new THREE.Group(); h.add(g.scene); fit(g.scene, 1.65); h.position.set(FIRE.x - 1.2, 0, FIRE.z + 0.9); h.rotation.y = Math.atan2(FIRE.x - h.position.x, FIRE.z - h.position.z); nightTree(h); W.add(h);
+  const m = new THREE.AnimationMixer(g.scene); mixers.push(m); const get = rx => g.animations.find(a => rx.test(a.name));
+  for (const [k, rx] of [['sit', /Sit/], ['fall', /fall/i], ['arise', /Arise|Stand/]]) { const c = get(rx); if (c) { const a = m.clipAction(c); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; shepherd.acts[k] = a; } }
+  const play = (k, fade = 0.3) => { const a = shepherd.acts[k]; if (!a) return 0; shepherd.cur?.fadeOut(fade); a.reset().fadeIn(fade).play(); shepherd.cur = a; return a.getClip().duration; };
+  // he sits by the fire; when the angel appears he falls back in fear (Lk 2:9), then gets up to listen
+  shepherd.sit = () => { clearTimeout(shepherd.timer); const a = shepherd.acts.sit; if (!a) return; play('sit', 0); a.time = a.getClip().duration; m.update(0); };
+  shepherd.scare = () => { clearTimeout(shepherd.timer); const d = play('fall'); shepherd.timer = setTimeout(() => play('arise'), (d + 1.6) * 1000); };
+  shepherd.sit();
+}).catch(() => { });
 loader.loadAsync('animals/sheep.glb').then(g => { for (let i = 0; i < 7; i++) { const o = g.scene.clone(true), h = new THREE.Group(); h.add(o); fit(o, 0.62 + Math.random() * 0.12); const a = i / 7 * 6.283 + 0.4, r = 2.4 + Math.random() * 2.2; h.position.set(FIRE.x + Math.cos(a) * r, 0, FIRE.z + Math.sin(a) * r * 0.8); h.rotation.y = Math.random() * 6.28; nightTree(h); W.add(h); sheep.push({ h, p: Math.random() * 6 }); } }).catch(() => { });
 // the star of Bethlehem and the angels
 const STAR = dirOf(46, 300).map(x => x * 48), starV = new THREE.Vector3(STAR[0], STAR[1], STAR[2]);   // 60° to the left of straight ahead (az 300 = 60° west of north = forward is -z)
@@ -85,7 +95,7 @@ const starTex = canvasTex(256, 256, (x, w) => { const r = x.createRadialGradient
 const star = new THREE.Sprite(night(new THREE.SpriteMaterial({ map: starTex, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending }), false)); star.position.copy(starV); star.scale.setScalar(7); star.renderOrder = 2; W.add(star);
 const beamTex = canvasTex(64, 256, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(255,240,170,.8)'); g.addColorStop(1, 'rgba(255,240,170,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h); });
 const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 3.5, starV.y, 24, 1, true), night(new THREE.MeshBasicMaterial({ map: beamTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }), false)); beam.position.set(starV.x, starV.y / 2, starV.z); W.add(beam);
-const angelTex = canvasTex(256, 256, (g, w) => { g.translate(w / 2, w * .56); const s = w * .62; const gr = g.createRadialGradient(0, 0, 0, 0, 0, s * 1.2); gr.addColorStop(0, 'rgba(255,238,190,.6)'); gr.addColorStop(1, 'rgba(255,238,190,0)'); g.fillStyle = gr; g.beginPath(); g.arc(0, 0, s * 1.2, 0, 7); g.fill();
+const angelTex = canvasTex(256, 256, (g, w) => { g.translate(w / 2, w * .56); const s = w * .62; const gr = g.createRadialGradient(0, 0, 0, 0, 0, s * .62); gr.addColorStop(0, 'rgba(255,238,190,.55)'); gr.addColorStop(1, 'rgba(255,238,190,0)'); g.fillStyle = gr; g.beginPath(); g.arc(0, 0, s * .62, 0, 7); g.fill();
   for (const sd of [-1, 1]) { g.save(); g.scale(sd, 1); g.rotate(-.55); g.fillStyle = 'rgba(255,253,245,.95)'; g.beginPath(); g.ellipse(s * .38, -s * .2, s * .5, s * .17, 0, 0, 7); g.fill(); g.rotate(.4); g.fillStyle = 'rgba(255,250,235,.85)'; g.beginPath(); g.ellipse(s * .34, -s * .04, s * .42, s * .13, 0, 0, 7); g.fill(); g.restore(); }
   g.fillStyle = '#fffaf0'; g.beginPath(); g.moveTo(-s * .12, -s * .24); g.quadraticCurveTo(-s * .3, s * .22, -s * .34, s * .55); g.quadraticCurveTo(0, s * .66, s * .34, s * .55); g.quadraticCurveTo(s * .3, s * .22, s * .12, -s * .24); g.fill(); g.fillStyle = '#ffe2bd'; g.beginPath(); g.arc(0, -s * .36, s * .13, 0, 7); g.fill(); g.strokeStyle = 'rgba(255,215,100,.95)'; g.lineWidth = 3; g.beginPath(); g.ellipse(0, -s * .56, s * .13, s * .04, 0, 0, 7); g.stroke(); });
 const angels = Array.from({ length: 16 }, (_, i) => { const sp = new THREE.Sprite(night(new THREE.SpriteMaterial({ map: angelTex, transparent: true, depthWrite: false, opacity: 0 }), false)); sp.visible = false; sp.renderOrder = 3; W.add(sp); return { sp, i, a0: i / 16 * 6.283, r: 9 + (i % 4) * 2.2, h: 6 + (i % 5) * 1.8, w: .12 + (i % 3) * .04, big: i === 0 }; });
@@ -105,12 +115,12 @@ function setInside(v) {
   const changed = v !== inside; inside = v; for (const m of mats) m.stencilFunc = v ? THREE.AlwaysStencilFunc : THREE.EqualStencilFunc; clipP.constant = v ? 1e4 : 0;
   $('enter').hidden = !(mode === 'window' && placed && !v); $('leave').hidden = !(mode === 'window' && v);
   if (changed) { const f = document.createElement('div'); f.style.cssText = 'position:fixed;inset:0;background:#fff;opacity:.85;pointer-events:none;transition:opacity 1.2s;z-index:3'; document.body.append(f); requestAnimationFrame(() => f.style.opacity = 0); setTimeout(() => f.remove(), 1400); }
-  if (v) { amb.volume = .22; amb.play().catch(() => { }); phase = 'seek'; hold = 0; hint('Оглянись вокруг и найди яркую звезду'); caption('Найди Вифлеемскую звезду.'); speak('audio/sky/s0.mp3'); beam.material.opacity = 0; angels.forEach(a => { a.sp.visible = false; a.sp.material.opacity = 0; }); star.scale.setScalar(7); }
+  if (v) { amb.volume = .22; amb.play().catch(() => { }); phase = 'seek'; hold = 0; hint('Оглянись вокруг и найди яркую звезду'); caption('Найди Вифлеемскую звезду.'); speak('audio/sky/s0.mp3'); shepherd.sit?.(); beam.material.opacity = 0; angels.forEach(a => { a.sp.visible = false; a.sp.material.opacity = 0; }); star.scale.setScalar(7); }
   else { amb.pause(); choir?.pause(); voice.pause(); caption(''); hint('Ты снова в комнате. Шагни в портал ещё раз.'); }
 }
 function story() {
   phase = 'found'; hint(''); caption('Вот она, Вифлеемская звезда! Её увидели мудрецы с востока. А пастухам в ту ночь явился ангел.'); if (navigator.vibrate) navigator.vibrate(60);
-  speak('audio/sky/s1.mp3', () => { phase = 'announce'; angelT = 0; angels.forEach(a => a.sp.visible = true); caption('«Не бойтесь; я возвещаю вам великую радость, которая будет всем людям: ибо ныне родился вам в городе Давидовом Спаситель, Который есть Христос Господь».');
+  speak('audio/sky/s1.mp3', () => { phase = 'announce'; angelT = 0; shepherd.scare?.(); angels.forEach(a => a.sp.visible = true); caption('«Не бойтесь; я возвещаю вам великую радость, которая будет всем людям: ибо ныне родился вам в городе Давидовом Спаситель, Который есть Христос Господь».');
     speak('audio/sky/s2.mp3', () => { phase = 'sing'; try { ac?.resume(); choir.currentTime = 0; choir.play(); } catch { } caption('«Слава в вышних Богу, и на земле мир, в человеках благоволение!»');
       speak('audio/sky/s3.mp3', () => { phase = 'done'; caption(''); hint('Шагни назад в портал, чтобы вернуться в комнату.'); }); }); });
 }

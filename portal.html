@@ -14,12 +14,13 @@
   <div id="cap" hidden></div>
   <div id="bar"><button id="enter" hidden>🚪 Шагнуть внутрь</button><button id="leave" hidden>↩ Выйти</button><button id="stop">✕ Закрыть</button></div>
 </div>
-<div id="start"><div class="box">
-  <h1>Портал в Вифлеем</h1>
-  <p id="lead">Открой в комнате волшебное окно в ночь над Вифлеемом и шагни в него.</p>
-  <button id="go" class="primary">🌟 Открыть портал</button>
-  <p class="small" id="note"></p>
-  <a href="./" class="home">‹ На главную</a>
-</div></div>
+<div id="start"><a id="sback" href="./">‹ Назад</a><div class="sbg"></div>
+  <main class="sheet">
+    <header class="shead"><img id="startImg" src="card/bg/shepherds.jpg" alt=""><div class="stitle"><h2>Портал в Вифлеем</h2><span class="chip">Лк 2:8–14</span></div></header>
+    <section class="sec"><h3>Как будем смотреть?</h3><div id="opts"></div></section>
+    <section class="sec how"><h3>Как это работает</h3><ol id="how"></ol><p id="tip"></p></section>
+  </main>
+  <footer class="sfoot"><button id="go" class="primary">Поехали!</button></footer>
+</div>
 <script type="module" src="/src/portal/main.js"></script>
 </body></html>

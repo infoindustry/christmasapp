@@ -201,7 +201,16 @@ $('stop').onclick = () => { if (session) { try { session.end(); } catch { } sess
 
 // ---------- start ----------
 const xrOk = !win && !!navigator.xr && await navigator.xr.isSessionSupported('immersive-ar').catch(() => false);
-$('note').textContent = xrOk ? 'На этом телефоне окно повиснет в комнате на уровне глаз: подойди и шагни в него. Освободи немного места вокруг.' : 'На этом телефоне портал откроется как «окно»: камера и поворот телефона. Шагнуть внутрь можно кнопкой.';
-$('go').onclick = async () => { unlockAudio(); try { if (xrOk) { await startXR(); } else { $('start').hidden = true; $('hud').hidden = false; await startWindow(); } } catch (e) { console.warn(e); $('start').hidden = false; $('hud').hidden = true; $('note').textContent = 'Не получилось включить камеру. Разреши доступ и попробуй ещё раз.'; } };
+const HOW = {
+  xr: { icon: '🏠', color: '#3d9bff', title: 'В комнате', sub: 'Окно повиснет перед тобой, и в него можно шагнуть', steps: [['🔊', 'Включи звук.'], ['👆', 'Нажми «Поехали!» и наведи камеру на пол.'], ['✨', 'Коснись экрана: перед тобой откроется окно в ночь.'], ['🌟', 'Подойди, шагни в окно и найди звезду.']], tip: 'Освободи немного места вокруг и ходи медленно.' },
+  window: { icon: '📱', color: '#3ec57a', title: 'Окно в телефоне', sub: 'Смотри сквозь окно: камера и поворот телефона', steps: [['🔊', 'Включи звук.'], ['👆', 'Нажми «Поехали!»: окно откроется перед камерой.'], ['🚪', 'Нажми «Шагнуть внутрь».'], ['🌟', 'Поворачивай телефон и найди звезду.']], tip: 'Если камера не включилась, разреши доступ к ней в настройках.' },
+};
+let pick = xrOk ? 'xr' : 'window';
+function renderStart() {
+  $('opts').innerHTML = Object.entries(HOW).map(([k, h]) => { const can = k === 'window' || xrOk; return `<button class="opt${can ? '' : ' off'}${k === pick ? ' on' : ''}" data-m="${k}" ${can ? '' : 'disabled'}><span class="oi" style="background:${h.color}">${h.icon}</span><span class="ot"><b>${h.title}</b><small>${can ? h.sub : 'работает на Android (Chrome с ARCore); на iPhone пока нет'}</small></span><i class="ck"></i></button>`; }).join('');
+  $('how').innerHTML = HOW[pick].steps.map(([i, t]) => `<li><span>${i}</span><div>${t}</div></li>`).join(''); $('tip').textContent = HOW[pick].tip;
+}
+$('opts').onclick = e => { const b = e.target.closest('.opt'); if (!b || b.disabled) return; pick = b.dataset.m; renderStart(); }; renderStart();
+$('go').onclick = async () => { unlockAudio(); try { if (pick === 'xr') { await startXR(); } else { $('start').hidden = true; $('hud').hidden = false; await startWindow(); } } catch (e) { console.warn(e); $('start').hidden = false; $('hud').hidden = true; $('tip').textContent = 'Не получилось включить камеру. Разреши доступ и попробуй ещё раз.'; } };
 window.__portal = { P, view, get inside() { return inside; }, setInside, story, get phase() { return phase; }, walk: () => walk, begin: () => $('go').click() };
 renderer.setAnimationLoop(frame);

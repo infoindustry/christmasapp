@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#14102a">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Пазлы Рождества</title>
+<link rel="stylesheet" href="/src/puzzle.css">
+</head>
+<body>
+<a id="back" href="./">‹</a><button id="cc" title="Подписи">Aa</button>
+<div id="menu">
+  <h1>Пазлы Рождества</h1><p class="lead">Выбери картинку и собери её. А потом послушай, что на ней происходит.</p>
+  <div class="chips" id="lv"></div>
+  <div id="grid"></div>
+</div>
+<div id="game" hidden>
+  <div id="ttl"></div>
+  <canvas id="cv"></canvas>
+  <div id="bar"><button id="peek">👁 Подсказка</button><button id="shuf">🔀 Заново</button></div>
+  <div id="done" hidden><div id="story"></div><div class="row"><button id="next" class="primary">Следующий пазл ›</button><button id="menuB">Все пазлы</button></div></div>
+</div>
+<script type="module" src="/src/puzzle.js"></script>
+</body></html>

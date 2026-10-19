@@ -7,8 +7,8 @@ import { join } from 'node:path';
 const SRC = process.argv[2], OUT = 'public/usdz', TMP = '/private/tmp/claude-501/usdz-work', SIZE = +process.argv[3] || 1024;
 const ID = [[/anna/, 'anna'], [/joseph/, 'joseph'], [/mary/, 'mary'], [/wise_man/, 'wiseman'], [/shepherd/, 'shepherd'], [/simeon_multiview/, 'simeon'], [/zechariah/, 'zechariah'], [/elizabeth/, 'elizabeth'], [/micah/, 'micah'], [/herod/, 'herod']];
 mkdirSync(OUT, { recursive: true });
-// several exports per witness: the model that matches the app's figure, then a talking gesture before idle before running
-const SKIP = /pixar|shepherd_multiview/, rank = f => (/Talk_with_Hands/.test(f) ? 4 : /Talk/.test(f) ? 3 : /Idle/.test(f) ? 2 : 1) + (/shepherd_rigged/.test(f) ? 10 : 0), best = {};
+// several exports per witness: the model that matches the app's figure, then calm idle first, then a talking gesture, then running
+const SKIP = /pixar|shepherd_multiview/, rank = f => (/Idle/.test(f) ? 4 : /Talk_with_Hands/.test(f) ? 3 : /Talk/.test(f) ? 2 : 1) + (/shepherd_rigged/.test(f) ? 10 : 0), best = {};
 for (const f of readdirSync(SRC).filter(f => f.endsWith('.usdz') && !SKIP.test(f))) { const id = ID.find(([r]) => r.test(f))?.[1]; if (id && (!best[id] || rank(f) > rank(best[id]))) best[id] = f; }
 for (const [id, f] of Object.entries(best)) {
   console.log(id, '<-', f);

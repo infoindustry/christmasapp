@@ -8,6 +8,7 @@ import { loadCompanions } from './companions.js';
 import { buildRoom } from './roomfx.js';
 import { buildGame } from './gamefx.js';
 import { buildBethlehem } from './bethfx.js';
+import { Appear } from './appear.js';
 
 const DISC_R = 0.5, DISC_H = 0.035, FIGURE_H = 1.18;
 const UPPER = /Spine|Neck|Head|Shoulder|Arm|Hand|headfront/i, LOWER = /Leg|Foot|Toe|Hips/i;
@@ -138,6 +139,7 @@ export class Stage {
     this._play('idle');
     this.companions = await loadCompanions(id, this.anchor, DISC_H, loader);
     this.baseCam = this.camera.position.clone(); this.baseTarget = this.controls.target.clone(); this._layoutCompanions();
+    this._fx = new Appear(this, DISC_H, FIGURE_H); this._fx.prepare([this.figure, ...this.companions.map(c => c.root)]);
     return { clips: this.clipNames, companions: this.companions.map(c => c.cfg.name) };
   }
   async _borrowTalk(loader, targetScene, id) {
@@ -165,6 +167,8 @@ export class Stage {
     else this._play('idle');
     this.noTalkClip = !this.actions.talk;
   }
+  /** the arrival effect (light, scan, sparks); `done` is called when the figure is whole */
+  appear(done) { this._fx ||= new Appear(this, DISC_H, FIGURE_H); this._fx.play(done); }
   bow() { if (this.actions.bow) { this._play('bow', 0.4, true); this.actions.bow.getMixer().addEventListener('finished', () => this._play('idle', 0.6), { once: true }); } }
   // keep the soles on the disc: the baked clips lift the feet (idle/talk sway), so measure the lowest foot bone and drop the figure to match
   /** a dark pedestal with a golden ring under the diorama of Bethlehem (it has no printed medallion) */
@@ -276,7 +280,7 @@ export class Stage {
   _frame(xrFrame) {
     const dt = Math.min(this.clock.getDelta(), 0.05), t = this.clock.elapsedTime;
     this.insetCur ??= 0; this.insetTarget ??= 0; if (this.mode === 'scene' && this.insetCur !== this.insetTarget) { this.insetCur += (this.insetTarget - this.insetCur) * Math.min(1, dt * 8); if (Math.abs(this.insetTarget - this.insetCur) < 0.5) this.insetCur = this.insetTarget; this._viewOffset(); }
-    this.mixer?.update(dt);
+    this.mixer?.update(dt); this._fx?.update(dt);
     if (this.roomFx) this.roomFx.update(t, dt, this.speaking);
     if (this.gameFx) this.gameFx.update(t, dt);
     if (this.bethFx) this.bethFx.update(t, dt);

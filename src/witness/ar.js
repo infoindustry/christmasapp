@@ -79,10 +79,10 @@ export class AR {
     controller.processVideo(feed);
     this.cleanup.push(() => { pumping = false; controller.dispose?.(); controller.stopProcessVideo?.(); });
 
-    let shown = false; this.ui.hint('Наведи камеру на этот кружок в журнале. Он должен быть виден весь', 0, 5000);
+    let shown = false, arrived = false; this.ui.hint('Наведи камеру на этот кружок в журнале. Он должен быть виден весь', 0, 5000);
     s.onFrame = () => {
       const now = performance.now() / 1000;
-      if (smoother.visible(now)) { s.arRoot.matrix.copy(smoother.step(now)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; if (!shown) { shown = true; this.ui.hint(''); } }
+      if (smoother.visible(now)) { s.arRoot.matrix.copy(smoother.step(now)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; if (!shown) { shown = true; this.ui.hint(''); if (!arrived) { arrived = true; s.appear(() => s.bow()); } } }
       else if (shown) { shown = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
     };
   }
@@ -113,7 +113,7 @@ export class AR {
     const ray = new THREE.Raycaster(), tmpM = new THREE.Matrix4(), O = new THREE.Vector3(), D = new THREE.Vector3(), P = new THREE.Vector3();
     session.addEventListener('select', e => {
       if (!placed) {   // the first tap puts the world on the table; after that the world stays where it is
-        if (!last) return; s.arRoot.matrixAutoUpdate = false; s.arRoot.matrix.copy(last).multiply(new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; placed = true; ret.visible = false; this.ui.hint(''); if (lastHit?.createAnchor) lastHit.createAnchor().then(a => { anchor = a; }).catch(() => {}); return;   // an anchor keeps the figure glued to the table as tracking improves
+        if (!last) return; s.arRoot.matrixAutoUpdate = false; s.arRoot.matrix.copy(last).multiply(new THREE.Matrix4().makeScale(SCALE, SCALE, SCALE)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; placed = true; ret.visible = false; this.ui.hint(''); s.appear(() => s.bow()); if (lastHit?.createAnchor) lastHit.createAnchor().then(a => { anchor = a; }).catch(() => {}); return;   // an anchor keeps the figure glued to the table as tracking improves
       }
       if (!e.frame) return;
       const pose = e.frame.getPose(e.inputSource.targetRaySpace, ref); if (!pose) return;
@@ -138,7 +138,7 @@ export class AR {
     try { if (window.__gyroPerm) await window.__gyroPerm; else if (typeof DeviceOrientationEvent.requestPermission === 'function') await DeviceOrientationEvent.requestPermission(); } catch (e) { console.warn('gyro not available', e.message); }
     await this._camera(); s.setAR(true); s.controls.enabled = false;
     s.camera.fov = 60; s.camera.position.set(0, 0, 0); s.camera.rotation.order = 'YXZ'; s.camera.updateProjectionMatrix();
-    const DIST = 2.2; s.arRoot.scale.setScalar(s.gameFx ? 1.1 : 0.7); s.arRoot.position.set(0, -1.0, -DIST); s.arRoot.visible = true;   // stands in front of you right away; tap to put it somewhere else
+    const DIST = 2.2; s.arRoot.scale.setScalar(s.gameFx ? 1.1 : 0.7); s.arRoot.position.set(0, -1.0, -DIST); s.arRoot.visible = true; s.appear(() => s.bow());   // stands in front of you right away; tap to put it somewhere else
     const q = new THREE.Quaternion(), e = new THREE.Euler(), q0 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), q1 = new THREE.Quaternion();
     let orient = null, heading0 = null;
     const on = ev => { if (ev.alpha == null) return; orient = ev; };
@@ -156,7 +156,7 @@ export class AR {
       ndc.set((ev.clientX / innerWidth) * 2 - 1, -(ev.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, s.camera);
       const d = ray.ray.direction; let pt;
       if (d.y < -0.05) { const k = FLOOR / d.y; pt = d.clone().multiplyScalar(Math.min(k, 3)); } else pt = new THREE.Vector3(d.x, 0, d.z).normalize().multiplyScalar(DIST).setY(FLOOR);
-      s.arRoot.position.copy(pt); s.arRoot.visible = true; this.ui.hint('');
+      s.arRoot.position.copy(pt); s.arRoot.visible = true; this.ui.hint(''); s.appear(() => s.bow());
     };
     s.canvas.addEventListener('click', tap); this.cleanup.push(() => s.canvas.removeEventListener('click', tap));
     this.ui.hint('Фигура стоит перед тобой. Коснись пола или стола, чтобы переставить её', 5000);

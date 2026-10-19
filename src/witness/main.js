@@ -112,7 +112,7 @@ const startMode = chooseMode({ $, kind: BETH ? 'room' : QUIZ ? 'quiz' : GAME ? '
   if (ROOM) { room = initRoom({ stage, $ }); window.__w.room = room; if (mode !== 'scene') setMode(mode); return; }
   if (BOOK) { word = await initWord({ stage, $ }); window.__w.word = word; if (mode !== 'scene') setMode(mode); return; }
   audio.src = fileOf(story[0]); audio.volume = 0; audio.play().then(() => { audio.pause(); audio.volume = 1; }).catch(() => { audio.volume = 1; }); // unlock audio on this tap
-  stage.bow();
+  stage.appear(() => stage.bow());
   setSub('Нажми «Рассказать», и я расскажу, как всё было.', true); showDots();
   if (mode !== 'scene') setMode(mode);
 })();

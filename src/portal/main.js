@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { makeDate, skyAt, dirOf } from '../sky/astro.js';
+import { createChoir } from '../choir.js';
 const $ = id => document.getElementById(id), D = Math.PI / 180, ease = x => x * x * (3 - 2 * x), easeBack = x => { const c = 1.70158; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); }, clamp = x => Math.max(0, Math.min(1, x));
 const DOOR_W = 1.2, DOOR_H = 2.1, EYE = 1.35;
 let subs = false; try { subs = localStorage.getItem('subs') === '1'; } catch { }
@@ -101,10 +102,10 @@ const angelTex = canvasTex(256, 256, (g, w) => { g.translate(w / 2, w * .56); co
 const angels = Array.from({ length: 16 }, (_, i) => { const sp = new THREE.Sprite(night(new THREE.SpriteMaterial({ map: angelTex, transparent: true, depthWrite: false, opacity: 0 }), false)); sp.visible = false; sp.renderOrder = 3; W.add(sp); return { sp, i, a0: i / 16 * 6.283, r: 9 + (i % 4) * 2.2, h: 6 + (i % 5) * 1.8, w: .12 + (i % 3) * .04, big: i === 0 }; });
 
 // ---------- sound ----------
-const AC = window.AudioContext || window.webkitAudioContext; let ac, pan, choir; const voice = new Audio(), amb = new Audio('audio/theme-nativity.mp3'); amb.loop = true; amb.volume = 0; let voiceEnd = null;
+const choir = createChoir(); const voice = new Audio(), amb = new Audio('audio/theme-nativity.mp3'); amb.loop = true; amb.volume = 0; let voiceEnd = null;
 voice.onended = () => { const f = voiceEnd; voiceEnd = null; f?.(); };
 const speak = (src, onend) => { voice.pause(); voiceEnd = onend || null; voice.src = src; voice.play().catch(() => onend && setTimeout(() => { if (voiceEnd === onend) { voiceEnd = null; onend(); } }, 4000)); };
-function unlockAudio() { try { ac ||= new AC(); ac.resume(); choir = new Audio('audio/family/choir.mp3'); choir.loop = true; const s = ac.createMediaElementSource(choir); pan = ac.createPanner(); pan.panningModel = 'HRTF'; pan.distanceModel = 'inverse'; pan.refDistance = 6; pan.rolloffFactor = 0.4; s.connect(pan); pan.connect(ac.destination); choir.muted = true; choir.play().then(() => { choir.pause(); choir.muted = false; }).catch(() => { choir.muted = false; }); amb.play().then(() => amb.pause()).catch(() => { }); } catch { } }
+function unlockAudio() { choir.unlock(); try { amb.play().then(() => amb.pause()).catch(() => { }); } catch { } }
 const caption = t => { $('cap').textContent = t; $('cap').hidden = !subs || !t; };
 const hint = t => { $('hint').textContent = t; };
 
@@ -116,12 +117,12 @@ function setInside(v) {
   $('enter').hidden = !(mode === 'window' && placed && !v); $('leave').hidden = !(mode === 'window' && v);
   if (changed) { const f = document.createElement('div'); f.style.cssText = 'position:fixed;inset:0;background:#fff;opacity:.85;pointer-events:none;transition:opacity 1.2s;z-index:3'; document.body.append(f); requestAnimationFrame(() => f.style.opacity = 0); setTimeout(() => f.remove(), 1400); }
   if (v) { amb.volume = .22; amb.play().catch(() => { }); phase = 'seek'; hold = 0; hint('Оглянись вокруг и найди яркую звезду'); caption('Найди Вифлеемскую звезду.'); speak('audio/sky/s0.mp3'); shepherd.sit?.(); beam.material.opacity = 0; angels.forEach(a => { a.sp.visible = false; a.sp.material.opacity = 0; }); star.scale.setScalar(7); }
-  else { amb.pause(); choir?.pause(); voice.pause(); caption(''); hint('Ты снова в комнате. Шагни в портал ещё раз.'); }
+  else { amb.pause(); choir.stop(); voice.pause(); caption(''); hint('Ты снова в комнате. Шагни в портал ещё раз.'); }
 }
 function story() {
   phase = 'found'; hint(''); caption('Вот она, Вифлеемская звезда! Её увидели мудрецы с востока. А пастухам в ту ночь явился ангел.'); if (navigator.vibrate) navigator.vibrate(60);
   speak('audio/sky/s1.mp3', () => { phase = 'announce'; angelT = 0; shepherd.scare?.(); angels.forEach(a => a.sp.visible = true); caption('«Не бойтесь; я возвещаю вам великую радость, которая будет всем людям: ибо ныне родился вам в городе Давидовом Спаситель, Который есть Христос Господь».');
-    speak('audio/sky/s2.mp3', () => { phase = 'sing'; try { ac?.resume(); choir.currentTime = 0; choir.play(); } catch { } caption('«Слава в вышних Богу, и на земле мир, в человеках благоволение!»');
+    speak('audio/sky/s2.mp3', () => { phase = 'sing'; choir.start(); caption('«Слава в вышних Богу, и на земле мир, в человеках благоволение!»');
       speak('audio/sky/s3.mp3', () => { phase = 'done'; caption(''); hint('Шагни назад в портал, чтобы вернуться в комнату.'); }); }); });
 }
 
@@ -153,9 +154,9 @@ function frame(now, xrFrame) {
   } else $('arrow').hidden = true;
   // the angels fly over (and the choir sings from where they are)
   if (phase === 'announce' || phase === 'sing' || phase === 'done') {
-    angelT += dt; let cx = 0, cy = 0, cz = 0, w = 0;
-    for (const a of angels) { const k = ease(clamp((angelT - a.i * 0.45) / 1.6)); const th = a.a0 + t * a.w * (a.i % 2 ? 1 : -1); const r = a.big ? 6 : a.r; a.sp.position.set(Math.sin(th) * r * 1.0, (a.big ? 9 : a.h) + Math.sin(t * .9 + a.i) * 0.6, -Math.cos(th) * r - 3); a.sp.material.opacity = k; a.sp.scale.setScalar(a.big ? 5.5 : 2.6 + (a.i % 3) * 0.4); cx += a.sp.position.x * k; cy += a.sp.position.y * k; cz += a.sp.position.z * k; w += k; }
-    if (pan && w) { tmpV.set(cx / w, cy / w, cz / w); P.localToWorld(tmpV); const L = ac.listener; if (L.positionX) { L.positionX.value = camW.x; L.positionY.value = camW.y; L.positionZ.value = camW.z; fwd.set(0, 0, -1).transformDirection(c.matrixWorld); L.forwardX.value = fwd.x; L.forwardY.value = fwd.y; L.forwardZ.value = fwd.z; tmpQ.setFromRotationMatrix(c.matrixWorld); const up = new THREE.Vector3(0, 1, 0).applyQuaternion(tmpQ); L.upX.value = up.x; L.upY.value = up.y; L.upZ.value = up.z; } if (pan.positionX) { pan.positionX.value = tmpV.x; pan.positionY.value = tmpV.y; pan.positionZ.value = tmpV.z; } }
+    angelT += dt; const G = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    for (const a of angels) { const k = ease(clamp((angelT - a.i * 0.45) / 1.6)); const th = a.a0 + t * a.w * (a.i % 2 ? 1 : -1); const r = a.big ? 6 : a.r; a.sp.position.set(Math.sin(th) * r * 1.0, (a.big ? 9 : a.h) + Math.sin(t * .9 + a.i) * 0.6, -Math.cos(th) * r - 3); a.sp.material.opacity = k; a.sp.scale.setScalar(a.big ? 5.5 : 2.6 + (a.i % 3) * 0.4); const g3 = G[a.i % 3]; g3[0] += a.sp.position.x * k; g3[1] += a.sp.position.y * k; g3[2] += a.sp.position.z * k; g3[3] += k; }
+    if (choir.ready) { choir.place(G.map(g3 => { if (!g3[3]) return null; tmpV.set(g3[0] / g3[3], g3[1] / g3[3], g3[2] / g3[3]); P.localToWorld(tmpV); return [tmpV.x, tmpV.y, tmpV.z]; })); fwd.set(0, 0, -1).transformDirection(c.matrixWorld); tmpQ.setFromRotationMatrix(c.matrixWorld); const up = new THREE.Vector3(0, 1, 0).applyQuaternion(tmpQ); choir.listener([camW.x, camW.y, camW.z], [fwd.x, fwd.y, fwd.z], [up.x, up.y, up.z]); }
   }
   renderer.render(scene, camera);
 }
@@ -191,7 +192,7 @@ async function startXR() {
   session.addEventListener('select', () => { if (placed || !last) return; const pos = new THREE.Vector3().setFromMatrixPosition(last), c = camWorld(), cp = new THREE.Vector3().setFromMatrixPosition(c.matrixWorld); P.position.copy(pos); P.rotation.set(0, Math.atan2(cp.x - pos.x, cp.z - pos.z), 0); placed = true; openT = 0; prevZ = 1; ret.visible = false; setInside(false); hint('Подойди к порталу и шагни внутрь'); });
   session.addEventListener('end', () => { xrHit = null; renderer.xr.enabled = false; scene.remove(ret); placed = false; inside = false; stopAll(); }); $('hud').hidden = false; $('start').hidden = true;
 }
-function stopAll() { voice.pause(); amb.pause(); choir?.pause(); $('hud').hidden = true; $('start').hidden = false; $('cam').classList.remove('on'); try { $('cam').srcObject?.getTracks().forEach(t => t.stop()); } catch { } placed = false; mode = null; setInside(false); P.visible = true; $('enter').hidden = $('leave').hidden = true; }
+function stopAll() { voice.pause(); amb.pause(); choir.stop(0); $('hud').hidden = true; $('start').hidden = false; $('cam').classList.remove('on'); try { $('cam').srcObject?.getTracks().forEach(t => t.stop()); } catch { } placed = false; mode = null; setInside(false); P.visible = true; $('enter').hidden = $('leave').hidden = true; }
 $('stop').onclick = () => { if (session) { try { session.end(); } catch { } session = null; } else stopAll(); };
 
 // ---------- start ----------

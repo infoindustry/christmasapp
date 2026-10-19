@@ -1,0 +1,14 @@
+:root { --gold: #e8c46a; --sys: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, system-ui, sans-serif; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #04061a; color: #fff; font-family: var(--sys); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+#cam { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; } #cam.on { display: block; }
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+[hidden] { display: none !important; }
+#hint { position: fixed; left: 0; right: 0; top: max(14px, env(safe-area-inset-top)); text-align: center; padding: 0 16px; font: 600 17px/1.35 var(--sys); text-shadow: 0 1px 10px #000, 0 0 3px #000; pointer-events: none; }
+#cap { position: fixed; left: 14px; right: 14px; bottom: calc(max(20px, env(safe-area-inset-bottom)) + 70px); text-align: center; font: 17px/1.35 Georgia, serif; text-shadow: 0 1px 10px #000, 0 0 3px #000; pointer-events: none; }
+#bar { position: fixed; left: 0; right: 0; bottom: max(18px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 10px; z-index: 5; }
+button { font: 600 16px var(--sys); border: 0; border-radius: 14px; padding: 13px 18px; background: rgba(20, 22, 60, .78); color: #fff; box-shadow: inset 0 0 0 1px #ffffff2a; } .primary { background: linear-gradient(180deg, #f3d48a, #e0b54e); color: #2a1a05; box-shadow: none; } #enter, #leave { background: linear-gradient(180deg, #f3d48a, #e0b54e); color: #2a1a05; }
+#arrow { position: fixed; left: 0; top: 0; z-index: 4; font-size: 38px; color: var(--gold); text-shadow: 0 0 14px #ffd86b; pointer-events: none; }
+#ring { position: fixed; left: 50%; top: 50%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; pointer-events: none; border: 2px solid #ffffff40; } #ring i { position: absolute; inset: -2px; border-radius: 50%; background: conic-gradient(var(--gold) calc(var(--p, 0) * 1turn), transparent 0); -webkit-mask: radial-gradient(circle, transparent 56px, #000 57px); mask: radial-gradient(circle, transparent 56px, #000 57px); }
+#start { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px; background: radial-gradient(circle at 50% 20%, #1b2562, #04061a 70%); }
+.box { width: min(420px, 100%); display: flex; flex-direction: column; gap: 14px; text-align: center; } h1 { margin: 0; font: 700 clamp(28px, 7vw, 36px) Georgia, serif; color: var(--gold); } .box p { margin: 0; opacity: .85; line-height: 1.4; } .small { font-size: 13px; opacity: .6 !important; } .home { color: #fff9; text-decoration: none; font-size: 14px; padding: 6px; }

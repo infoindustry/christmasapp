@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#04061a">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Портал в Вифлеем</title>
+<link rel="stylesheet" href="/src/portal/portal.css">
+</head>
+<body>
+<video id="cam" playsinline muted autoplay></video>
+<canvas id="gl"></canvas>
+<div id="hud" hidden>
+  <div id="hint"></div><div id="arrow" hidden>➤</div><div id="ring" hidden><i></i></div>
+  <div id="cap" hidden></div>
+  <div id="bar"><button id="enter" hidden>🚪 Шагнуть внутрь</button><button id="leave" hidden>↩ Выйти</button><button id="stop">✕ Закрыть</button></div>
+</div>
+<div id="start"><div class="box">
+  <h1>Портал в Вифлеем</h1>
+  <p id="lead">Открой в комнате дверь в ночь над Вифлеемом и шагни внутрь.</p>
+  <button id="go" class="primary">🌟 Открыть портал</button>
+  <p class="small" id="note"></p>
+  <a href="./" class="home">‹ На главную</a>
+</div></div>
+<script type="module" src="/src/portal/main.js"></script>
+</body></html>

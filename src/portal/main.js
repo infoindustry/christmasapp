@@ -7,7 +7,7 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { makeDate, skyAt, dirOf } from '../sky/astro.js';
 import { createChoir } from '../choir.js';
 const $ = id => document.getElementById(id), D = Math.PI / 180, ease = x => x * x * (3 - 2 * x), easeBack = x => { const c = 1.70158; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); }, clamp = x => Math.max(0, Math.min(1, x));
-const DOOR_W = 1.2, DOOR_H = 2.1, EYE = 1.35;
+const WIN_R = 0.8, WIN_Y = 1.3, EYE = 1.35;   // a round window hanging at eye height: it needs no floor
 let subs = false; try { subs = localStorage.getItem('subs') === '1'; } catch { }
 const win = new URLSearchParams(location.search).has('window');
 
@@ -24,20 +24,18 @@ const nightTree = root => root.traverse(o => { if (o.isMesh) { for (const m of A
 const canvasTex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
 function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); } addEventListener('resize', resize); resize();
 
-// ---------- the doorway ----------
+// ---------- the round window ----------
 (function buildDoor() {
-  const sh = new THREE.Shape(); sh.moveTo(-DOOR_W / 2, 0); sh.lineTo(-DOOR_W / 2, DOOR_H - DOOR_W / 2); sh.absarc(0, DOOR_H - DOOR_W / 2, DOOR_W / 2, Math.PI, 0, true); sh.lineTo(DOOR_W / 2, 0); sh.closePath();
-  const mask = new THREE.Mesh(new THREE.ShapeGeometry(sh, 24), new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp, side: THREE.DoubleSide })); mask.renderOrder = -10; door.add(mask);
-  const pts = []; for (let y = 0; y <= DOOR_H - DOOR_W / 2; y += 0.1) pts.push(new THREE.Vector3(-DOOR_W / 2, y, 0)); for (let a = 180; a >= 0; a -= 6) pts.push(new THREE.Vector3(Math.cos(a * D) * DOOR_W / 2, DOOR_H - DOOR_W / 2 + Math.sin(a * D) * DOOR_W / 2, 0)); for (let y = DOOR_H - DOOR_W / 2; y >= 0; y -= 0.1) pts.push(new THREE.Vector3(DOOR_W / 2, y, 0));
-  const curve = new THREE.CatmullRomCurve3(pts), add = (r, c, o) => { const m = new THREE.Mesh(new THREE.TubeGeometry(curve, 160, r, 8), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: o, blending: THREE.AdditiveBlending, depthWrite: false })); m.renderOrder = 5; door.add(m); return m; };
-  add(0.03, 0xffe08a, 1); door.glow1 = add(0.09, 0xffc850, 0.35); door.glow2 = add(0.13, 0xffb040, 0.12);
+  door.position.y = WIN_Y;
+  const mask = new THREE.Mesh(new THREE.CircleGeometry(WIN_R, 64), new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp, side: THREE.DoubleSide })); mask.renderOrder = -10; door.add(mask);
+  const add = (r, c, o) => { const m = new THREE.Mesh(new THREE.TorusGeometry(WIN_R, r, 12, 96), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: o, blending: THREE.AdditiveBlending, depthWrite: false })); m.renderOrder = 5; door.add(m); return m; };
+  add(0.035, 0xffe08a, 1); door.glow1 = add(0.1, 0xffc850, 0.35); door.glow2 = add(0.17, 0xffb040, 0.12);
+  // a few stars drifting around the rim
+  const dotTex2 = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,245,200,1)'); g.addColorStop(1, 'rgba(255,200,100,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
+  door.motes = Array.from({ length: 14 }, (_, i) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex2, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sp.scale.setScalar(0.09); sp.renderOrder = 6; door.add(sp); return { sp, a: i / 14 * 6.283, s: 0.25 + (i % 3) * 0.12, r: WIN_R + (i % 2 ? 0.07 : -0.05) }; });
 })();
-door.scale.y = 0.001;
+door.scale.setScalar(0.001);
 
-// a soft glowing threshold at the foot of the doorway
-{
-  const sill = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.8).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const x = c.getContext('2d'), g = x.createRadialGradient(128, 64, 4, 128, 64, 120); g.addColorStop(0, 'rgba(255,214,120,.7)'); g.addColorStop(1, 'rgba(255,200,90,0)'); x.fillStyle = g; x.fillRect(0, 0, 256, 128); return new THREE.CanvasTexture(c); })(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sill.position.set(0, 0.008, 0.2); sill.renderOrder = 2; P.add(sill);
-}
 // ---------- the night world ----------
 const cat = await fetch('sky/sky.json').then(r => r.json());
 const dotTex = canvasTex(64, 64, x => { const r = x.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = r; x.fillRect(0, 0, 64, 64); });
@@ -121,13 +119,13 @@ function setInside(v) {
   $('enter').hidden = !(mode === 'window' && placed && !v); $('leave').hidden = !(mode === 'window' && v);
   if (changed) { const f = document.createElement('div'); f.style.cssText = 'position:fixed;inset:0;background:#fff;opacity:.85;pointer-events:none;transition:opacity 1.2s;z-index:3'; document.body.append(f); requestAnimationFrame(() => f.style.opacity = 0); setTimeout(() => f.remove(), 1400); }
   if (v) { amb.volume = .22; amb.play().catch(() => { }); phase = 'seek'; hold = 0; hint('Оглянись вокруг и найди яркую звезду'); caption('Найди Вифлеемскую звезду.'); speak('audio/sky/s0.mp3'); shepherd.sit?.(); beam.material.opacity = 0; angels.forEach(a => { a.sp.visible = false; a.sp.material.opacity = 0; }); star.scale.setScalar(7); }
-  else { amb.pause(); choir.stop(); voice.pause(); caption(''); hint('Ты снова в комнате. Шагни в портал ещё раз.'); }
+  else { amb.pause(); choir.stop(); voice.pause(); caption(''); hint('Ты снова в комнате. Можно шагнуть в окно ещё раз.'); }
 }
 function story() {
   phase = 'found'; hint(''); caption('Вот она, Вифлеемская звезда! Её увидели мудрецы с востока. А пастухам в ту ночь явился ангел.'); if (navigator.vibrate) navigator.vibrate(60);
   speak('audio/sky/s1.mp3', () => { phase = 'announce'; angelT = 0; shepherd.scare?.(); angels.forEach(a => a.sp.visible = true); caption('«Не бойтесь; я возвещаю вам великую радость, которая будет всем людям: ибо ныне родился вам в городе Давидовом Спаситель, Который есть Христос Господь».');
     speak('audio/sky/s2.mp3', () => { phase = 'sing'; choir.start(); caption('«Слава в вышних Богу, и на земле мир, в человеках благоволение!»');
-      speak('audio/sky/s3.mp3', () => { phase = 'done'; caption(''); hint('Шагни назад в портал, чтобы вернуться в комнату.'); }); }); });
+      speak('audio/sky/s3.mp3', () => { phase = 'done'; caption(''); hint('Шагни назад в окно, чтобы вернуться в комнату.'); }); }); });
 }
 
 // ---------- per-frame ----------
@@ -137,10 +135,10 @@ function frame(now, xrFrame) {
   if (mode === 'window') updateWindowCam(dt);
   if (xrFrame && xrHit) xrHit(xrFrame);
   if (!placed) { renderer.render(scene, camera); return; }
-  openT = Math.min(1.4, openT + dt); door.scale.y = Math.max(0.001, easeBack(clamp(openT / 1.2))); door.glow1.material.opacity = .3 + .15 * Math.sin(t * 3); door.glow2.material.opacity = .1 + .06 * Math.sin(t * 2.1);
+  openT = Math.min(1.4, openT + dt); door.scale.setScalar(Math.max(0.001, easeBack(clamp(openT / 1.2)))); for (const m of door.motes) m.sp.position.set(Math.cos(m.a + t * m.s) * m.r, Math.sin(m.a + t * m.s) * m.r, 0.02); door.glow1.material.opacity = .3 + .15 * Math.sin(t * 3); door.glow2.material.opacity = .1 + .06 * Math.sin(t * 2.1);
   P.updateMatrixWorld(true); const c = camWorld(); camW.setFromMatrixPosition(c.matrixWorld); lp.copy(camW); P.worldToLocal(lp);
   // walking through the doorway flips the world: outside = a window, inside = the whole night
-  const inRect = Math.abs(lp.x) < DOOR_W / 2 + 0.12 && lp.y > -0.3 && lp.y < DOOR_H + 0.2;
+  const inRect = Math.hypot(lp.x, lp.y - WIN_Y) < WIN_R + 0.1;
   if (openT > 0.3 && inRect) { if (!inside && prevZ > 0 && lp.z <= 0) setInside(true); else if (inside && prevZ < 0 && lp.z >= 0) setInside(false); }
   prevZ = lp.z; W.visible = inside || lp.z > 0;
   tmpV.set(0, 0, -1).transformDirection(P.matrixWorld); if (inside) { clipP.normal.copy(tmpV); clipP.constant = 1e4; } else clipP.setFromNormalAndCoplanarPoint(tmpV, starW.setFromMatrixPosition(P.matrixWorld));
@@ -180,7 +178,7 @@ $('enter').onclick = () => { walk.goal = 3.6; hint(''); }; $('leave').onclick = 
 async function startWindow() {
   mode = 'window'; await startSensors();
   try { $('cam').srcObject = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }); $('cam').classList.add('on'); $('cam').play(); } catch { }
-  P.position.set(0, 0, -2.6); P.rotation.set(0, 0, 0); placed = true; openT = 0; prevZ = 1; walk = { z: 0, goal: 0 }; camera.position.set(0, EYE, 0); setInside(false); $('hint').textContent = 'Смотри в портал. Нажми «Шагнуть внутрь».';
+  P.position.set(0, 0, -2.6); P.rotation.set(0, 0, 0); placed = true; openT = 0; prevZ = 1; walk = { z: 0, goal: 0 }; camera.position.set(0, EYE, 0); setInside(false); $('hint').textContent = 'Смотри в окно. Нажми «Шагнуть внутрь».';
 }
 
 // ---------- WebXR mode (Android): tap the floor to open the doorway ----------
@@ -191,10 +189,10 @@ async function startXR() {
   await renderer.xr.setSession(session); const ref = renderer.xr.getReferenceSpace(), viewer = await session.requestReferenceSpace('viewer'), src = await session.requestHitTestSource({ space: viewer });
   const ret = new THREE.Mesh(new THREE.RingGeometry(0.1, 0.13, 40).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xe8c46a })); ret.matrixAutoUpdate = false; ret.visible = false; scene.add(ret); let last = null;
   for (const sel of ['#bar', '#hud']) document.querySelector(sel)?.addEventListener('beforexrselect', e => e.preventDefault());
-  hint('Наведи камеру на пол и коснись экрана: откроется портал'); placed = false;
+  hint('Наведи камеру на пол и коснись экрана: перед тобой откроется окно в ночь'); placed = false;
   let lastHit = null, anchor = null, yawM = new THREE.Matrix4();
   xrHit = f => { if (placed) { if (anchor) { const p = f.getPose(anchor.anchorSpace, ref); if (p) { P.matrix.fromArray(p.transform.matrix).multiply(yawM); P.matrixWorldNeedsUpdate = true; } } return; } const h = f.getHitTestResults(src); if (h.length) { lastHit = h[0]; const p = h[0].getPose(ref); last = new THREE.Matrix4().fromArray(p.transform.matrix); ret.matrix.copy(last); ret.visible = true; } else { ret.visible = false; last = null; lastHit = null; } };
-  session.addEventListener('select', () => { if (placed || !last) return; const pos = new THREE.Vector3().setFromMatrixPosition(last), c = camWorld(), cp = new THREE.Vector3().setFromMatrixPosition(c.matrixWorld); const yaw = Math.atan2(cp.x - pos.x, cp.z - pos.z); yawM.makeRotationY(yaw); P.matrixAutoUpdate = false; P.matrix.copy(last).multiply(yawM); P.matrixWorldNeedsUpdate = true; if (lastHit?.createAnchor) lastHit.createAnchor().then(a => { anchor = a; }).catch(() => { }); placed = true; openT = 0; prevZ = 1; ret.visible = false; setInside(false); hint('Подойди к порталу и шагни внутрь'); });
+  session.addEventListener('select', () => { if (placed || !last) return; const pos = new THREE.Vector3().setFromMatrixPosition(last), c = camWorld(), cp = new THREE.Vector3().setFromMatrixPosition(c.matrixWorld); const yaw = Math.atan2(cp.x - pos.x, cp.z - pos.z); yawM.makeRotationY(yaw); P.matrixAutoUpdate = false; P.matrix.copy(last).multiply(yawM); P.matrixWorldNeedsUpdate = true; if (lastHit?.createAnchor) lastHit.createAnchor().then(a => { anchor = a; }).catch(() => { }); placed = true; openT = 0; prevZ = 1; ret.visible = false; setInside(false); hint('Подойди к окну и шагни в него'); });
   session.addEventListener('end', () => { xrHit = null; P.matrixAutoUpdate = true; renderer.xr.enabled = false; scene.remove(ret); placed = false; inside = false; stopAll(); }); $('hud').hidden = false; $('start').hidden = true;
 }
 function stopAll() { voice.pause(); amb.pause(); choir.stop(0); $('hud').hidden = true; $('start').hidden = false; $('cam').classList.remove('on'); try { $('cam').srcObject?.getTracks().forEach(t => t.stop()); } catch { } placed = false; mode = null; setInside(false); P.visible = true; $('enter').hidden = $('leave').hidden = true; }
@@ -203,7 +201,7 @@ $('stop').onclick = () => { if (session) { try { session.end(); } catch { } sess
 
 // ---------- start ----------
 const xrOk = !win && !!navigator.xr && await navigator.xr.isSessionSupported('immersive-ar').catch(() => false);
-$('note').textContent = xrOk ? 'На этом телефоне портал встанет на пол в натуральный рост. Освободи немного места вокруг.' : 'На этом телефоне портал откроется как «окно»: камера и поворот телефона. Шагнуть внутрь можно кнопкой.';
+$('note').textContent = xrOk ? 'На этом телефоне окно повиснет в комнате на уровне глаз: подойди и шагни в него. Освободи немного места вокруг.' : 'На этом телефоне портал откроется как «окно»: камера и поворот телефона. Шагнуть внутрь можно кнопкой.';
 $('go').onclick = async () => { unlockAudio(); try { if (xrOk) { await startXR(); } else { $('start').hidden = true; $('hud').hidden = false; await startWindow(); } } catch (e) { console.warn(e); $('start').hidden = false; $('hud').hidden = true; $('note').textContent = 'Не получилось включить камеру. Разреши доступ и попробуй ещё раз.'; } };
 window.__portal = { P, view, get inside() { return inside; }, setInside, story, get phase() { return phase; }, walk: () => walk, begin: () => $('go').click() };
 renderer.setAnimationLoop(frame);

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#14102a">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Волшебная раскраска</title>
+<link rel="stylesheet" href="/src/coloring.css">
+</head>
+<body>
+<a id="back" href="./">‹ Назад</a><button id="cc" title="Подписи">Aa</button>
+<div id="menu">
+  <h1>Волшебная раскраска</h1><p class="lead">Выбери картинку и води пальцем: краски оживают!</p>
+  <div id="grid"></div>
+</div>
+<div id="game" hidden>
+  <canvas id="cv"></canvas>
+  <div id="pal"></div>
+  <div id="done" hidden><div id="story"></div><div class="row"><button id="next" class="primary">Ещё картинка ›</button><button id="menuB">Все картинки</button></div></div>
+</div>
+<script type="module" src="/src/coloring.js"></script>
+</body></html>

@@ -453,7 +453,7 @@
   },
   "joseph-s05": {
    "file": "audio/witnesses/joseph/joseph-s05.mp3",
-   "sec": 4.32,
+   "sec": 4.24,
    "kind": "story"
   },
   "joseph-s06": {
@@ -715,7 +715,7 @@
   },
   "micah-p05": {
    "file": "audio/witnesses/micah/micah-p05.mp3",
-   "sec": 4.24,
+   "sec": 3.92,
    "kind": "poke"
   }
  },
@@ -822,7 +822,7 @@
   },
   "shepherd-q06": {
    "file": "audio/witnesses/shepherd/shepherd-q06.mp3",
-   "sec": 11.84,
+   "sec": 11.12,
    "kind": "answer"
   },
   "shepherd-q07": {
@@ -1310,7 +1310,7 @@
   },
   "herod-s03": {
    "file": "audio/witnesses/herod/herod-s03.mp3",
-   "sec": 9.44,
+   "sec": 8.72,
    "kind": "story"
   },
   "herod-s04": {
@@ -1365,7 +1365,7 @@
   },
   "herod-s14": {
    "file": "audio/witnesses/herod/herod-s14.mp3",
-   "sec": 8.24,
+   "sec": 4.08,
    "kind": "story"
   },
   "herod-s15": {
@@ -1430,7 +1430,7 @@
   },
   "herod-p04": {
    "file": "audio/witnesses/herod/herod-p04.mp3",
-   "sec": 3.84,
+   "sec": 4.24,
    "kind": "poke"
   },
   "herod-p05": {

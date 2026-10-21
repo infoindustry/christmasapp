@@ -366,7 +366,7 @@
   },
   "elizabeth-q01": {
    "file": "audio/witnesses/elizabeth/elizabeth-q01.mp3",
-   "sec": 7.84,
+   "sec": 7.68,
    "kind": "answer"
   },
   "elizabeth-q02": {
@@ -787,7 +787,7 @@
   },
   "shepherd-s14": {
    "file": "audio/witnesses/shepherd/shepherd-s14.mp3",
-   "sec": 15.76,
+   "sec": 15.92,
    "kind": "story"
   },
   "shepherd-s15": {
@@ -1440,7 +1440,6 @@
   }
  },
  "word": {},
- "family": {},
  "bethlehem": {},
  "room": {},
  "quiz": {},

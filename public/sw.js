@@ -14,6 +14,14 @@ self.addEventListener('install', e => e.waitUntil((async () => {
 
 self.addEventListener('activate', e => e.waitUntil((async () => {
   for (const k of await caches.keys()) if (k !== SHELL && k !== MEDIA) await caches.delete(k);   // old versions (and the very first cache) go away
+  // a re-voiced line or a new model keeps its file name: drop the saved offline copy whose size differs from the published one
+  try {
+    const pc = await (await fetch(new URL('precache.json', base), { cache: 'no-store' })).json(), sizes = pc.mediaSize || {}, c = await caches.open(MEDIA);
+    for (const req of await c.keys()) {
+      const want = sizes[req.url.slice(base.length)], res = await c.match(req), have = res && +res.headers.get('content-length');
+      if (want && have && have !== want) await c.delete(req);
+    }
+  } catch (err) { /* offline: check again on the next update */ }
   await self.clients.claim();
   for (const c of await self.clients.matchAll({ type: 'window' })) { try { c.navigate(c.url); } catch (err) {} }   // pages opened with an old version reload once, with the new files
 })()));

@@ -6,6 +6,6 @@ const skip = /^(CNAME|sw\.js|precache\.json|usdz\/.*)$/;   // the iPhone AR mode
 const isMedia = u => /^(audio|film|witnesses|animals|room|game|usdz|bethlehem|family)\//.test(u) && !/\.(webp|png|jpg)$/.test(u) || /\.glb$/.test(u);
 const shell = files.filter(f => !skip.test(f.url) && !isMedia(f.url)).map(f => f.url), media = files.filter(f => !skip.test(f.url) && isMedia(f.url));
 const version = Date.now().toString(36);
-fs.writeFileSync(`${root}/precache.json`, JSON.stringify({ version, shell: ['./', ...shell], media: media.map(f => f.url), mediaBytes: media.reduce((a, f) => a + f.size, 0) }));
+fs.writeFileSync(`${root}/precache.json`, JSON.stringify({ version, shell: ['./', ...shell], media: media.map(f => f.url), mediaSize: Object.fromEntries(media.map(f => [f.url, f.size])), mediaBytes: media.reduce((a, f) => a + f.size, 0) }));
 fs.writeFileSync(`${root}/sw.js`, fs.readFileSync(`${root}/sw.js`, 'utf8').replace('__VERSION__', version));   // a new version string = new bytes = the phones install the new worker
 console.log(`precache: ${shell.length} shell files, ${media.length} media files (${(media.reduce((a, f) => a + f.size, 0) / 1048576).toFixed(0)} MB)`);

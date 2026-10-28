@@ -105,7 +105,7 @@ body.game #sub, body.game #dots, body.game #controls { display: none; }
 #start .chip { display: inline-block; font-size: 12px; padding: 4px 12px; border-radius: 999px; background: #ffffff1f; color: #ffffffd0; }
 #start .sec { display: flex; flex-direction: column; gap: 8px; width: min(480px, 100%); margin: 0 auto; }
 #start .sec h3 { margin: 0 4px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: #ffffff99; font-weight: 600; }
-#start #opts { display: flex; flex-direction: column; background: #ffffff12; border-radius: 20px; overflow: hidden; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: inset 0 0 0 1px #ffffff14; }
+#start #opts, #start #eopts { display: flex; flex-direction: column; background: #ffffff12; border-radius: 20px; overflow: hidden; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: inset 0 0 0 1px #ffffff14; }
 #start .opt { display: flex; align-items: center; gap: 13px; padding: 12px 14px; background: transparent; border: 0; border-radius: 0; text-align: left; color: #fff; font-family: var(--sys); backdrop-filter: none; width: 100%; }
 #start .opt + .opt { box-shadow: 0 -1px 0 #ffffff12; }
 #start .opt .oi { flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 24px; box-shadow: inset 0 1px 0 #ffffff55, 0 4px 12px #0005; }
@@ -197,3 +197,5 @@ body.book #btnCC, body.room #btnCC, body.game #btnCC, body.quiz #btnCC, body.bet
 .home-foot { text-align: center; margin: 6px 0 0; } .home-foot a { color: var(--gold); text-decoration: none; font-family: var(--sys); font-size: 15px; font-weight: 600; padding: 10px 18px; border-radius: 999px; background: #ffffff12; display: inline-block; }
 
 #sback { position: fixed; left: 12px; top: max(10px, env(safe-area-inset-top)); z-index: 40; color: #fff; text-decoration: none; font: 600 14px system-ui, sans-serif; padding: 8px 14px; border-radius: 999px; background: rgba(20, 16, 44, .72); box-shadow: inset 0 0 0 1px #ffffff2a; }
+
+#start .etip { margin: 2px 6px 0; font-size: 13px; line-height: 1.4; color: #ffffffb0; }

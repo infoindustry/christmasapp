@@ -24,6 +24,12 @@ const HOW = {
     tip: 'Вопросы можно задать кнопкой «Спросить».',
   },
 };
+// the three ways to read the printed medallion (all three look at the same picture): which one works best depends on the phone
+const ENGINES = [
+  { m: 'marker', icon: '⭐', name: 'Звезда', sub: 'Самый лёгкий и быстрый. Хорош при ярком свете.' },
+  { m: 'marker2', icon: '🕯️', name: 'Свеча', sub: 'Другой способ узнавать кружок. Попробуй, если «Звезда» дрожит.' },
+  { m: 'xr8', icon: '🌟', name: 'Вифлеем', sub: 'Запоминает комнату: он остаётся на месте, даже когда отведёшь камеру. Самый умный, но тяжелее.' },
+];
 const GAME_HOW = { surface: [['🪑', 'Найди стол или пол и наведи на него камеру.'], ['👆', 'Коснись экрана: пряничек встанет на стол.'], ['🌟', 'Касайся стола: пряничек побежит туда и соберёт звёздочки по всему столу.'], ['⛄', 'Берегись снежков! Коснись пряничка, и он перепрыгнет.']], scene: [['🔊', 'Включи звук.'], ['👆', 'Нажми «Играть».'], ['🌟', 'Касайся тарелки: пряничек побежит и соберёт звёздочки.'], ['⛄', 'Берегись снежков! Коснись пряничка, и он перепрыгнет.']] };
 const QUIZ_HOW = { surface: [['🪑', 'Найди стол и наведи на него камеру.'], ['👆', 'Коснись экрана: пряничек появится на столе.'], ['❓', 'Он задаст вопрос о Рождестве: правда или нет?'], ['✅', 'Нажми «Правда» или «Неправда». Вопросов 100, можно закончить раньше.']], scene: [['🔊', 'Включи звук.'], ['👆', 'Нажми «Играть».'], ['❓', 'Пряничек прочитает вопрос о Рождестве.'], ['✅', 'Нажми «Правда» или «Неправда». Вопросов 100, можно закончить раньше.']] };
 const BETH_HOW = { marker: [['📖', 'Открой страницу журнала, где нарисован кружок «Вифлеем».'], ['📱', 'Наведи камеру на кружок: целиком.'], ['🌙', 'Нажми «Ночь»: в окнах зажгутся огни, над домиком засияет звезда.'], ['👀', 'Нажми «Заглянуть в ясли»: ты увидишь Святое семейство. Коснись Марии, Иосифа или Младенца: они заговорят.']], surface: [['🪑', 'Найди ровное место: стол или пол.'], ['👆', 'Коснись экрана: на столе встанет Вифлеем.'], ['🌙', 'Нажми «Ночь»: в окнах зажгутся огни, над домиком засияет звезда.'], ['👀', 'Нажми «Заглянуть в ясли»: ты увидишь Святое семейство. Коснись Марии, Иосифа или Младенца: они заговорят.']], scene: [['🔊', 'Включи звук.'], ['🌙', 'Нажми «Ночь»: в окнах зажгутся огни, над домиком засияет звезда.'], ['👀', 'Нажми «Заглянуть в ясли»: ты увидишь Святое семейство. Коснись Марии, Иосифа или Младенца: они заговорят.'], ['👆', 'Води пальцем, чтобы рассмотреть город.']] };
@@ -33,29 +39,35 @@ export async function chooseMode({ $, kind = 'witness', name, preset, ref }) {
   const sup = await AR.support(); const pageId = new URLSearchParams(location.search).get('id');
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || location.search.includes('ios=1');   // (?ios=1 shows the iPhone option on a computer, for testing)
   const usdz = isIOS && kind === 'witness' ? await fetch(`usdz/${pageId}.usdz`, { method: 'HEAD' }).then(r => r.ok).catch(() => false) : false;   // Apple AR Quick Look: only on iPhone, and only where a model was baked
-  const HIDE = (usdz ? [] : ['ql']).concat(kind === 'game' || kind === 'quiz' || new URLSearchParams(location.search).get('id') === 'bethlehem' ? ['marker'] : []);   // the game needs no printed medallion
-  const el = $('start'); $('startRef').textContent = ref || ''; const can = { marker: sup.marker, surface: kind === 'game' ? sup.xr : sup.surface, scene: true, ql: usdz };   // the game needs real surface tracking (WebXR), not a guess
+  const HIDE = (usdz ? [] : ['ql']).concat(kind === 'game' || kind === 'quiz' || new URLSearchParams(location.search).get('id') === 'bethlehem' ? ['marker', 'marker2', 'xr8'] : []);   // the game needs no printed medallion
+  const el = $('start'); $('startRef').textContent = ref || ''; const can = { marker: sup.marker, surface: kind === 'game' ? sup.xr : sup.surface, scene: true, ql: usdz, marker2: sup.marker2, xr8: sup.xr8 };   // the game needs real surface tracking (WebXR), not a guess
   const why = { marker: 'нужна камера и защищённое соединение', surface: kind === 'game' ? 'работает на Android (Chrome с ARCore); на iPhone пока нет' : 'нужна камера и защищённое соединение' };
   let saved = null; try { saved = localStorage.getItem('viewMode'); } catch (e) {}
   let mode = [preset, saved, ...(kind === 'game' || kind === 'quiz' || new URLSearchParams(location.search).get('id') === 'bethlehem' ? ['surface'] : ['marker', 'surface']), 'scene'].find(m => m && can[m] && !HIDE.includes(m)) || 'scene';
+  let eng = 'marker'; if (mode === 'marker2' || mode === 'xr8') { eng = mode; mode = 'marker'; }   // a remembered engine belongs to the "В журнале" way
   const goWord = GO[kind] || GO.witness;
   const ACC = { zechariah: '#9b6fe0', mary: '#4f86e0', elizabeth: '#d9677f', joseph: '#c28a4e', micah: '#3fb0b0', shepherd: '#6cc04a', simeon: '#6f8ae8', anna: '#bd70cc', wiseman: '#7068e8', herod: '#d9535b', word: '#dcae3c', room: '#3fa862', game: '#ee8c2e', quiz: '#5b8def', bethlehem: '#d99a4a' };
   el.style.setProperty('--acc', ACC[new URLSearchParams(location.search).get('id')] || '#e8c46a');
   const ICON = { marker: '#8e6bff', surface: '#3d9bff', scene: '#3ec57a', ql: '#ff9f0a' };
   el.querySelector('#opts').innerHTML = Object.entries(HOW).filter(([k]) => !HIDE.includes(k)).map(([k, h]) => `<button class="opt${can[k] ? '' : ' off'}" data-m="${k}" ${can[k] ? '' : 'disabled'}><span class="oi" style="background:${ICON[k]}">${h.icon}</span><span class="ot"><b>${h.title}</b><small>${can[k] ? h.sub : why[k]}</small></span><i class="ck"></i></button>`).join('');
+  const eEl = el.querySelector('#eopts'); eEl.innerHTML = ENGINES.map(g => `<button class="opt${can[g.m] ? '' : ' off'}" data-e="${g.m}" ${can[g.m] ? '' : 'disabled'}><span class="oi" style="background:#8e6bff">${g.icon}</span><span class="ot"><b>${g.name}</b><small>${g.sub}</small></span><i class="ck"></i></button>`).join('');
   const render = () => {
-    for (const b of el.querySelectorAll('.opt')) b.classList.toggle('on', b.dataset.m === mode);
+    for (const b of el.querySelectorAll('#opts .opt')) b.classList.toggle('on', b.dataset.m === mode);
+    for (const b of eEl.querySelectorAll('.opt')) b.classList.toggle('on', b.dataset.e === eng);
+    el.querySelector('#engines').hidden = mode !== 'marker' || HIDE.includes('marker');
     const h = HOW[mode]; const steps = (kind === 'game' && GAME_HOW[mode]) || (kind === 'quiz' && QUIZ_HOW[mode]) || (new URLSearchParams(location.search).get('id') === 'bethlehem' && BETH_HOW[mode]) || h.steps; el.querySelector('#how').innerHTML = steps.map(([i, t], n) => `<li><span>${i}</span><div>${t.replace('{go}', goWord)}</div></li>`).join(''); el.querySelector('#tip').textContent = h.tip;
   };
   el.querySelector('#opts').onclick = e => { const b = e.target.closest('.opt'); if (!b || b.disabled) return; mode = b.dataset.m; render(); };
+  eEl.onclick = e => { const b = e.target.closest('.opt'); if (!b || b.disabled) return; eng = b.dataset.e; render(); };
   render(); $('go').textContent = 'Поехали!';
   return new Promise(res => {
     $('go').addEventListener('click', () => {
-      try { localStorage.setItem('viewMode', mode === 'ql' ? 'scene' : mode); } catch (e) {}
+      const result = mode === 'marker' ? (can[eng] ? eng : 'marker') : mode;   // "В журнале" starts the chosen engine
+      try { localStorage.setItem('viewMode', result === 'ql' ? 'scene' : result); } catch (e) {}
       // iPhone asks for gyroscope access only inside a tap: ask right now, the AR code picks the answer up
       if ((mode === 'marker' || (mode === 'surface' && !sup.xr)) && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') window.__gyroPerm = DeviceOrientationEvent.requestPermission().catch(() => 'denied');
       if (mode === 'ql') { const a = document.createElement('a'); a.rel = 'ar'; a.href = `usdz/${pageId}.usdz#allowsContentScaling=1`; a.style.display = 'none'; a.appendChild(document.createElement('img')); document.body.appendChild(a); a.click(); a.remove(); mode = 'scene'; }   // the tap itself opens the system viewer; the page then continues as the normal screen
-      res(mode);
+      res(result);
     }, { once: true });
   });
 }

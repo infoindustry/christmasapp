@@ -62,7 +62,7 @@ export class AR {
       const e = wm.elements; if (e[8] * e[12] + e[9] * e[13] + e[10] * e[14] >= 0) return null;   // flipped solution: the page's normal must point at the camera
       const frac = Math.abs(area) / 2 / 4; if (frac < 0.01 || frac > 1.8) return null; return { x: cx, y: cy };
     };
-    this.dbg = { updates: 0, found: 0 }; const smoother = new PoseSmoother({ validator: plausible, lostGrace: 2 }); this.dbg.smoother = smoother;
+    this.dbg = { updates: 0, found: 0 }; const smoother = new PoseSmoother({ validator: plausible, lostGrace: 0.6 }); this.dbg.smoother = smoother;
     const controller = new Controller({
       inputWidth: vw, inputHeight: vh,
       onUpdate: d => {
@@ -81,10 +81,26 @@ export class AR {
     this.cleanup.push(() => { pumping = false; controller.dispose?.(); controller.stopProcessVideo?.(); });
 
     let shown = false, arrived = false; this.ui.hint('Наведи камеру на этот кружок в журнале. Он должен быть виден весь', 0, 5000);
+    // The figure follows the medallion while it is seen. A tap on the empty screen NAILS it where it stands: from then on the tracker is ignored
+    // (no jitter) and the gyroscope keeps it put against the phone's turns. The same hold covers a medallion that is lost. A second tap lets go.
+    let orient = null; const on = ev => { if (ev.alpha != null) orient = ev; }; addEventListener('deviceorientation', on); this.cleanup.push(() => removeEventListener('deviceorientation', on));
+    const E = new THREE.Euler(), q0 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), q1 = new THREE.Quaternion(), Z = new THREE.Vector3(0, 0, 1);
+    const camQ = out => { if (!orient) return null; E.set(orient.beta * DEG, orient.alpha * DEG, -orient.gamma * DEG, 'YXZ'); out.setFromEuler(E).multiply(q0).multiply(q1.setFromAxisAngle(Z, -(screen.orientation?.angle || 0) * DEG)); return out; };
+    const qLast = new THREE.Quaternion(), qNow = new THREE.Quaternion(), R = new THREE.Matrix4(), held = new THREE.Matrix4(), cur = new THREE.Matrix4(); let holding = false, nailed = false, haveQ = false;
+    const nail = on => { nailed = on && shown && haveQ; if (nailed) { held.copy(cur); holding = true; } else if (!on && holding && smoother.visible(performance.now() / 1000)) { holding = false; held.decompose(smoother.pos, smoother.quat, smoother.scale); } this.ui.hint(nailed ? 'Фигура закреплена. Коснись пустого места, чтобы отпустить' : '', nailed ? 3500 : 0); };
+    const tap = ev => { if (ev.target !== s.canvas || s.pick(ev.clientX, ev.clientY)) return; nail(!nailed); };
+    s.canvas.addEventListener('click', tap); this.cleanup.push(() => s.canvas.removeEventListener('click', tap));
+    const place = () => { camQ(qNow); R.makeRotationFromQuaternion(qNow.invert().multiply(qLast)); s.arRoot.matrix.copy(R).multiply(held); s.arRoot.matrixWorldNeedsUpdate = true; };   // new camera-space pose = (qNow^-1 * qLast) * the pose at the moment of nailing
     s.onFrame = () => {
-      const now = performance.now() / 1000;
-      if (smoother.visible(now)) { s.arRoot.matrix.copy(smoother.step(now)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; if (!shown) { shown = true; this.ui.hint(''); if (!arrived) { arrived = true; s.appear(() => s.bow()); } } }   // lost for a moment: the figure stays frozen on the last pose (lostGrace)
-      else if (shown) { shown = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
+      const now = performance.now() / 1000, seen = smoother.visible(now);
+      if (seen && !nailed) {
+        if (holding) { holding = false; held.decompose(smoother.pos, smoother.quat, smoother.scale); }   // found again: continue from where the held figure stands
+        cur.copy(smoother.step(now)); s.arRoot.matrix.copy(cur); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; haveQ = !!camQ(qLast);
+        if (!shown) { shown = true; this.ui.hint(''); if (!arrived) { arrived = true; s.appear(() => s.bow()); } }
+      } else if (shown) {
+        if (!holding) { holding = true; held.copy(cur); }
+        if (haveQ && orient) place(); else if (!seen) { shown = false; holding = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
+      }
     };
   }
 

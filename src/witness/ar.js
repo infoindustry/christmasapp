@@ -110,7 +110,7 @@ export class AR {
         if (!shown) { shown = true; this.ui.hint(''); if (!arrived) { arrived = true; s.appear(() => s.bow()); } }
       } else if (nailed) { place(); }
       else if (shown) { shown = false; holding = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
-      if (dbgEl) dbgEl.textContent = `upd ${this.dbg.updates} found ${this.dbg.found} plaus ${this.dbg.plaus} seen ${seen} fusion ${useF} err ${this.dbg.err} nailed ${nailed}`;
+      if (dbgEl) { const t = performance.now(); if (!this.dbg.t0 || t - this.dbg.t0 > 1000) { this.dbg.fps = this.dbg.t0 ? Math.round((this.dbg.updates - this.dbg.u0) * 1000 / (t - this.dbg.t0)) : 0; this.dbg.t0 = t; this.dbg.u0 = this.dbg.updates; } dbgEl.textContent = `track ${this.dbg.fps}/s video ${vw}x${vh} upd ${this.dbg.updates} found ${this.dbg.found} plaus ${this.dbg.plaus} seen ${seen} fusion ${useF} err ${this.dbg.err} nailed ${nailed}`; }
     };
   }
 

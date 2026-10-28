@@ -62,13 +62,25 @@ export class AR {
       const e = wm.elements; if (e[8] * e[12] + e[9] * e[13] + e[10] * e[14] >= 0) return null;   // flipped solution: the page's normal must point at the camera
       const frac = Math.abs(area) / 2 / 4; if (frac < 0.002 || frac > 1.8) return null; return { x: cx, y: cy };
     };
+    let orient = null; const on = ev => { if (ev.alpha != null) orient = ev; }; addEventListener('deviceorientation', on); this.cleanup.push(() => removeEventListener('deviceorientation', on));
+    const E = new THREE.Euler(), q0 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), q1 = new THREE.Quaternion(), Z = new THREE.Vector3(0, 0, 1);
+    const camQ = out => { if (!orient) return null; E.set(orient.beta * DEG, orient.alpha * DEG, -orient.gamma * DEG, 'YXZ'); out.setFromEuler(E).multiply(q0).multiply(q1.setFromAxisAngle(Z, -(screen.orientation?.angle || 0) * DEG)); return out; };
+    // Fusion: the medallion does not move in the room, so its pose is averaged in a frame that does not turn with the phone (camera pose x the gyroscope's rotation).
+    // The tracker's noise is then smoothed hard without any lag when the phone turns. If the gyroscope disagrees with the tracker, plain camera-space smoothing takes over.
+    const qm = new THREE.Quaternion(), Qm = new THREE.Matrix4(), Mc = new THREE.Matrix4(), Mw = new THREE.Matrix4(), Rinv = new THREE.Matrix4(), mq = new THREE.Quaternion(), mp = new THREE.Vector3(), ms = new THREE.Vector3();
+    const fsm = new PoseSmoother({ lostGrace: 0.8, posMin: 0.45, rotMin: 0.35, posBeta: 6, rotBeta: 2 }); let fusionOn = true; const bad = [];
     this.dbg = { updates: 0, found: 0 }; const smoother = new PoseSmoother({ validator: plausible, lostGrace: 0.8 }); this.dbg.smoother = smoother;
     const controller = new Controller({
       inputWidth: vw, inputHeight: vh,
       onUpdate: d => {
         if (d.type !== 'updateMatrix') return;
         const now = performance.now() / 1000; this.dbg.updates++; if (d.worldMatrix) { this.dbg.found++; this.dbg.last = Array.from(d.worldMatrix); this.dbg.idx = d.targetIndex; this.dbg.plaus = !!plausible(d.worldMatrix); }
-        smoother.push(d.worldMatrix && (d.targetIndex === undefined || d.targetIndex === mine) ? d.worldMatrix : null, now);
+        const raw = d.worldMatrix && (d.targetIndex === undefined || d.targetIndex === mine) ? d.worldMatrix : null;
+        smoother.push(raw, now);
+        if (raw && plausible(raw) && camQ(qm)) {
+          Mw.copy(Qm.makeRotationFromQuaternion(qm)).multiply(Mc.fromArray(raw)); fsm.push(Mw.toArray(), now);
+          if (fsm.has) { Mw.decompose(mp, mq, ms); const err = 2 * Math.acos(Math.min(1, Math.abs(fsm.quat.dot(mq)))) / DEG; bad.push(err > 30 ? 1 : 0); if (bad.length > 24) bad.shift(); if (bad.length >= 24 && bad.reduce((a, b) => a + b, 0) > 14) fusionOn = false; this.dbg.err = Math.round(err); }
+        } else fsm.push(null, now);
       },
     });
     s.camera.projectionMatrix.fromArray(controller.getProjectionMatrix()); s.camera.projectionMatrixInverse.copy(s.camera.projectionMatrix).invert();
@@ -83,24 +95,22 @@ export class AR {
     let shown = false, arrived = false; this.ui.hint('Наведи камеру на этот кружок в журнале. Он должен быть виден весь', 0, 5000);
     // The figure follows the medallion while it is seen. A tap on the empty screen NAILS it where it stands: from then on the tracker is ignored
     // (no jitter) and the gyroscope keeps it put against the phone's turns. The same hold covers a medallion that is lost. A second tap lets go.
-    let orient = null; const on = ev => { if (ev.alpha != null) orient = ev; }; addEventListener('deviceorientation', on); this.cleanup.push(() => removeEventListener('deviceorientation', on));
-    const E = new THREE.Euler(), q0 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), q1 = new THREE.Quaternion(), Z = new THREE.Vector3(0, 0, 1);
-    const camQ = out => { if (!orient) return null; E.set(orient.beta * DEG, orient.alpha * DEG, -orient.gamma * DEG, 'YXZ'); out.setFromEuler(E).multiply(q0).multiply(q1.setFromAxisAngle(Z, -(screen.orientation?.angle || 0) * DEG)); return out; };
     const qLast = new THREE.Quaternion(), qNow = new THREE.Quaternion(), R = new THREE.Matrix4(), held = new THREE.Matrix4(), cur = new THREE.Matrix4(); let holding = false, nailed = false, haveQ = false;
-    const nail = on => { nailed = on && shown && haveQ; if (nailed) { held.copy(cur); holding = true; } else if (!on && holding && smoother.visible(performance.now() / 1000)) { holding = false; held.decompose(smoother.pos, smoother.quat, smoother.scale); } this.ui.hint(nailed ? 'Фигура закреплена. Коснись пустого места, чтобы отпустить' : '', nailed ? 3500 : 0); };
+    const nail = on => { nailed = on && shown && haveQ; if (nailed) { held.copy(cur); holding = true; } else if (!on && holding && smoother.visible(performance.now() / 1000)) { holding = false; resync(); } this.ui.hint(nailed ? 'Фигура закреплена. Коснись пустого места, чтобы отпустить' : '', nailed ? 3500 : 0); };
+    const resync = () => { held.decompose(smoother.pos, smoother.quat, smoother.scale); if (camQ(qNow)) { Mw.copy(Qm.makeRotationFromQuaternion(qNow)).multiply(held).decompose(fsm.pos, fsm.quat, fsm.scale); } };   // let go of a nailed figure: both smoothers continue from where it stands
     const tap = ev => { if (ev.target !== s.canvas || s.pick(ev.clientX, ev.clientY)) return; nail(!nailed); };
     s.canvas.addEventListener('click', tap); this.cleanup.push(() => s.canvas.removeEventListener('click', tap));
     const place = () => { camQ(qNow); R.makeRotationFromQuaternion(qNow.invert().multiply(qLast)); s.arRoot.matrix.copy(R).multiply(held); s.arRoot.matrixWorldNeedsUpdate = true; };   // new camera-space pose = (qNow^-1 * qLast) * the pose at the moment of nailing
     const dbgEl = new URLSearchParams(location.search).has('debug') ? Object.assign(document.body.appendChild(document.createElement('div')), { style: 'position:fixed;left:6px;top:96px;z-index:99;font:12px monospace;color:#0f0;background:#000a;padding:2px 4px;pointer-events:none' }) : null; if (dbgEl) this.cleanup.push(() => dbgEl.remove());
     s.onFrame = () => {
-      const now = performance.now() / 1000, seen = smoother.visible(now);
+      const now = performance.now() / 1000, useF = fusionOn && fsm.has && !!orient, sm = useF ? fsm : smoother, seen = sm.visible(now);
       if (seen && !nailed) {
-        if (holding) { holding = false; held.decompose(smoother.pos, smoother.quat, smoother.scale); }   // found again: continue from where the held figure stands
-        cur.copy(smoother.step(now)); s.arRoot.matrix.copy(cur); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; haveQ = !!camQ(qLast);
+        if (holding) { holding = false; resync(); }   // found again: continue from where the held figure stands
+        cur.copy(sm.step(now)); if (useF && camQ(qNow)) cur.premultiply(Rinv.makeRotationFromQuaternion(qNow).invert()); s.arRoot.matrix.copy(cur); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; haveQ = !!camQ(qLast);
         if (!shown) { shown = true; this.ui.hint(''); if (!arrived) { arrived = true; s.appear(() => s.bow()); } }
       } else if (nailed) { place(); }
       else if (shown) { shown = false; holding = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
-      if (dbgEl) dbgEl.textContent = `upd ${this.dbg.updates} found ${this.dbg.found} plaus ${this.dbg.plaus} seen ${seen} nailed ${nailed}`;
+      if (dbgEl) dbgEl.textContent = `upd ${this.dbg.updates} found ${this.dbg.found} plaus ${this.dbg.plaus} seen ${seen} fusion ${useF} err ${this.dbg.err} nailed ${nailed}`;
     };
   }
 

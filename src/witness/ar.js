@@ -20,7 +20,7 @@ export class AR {
     const cam = !!navigator.mediaDevices?.getUserMedia;
     let xr = false; try { xr = !!(navigator.xr && await Promise.race([navigator.xr.isSessionSupported('immersive-ar'), new Promise(r => setTimeout(() => r(false), 1500))])); } catch (e) {}
     const gyro = typeof DeviceOrientationEvent !== 'undefined';
-    return { marker: cam, marker2: cam, surface: xr || (cam && gyro), xr };
+    return { marker: cam, marker2: cam, xr8: cam && gyro, surface: xr || (cam && gyro), xr };
   }
 
   async stop() {
@@ -119,6 +119,9 @@ export class AR {
       if (dbgEl) { const t = performance.now(); if (!this.dbg.t0 || t - this.dbg.t0 > 1000) { this.dbg.fps = this.dbg.t0 ? Math.round((this.dbg.updates - this.dbg.u0) * 1000 / (t - this.dbg.t0)) : 0; this.dbg.t0 = t; this.dbg.u0 = this.dbg.updates; } dbgEl.textContent = `track ${this.dbg.fps}/s video ${vw}x${vh} upd ${this.dbg.updates} found ${this.dbg.found} plaus ${this.dbg.plaus} seen ${seen} fusion ${useF} err ${this.dbg.err} nailed ${nailed}`; }
     };
   }
+
+  /** third engine: 8th Wall (finds the medallion and tracks the room, so the figure stays when the medallion leaves the frame) */
+  async startXr8() { return (await import('./xr8.js')).startXr8(this); }
 
   /* ----------------------------------------------------------------- surface */
   async startSurface() {

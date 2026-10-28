@@ -53,7 +53,7 @@ export async function chooseMode({ $, kind = 'witness', name, preset, ref }) {
     $('go').addEventListener('click', () => {
       try { localStorage.setItem('viewMode', mode === 'ql' ? 'scene' : mode); } catch (e) {}
       // iPhone asks for gyroscope access only inside a tap: ask right now, the AR code picks the answer up
-      if ((mode === 'marker' || (mode === 'surface' && !sup.xr)) && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') window.__gyroPerm = DeviceOrientationEvent.requestPermission().catch(() => 'denied');
+      if (mode === 'surface' && !sup.xr && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') window.__gyroPerm = DeviceOrientationEvent.requestPermission().catch(() => 'denied');
       if (mode === 'ql') { const a = document.createElement('a'); a.rel = 'ar'; a.href = `usdz/${pageId}.usdz#allowsContentScaling=1`; a.style.display = 'none'; a.appendChild(document.createElement('img')); document.body.appendChild(a); a.click(); a.remove(); mode = 'scene'; }   // the tap itself opens the system viewer; the page then continues as the normal screen
       res(mode);
     }, { once: true });

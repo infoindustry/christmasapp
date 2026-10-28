@@ -60,9 +60,9 @@ export class AR {
       let area = 0, sign = 0, cx = 0, cy = 0;
       for (let i = 0; i < 4; i++) { const [x1, y1] = pts[i], [x2, y2] = pts[(i + 1) % 4], [x3, y3] = pts[(i + 2) % 4]; area += x1 * y2 - x2 * y1; cx += x1 / 4; cy += y1 / 4; const cr = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2); if (sign && Math.sign(cr) !== sign) return null; sign = Math.sign(cr); }
       const e = wm.elements; if (e[8] * e[12] + e[9] * e[13] + e[10] * e[14] >= 0) return null;   // flipped solution: the page's normal must point at the camera
-      const frac = Math.abs(area) / 2 / 4; if (frac < 0.01 || frac > 1.8) return null; return { x: cx, y: cy };
+      const frac = Math.abs(area) / 2 / 4; if (frac < 0.002 || frac > 1.8) return null; return { x: cx, y: cy };
     };
-    this.dbg = { updates: 0, found: 0 }; const smoother = new PoseSmoother({ validator: plausible, lostGrace: 0.6 }); this.dbg.smoother = smoother;
+    this.dbg = { updates: 0, found: 0 }; const smoother = new PoseSmoother({ validator: plausible, lostGrace: 0.8 }); this.dbg.smoother = smoother;
     const controller = new Controller({
       inputWidth: vw, inputHeight: vh,
       onUpdate: d => {
@@ -91,16 +91,16 @@ export class AR {
     const tap = ev => { if (ev.target !== s.canvas || s.pick(ev.clientX, ev.clientY)) return; nail(!nailed); };
     s.canvas.addEventListener('click', tap); this.cleanup.push(() => s.canvas.removeEventListener('click', tap));
     const place = () => { camQ(qNow); R.makeRotationFromQuaternion(qNow.invert().multiply(qLast)); s.arRoot.matrix.copy(R).multiply(held); s.arRoot.matrixWorldNeedsUpdate = true; };   // new camera-space pose = (qNow^-1 * qLast) * the pose at the moment of nailing
+    const dbgEl = new URLSearchParams(location.search).has('debug') ? Object.assign(document.body.appendChild(document.createElement('div')), { style: 'position:fixed;left:6px;top:96px;z-index:99;font:12px monospace;color:#0f0;background:#000a;padding:2px 4px;pointer-events:none' }) : null; if (dbgEl) this.cleanup.push(() => dbgEl.remove());
     s.onFrame = () => {
       const now = performance.now() / 1000, seen = smoother.visible(now);
       if (seen && !nailed) {
         if (holding) { holding = false; held.decompose(smoother.pos, smoother.quat, smoother.scale); }   // found again: continue from where the held figure stands
         cur.copy(smoother.step(now)); s.arRoot.matrix.copy(cur); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; haveQ = !!camQ(qLast);
         if (!shown) { shown = true; this.ui.hint(''); if (!arrived) { arrived = true; s.appear(() => s.bow()); } }
-      } else if (shown) {
-        if (!holding) { holding = true; held.copy(cur); }
-        if (haveQ && orient) place(); else if (!seen) { shown = false; holding = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
-      }
+      } else if (nailed) { place(); }
+      else if (shown) { shown = false; holding = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
+      if (dbgEl) dbgEl.textContent = `upd ${this.dbg.updates} found ${this.dbg.found} plaus ${this.dbg.plaus} seen ${seen} nailed ${nailed}`;
     };
   }
 

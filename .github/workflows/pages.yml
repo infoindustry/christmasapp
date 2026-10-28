@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts   # mind-ar pulls in the native `canvas` package (only for its Node compiler); the browser build does not need it, and it cannot be built here
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

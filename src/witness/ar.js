@@ -53,7 +53,7 @@ export class AR {
     const wasFixed = s.fixedFacing; s.fixedFacing = true; if (s.figure) s.figure.rotation.y = 0; this.cleanup.push(() => { s.fixedFacing = wasFixed; });   // on the printed page the figure stands facing the reader; it must not spin after the camera
     s.anchor.rotation.set(Math.PI / 2, 0, 0);   // the stage's up (y) becomes the page's normal (+z, out of the paper)
 
-    const taar = new URLSearchParams(location.search).get('taar'), mine = 0;   // each witness has its own small tracking file (?taar= : test with another one)
+    const taar = new URLSearchParams(location.search).get('taar'), mine = 0;   // each witness has its own small tracking file with two targets: 0 = current medallion, 1 = the previous design (both are this witness) (?taar= : test with another one)
     const P = new THREE.Matrix4(), wm = new THREE.Matrix4(), v4 = new THREE.Vector4();
     const corners = [[-.5, .5], [.5, .5], [.5, -.5], [-.5, -.5]];
     const plausible = arr => {   // geometry of the found medallion must be believable: in front of the camera, convex, a sensible size
@@ -81,7 +81,7 @@ export class AR {
         const now = performance.now() / 1000; this.dbg.updates++;
         if (mind && d.worldMatrix) { if (!post) return; d = { ...d, worldMatrix: Mc.fromArray(d.worldMatrix).multiply(post).toArray() }; }   // MindAR: pixels of the target image, origin at its corner -> units of the medallion's width, centred (the same as Locus)
         if (d.worldMatrix) { this.dbg.found++; this.dbg.last = Array.from(d.worldMatrix); this.dbg.idx = d.targetIndex; this.dbg.plaus = !!plausible(d.worldMatrix); }
-        const raw = d.worldMatrix && (d.targetIndex === undefined || d.targetIndex === mine) ? d.worldMatrix : null;
+        const raw = d.worldMatrix && (d.targetIndex === undefined || d.targetIndex < 2) ? d.worldMatrix : null;
         smoother.push(raw, now);
         if (raw && plausible(raw) && camQ(qm)) {
           Mw.copy(Qm.makeRotationFromQuaternion(qm)).multiply(Mc.fromArray(raw)); fsm.push(Mw.toArray(), now);

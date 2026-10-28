@@ -14,7 +14,7 @@ const loadEngine = () => window.XR8 ? Promise.resolve(window.XR8) : new Promise(
 
 export async function startXr8(ar) {
   const s = ar.stage, XR8 = await loadEngine();
-  const target = await (await fetch(`targets/xr8/${ar.id}.json`)).json();
+  const targets = await (await fetch(`targets/xr8/${ar.id}.json`)).json();   // [current medallion, previous design]
   ar.kind = 'xr8'; s.setAR(true); s.controls.enabled = false;
   if (s.disc) s.disc.visible = false;   // the printed medallion itself is the pedestal
   const wasFixed = s.fixedFacing; s.fixedFacing = true; if (s.figure) s.figure.rotation.y = 0; ar.cleanup.push(() => { s.fixedFacing = wasFixed; });
@@ -31,7 +31,7 @@ export async function startXr8(ar) {
   const dbg = new URLSearchParams(location.search).has('debug') ? Object.assign(document.body.appendChild(document.createElement('div')), { style: 'position:fixed;left:6px;top:96px;z-index:99;font:12px monospace;color:#0f0;background:#000a;padding:2px 4px;pointer-events:none' }) : null; if (dbg) ar.cleanup.push(() => dbg.remove());
   let frames = 0, t0 = performance.now(), status = '';
   const onFound = ({ detail }) => {
-    if (detail.name !== ar.id) return;
+    if (detail.name.replace(/-old$/, '') !== ar.id) return;
     const { position: p, rotation: r } = detail, k = detail.scale * (detail.scaledWidth ?? 1); if (dbg) window.__xr8last = detail;   // `scale` is the target's height; our unit is the medallion's width (= the padded target's width)
     s.arRoot.matrix.compose(P.set(p.x, p.y, p.z), Q.set(r.x, r.y, r.z, r.w), S.set(k, k, k)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; found = true;
     if (!shown) { shown = true; ar.ui.hint(''); s.appear(() => s.bow()); }
@@ -49,7 +49,7 @@ export async function startXr8(ar) {
     listeners: [{ event: 'reality.imagefound', process: onFound }, { event: 'reality.imageupdated', process: onFound }, { event: 'reality.imagelost', process: () => { found = false; } }],   // a lost medallion does not hide the figure: the room tracking keeps it in place
   };
   const mobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);   // the engine runs the room tracking only on phones (on a computer: image targets only, for testing)
-  XR8.XrController.configure({ imageTargetData: [target], scale: mobile ? 'absolute' : 'responsive', disableWorldTracking: !mobile });
+  XR8.XrController.configure({ imageTargetData: targets, scale: mobile ? 'absolute' : 'responsive', disableWorldTracking: !mobile });
   XR8.addCameraPipelineModules([XR8.GlTextureRenderer.pipelineModule(), XR8.XrController.pipelineModule(), mod]);
   ar.cleanup.push(() => { try { XR8.stop(); XR8.clearCameraPipelineModules(); } catch (e) {} });
   ar.ui.hint('Наведи камеру на этот кружок в журнале. Он должен быть виден весь', 0, 8000);

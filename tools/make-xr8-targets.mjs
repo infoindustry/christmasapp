@@ -6,15 +6,17 @@ import fs from 'node:fs';
 
 const ids = JSON.parse(fs.readFileSync('public/data/witnesses.json', 'utf8')).filter(w => w.type !== 'game' && !w.nomarker).map(w => w.id);
 fs.mkdirSync('public/targets/xr8', { recursive: true });
-for (const id of ids) {
-  const src = await sharp(`art/medallions/${id}.png`).flatten({ background: '#f4ecd8' }).toBuffer();   // transparent corners -> paper colour
+const make = async (id, name, dir) => {
+  const src = await sharp(`${dir}/${id}.png`).flatten({ background: '#f4ecd8' }).toBuffer();   // transparent corners -> paper colour
   const { width: w, height: h } = await sharp(src).metadata();
   const H = Math.round(w * 4 / 3), pad = Math.floor((H - h) / 2);
   const padded = sharp(src).extend({ top: pad, bottom: H - h - pad, left: 0, right: 0, background: '#f4ecd8' });
-  await padded.clone().resize({ height: 640 }).grayscale().png().toFile(`public/targets/xr8/${id}_luminance.png`);
-  fs.writeFileSync(`public/targets/xr8/${id}.json`, JSON.stringify({
-    type: 'PLANAR', properties: { left: 0, top: 0, width: w, height: H, isRotated: false, originalWidth: w, originalHeight: H },
-    imagePath: `targets/xr8/${id}_luminance.png`, metadata: null, name: id, resources: { luminanceImage: `${id}_luminance.png` },
-  }));
-  console.log(id, w, H);
+  await padded.clone().resize({ height: 640 }).grayscale().png().toFile(`public/targets/xr8/${name}_luminance.png`);
+  return { type: 'PLANAR', properties: { left: 0, top: 0, width: w, height: H, isRotated: false, originalWidth: w, originalHeight: H },
+    imagePath: `targets/xr8/${name}_luminance.png`, metadata: null, name, resources: { luminanceImage: `${name}_luminance.png` } };
+};
+for (const id of ids) {
+  // [current medallion, the previous (dark) design]: either one found means this witness
+  fs.writeFileSync(`public/targets/xr8/${id}.json`, JSON.stringify([await make(id, id, 'art/medallions'), await make(id, `${id}-old`, 'art/medallions-old')]));
+  console.log(id);
 }

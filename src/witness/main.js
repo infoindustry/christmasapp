@@ -47,7 +47,7 @@ let word = null, room = null, game = null;
 
 function playLine(line, onEnd) {
   const my = ++token; clearTimeout(timer);
-  audio.pause(); audio.src = fileOf(line); audio.currentTime = 0;
+  audio.pause(); audio.muted = false; audio.src = fileOf(line); audio.currentTime = 0;
   speakSub(plain(line.text)); stage.setSpeaking(true, tagOf(line.text));
   audio.play().catch(() => {});
   audio.onended = () => { if (my !== token) return; stage.setSpeaking(false); onEnd?.(); };
@@ -111,7 +111,7 @@ const startMode = chooseMode({ $, kind: BETH ? 'room' : QUIZ ? 'quiz' : GAME ? '
   if (GAME) { game = initGame({ stage, $ }); window.__w.game = game; if (mode !== 'scene') setMode(mode); return; }
   if (ROOM) { room = initRoom({ stage, $ }); window.__w.room = room; if (mode !== 'scene') setMode(mode); return; }
   if (BOOK) { word = await initWord({ stage, $ }); window.__w.word = word; if (mode !== 'scene') setMode(mode); return; }
-  audio.src = fileOf(story[0]); audio.volume = 0; audio.play().then(() => { audio.pause(); audio.volume = 1; }).catch(() => { audio.volume = 1; }); // unlock audio on this tap
+  audio.src = fileOf(story[0]); audio.muted = true; const unlockTok = token; audio.play().then(() => { if (token === unlockTok) audio.pause(); audio.muted = false; }).catch(() => { audio.muted = false; }); // unlock audio on this tap (muted: iPhone ignores .volume, the first line would be heard before the witness is placed)
   stage.appear(() => stage.bow());
   setSub('Нажми «Рассказать», и я расскажу, как всё было.', true); showDots();
   if (mode !== 'scene') setMode(mode);

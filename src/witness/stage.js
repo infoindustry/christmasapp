@@ -169,7 +169,8 @@ export class Stage {
   }
   /** the arrival effect (light, scan, sparks); `done` is called when the figure is whole */
   appear(done) { this._fx ||= new Appear(this, DISC_H, FIGURE_H); this._fx.play(done); }
-  bow() { if (this.actions.bow) { this._play('bow', 0.4, true); this.actions.bow.getMixer().addEventListener('finished', () => this._play('idle', 0.6), { once: true }); } }
+  // only if nothing took over meanwhile (a story that began during the bow must keep its gestures)
+  bow() { if (this.actions.bow) { this._play('bow', 0.4, true); this.actions.bow.getMixer().addEventListener('finished', () => { if (this.currentName === 'bow') this._play('idle', 0.6); }, { once: true }); } }
   // keep the soles on the disc: the baked clips lift the feet (idle/talk sway), so measure the lowest foot bone and drop the figure to match
   /** a dark pedestal with a golden ring under the diorama of Bethlehem (it has no printed medallion) */
   _plateTexture() {

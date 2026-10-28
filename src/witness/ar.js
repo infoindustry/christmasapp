@@ -80,10 +80,23 @@ export class AR {
     this.cleanup.push(() => { pumping = false; controller.dispose?.(); controller.stopProcessVideo?.(); });
 
     let shown = false, arrived = false; this.ui.hint('Наведи камеру на этот кружок в журнале. Он должен быть виден весь', 0, 5000);
+    // when the medallion is lost the witness stays where he stood: the gyroscope turns the last pose against the phone's rotation
+    let orient = null; const on = ev => { if (ev.alpha != null) orient = ev; }; addEventListener('deviceorientation', on); this.cleanup.push(() => removeEventListener('deviceorientation', on));
+    const E = new THREE.Euler(), q0 = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)), q1 = new THREE.Quaternion(), Z = new THREE.Vector3(0, 0, 1);
+    const camQ = out => { if (!orient) return null; E.set(orient.beta * DEG, orient.alpha * DEG, -orient.gamma * DEG, 'YXZ'); out.setFromEuler(E).multiply(q0).multiply(q1.setFromAxisAngle(Z, -(screen.orientation?.angle || 0) * DEG)); return out; };
+    const qLast = new THREE.Quaternion(), qNow = new THREE.Quaternion(), R = new THREE.Matrix4(), held = new THREE.Matrix4(), cur = new THREE.Matrix4(); let holding = false, haveQ = false;
     s.onFrame = () => {
       const now = performance.now() / 1000;
-      if (smoother.visible(now)) { s.arRoot.matrix.copy(smoother.step(now)); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; if (!shown) { shown = true; this.ui.hint(''); if (!arrived) { arrived = true; s.appear(() => s.bow()); } } }
-      else if (shown) { shown = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
+      if (smoother.visible(now)) {
+        if (holding) { holding = false; held.decompose(smoother.pos, smoother.quat, smoother.scale); }   // found again: continue from where the held figure stands
+        cur.copy(smoother.step(now)); s.arRoot.matrix.copy(cur); s.arRoot.matrixWorldNeedsUpdate = true; s.arRoot.visible = true; haveQ = !!camQ(qLast);
+        if (!shown) { shown = true; this.ui.hint(''); if (!arrived) { arrived = true; s.appear(() => s.bow()); } }
+      } else if (shown) {
+        if (haveQ && camQ(qNow)) {   // new camera-space pose = (qNow^-1 * qLast) * last pose
+          if (!holding) { holding = true; held.copy(cur); }
+          R.makeRotationFromQuaternion(qNow.clone().invert().multiply(qLast)); s.arRoot.matrix.copy(R).multiply(held); s.arRoot.matrixWorldNeedsUpdate = true;
+        } else { shown = false; s.arRoot.visible = false; this.ui.hint('Медальон потерялся — наведи снова'); }
+      }
     };
   }
 

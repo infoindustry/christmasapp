@@ -20,7 +20,7 @@ export class AR {
     const cam = !!navigator.mediaDevices?.getUserMedia;
     let xr = false; try { xr = !!(navigator.xr && await Promise.race([navigator.xr.isSessionSupported('immersive-ar'), new Promise(r => setTimeout(() => r(false), 1500))])); } catch (e) {}
     const gyro = typeof DeviceOrientationEvent !== 'undefined';
-    return { marker: cam, surface: xr || (cam && gyro), xr };
+    return { marker: cam, marker2: cam, surface: xr || (cam && gyro), xr };
   }
 
   async stop() {
@@ -40,9 +40,10 @@ export class AR {
   }
 
   /* ------------------------------------------------------------------ marker */
-  async startMarker() {
+  /** engine: 'locus' (locus-ar, small files) or 'mindar' (MindAR: the other tracker, in case one works better on a given phone / page) */
+  async startMarker(engine = 'locus') {
     const s = this.stage, v = await this._camera(), vw = v.videoWidth, vh = v.videoHeight;
-    this.kind = 'marker'; s.setAR(true);
+    this.kind = 'marker'; this.engine = engine; s.setAR(true);
     if (s.disc) s.disc.visible = false;   // the printed medallion itself is the pedestal
     // the camera image is the video element (CSS cover); the canvas is cropped the same way so the tracker's projection lines up
     s.arView = { vw, vh }; s.resize();
@@ -71,11 +72,15 @@ export class AR {
     const qm = new THREE.Quaternion(), Qm = new THREE.Matrix4(), Mc = new THREE.Matrix4(), Mw = new THREE.Matrix4(), Rinv = new THREE.Matrix4(), mq = new THREE.Quaternion(), mp = new THREE.Vector3(), ms = new THREE.Vector3();
     const fsm = new PoseSmoother({ lostGrace: 0.8, posMin: 0.45, rotMin: 0.3, posBeta: 6, rotBeta: 1.5, rotGate: 18 }); let fusionOn = true; const bad = [];
     this.dbg = { updates: 0, found: 0 }; const smoother = new PoseSmoother({ validator: plausible, lostGrace: 0.8, rotMin: 0.3, rotBeta: 1.5, rotGate: 18 }); this.dbg.smoother = smoother;
-    const controller = new Controller({
+    const mind = engine === 'mindar', Ctl = mind ? (await import('mind-ar/dist/mindar-image.prod.js')).Controller : Controller;
+    let post = null;   // MindAR only, set once the target is loaded
+    const controller = new Ctl({
       inputWidth: vw, inputHeight: vh,
       onUpdate: d => {
         if (d.type !== 'updateMatrix') return;
-        const now = performance.now() / 1000; this.dbg.updates++; if (d.worldMatrix) { this.dbg.found++; this.dbg.last = Array.from(d.worldMatrix); this.dbg.idx = d.targetIndex; this.dbg.plaus = !!plausible(d.worldMatrix); }
+        const now = performance.now() / 1000; this.dbg.updates++;
+        if (mind && d.worldMatrix) { if (!post) return; d = { ...d, worldMatrix: Mc.fromArray(d.worldMatrix).multiply(post).toArray() }; }   // MindAR: pixels of the target image, origin at its corner -> units of the medallion's width, centred (the same as Locus)
+        if (d.worldMatrix) { this.dbg.found++; this.dbg.last = Array.from(d.worldMatrix); this.dbg.idx = d.targetIndex; this.dbg.plaus = !!plausible(d.worldMatrix); }
         const raw = d.worldMatrix && (d.targetIndex === undefined || d.targetIndex === mine) ? d.worldMatrix : null;
         smoother.push(raw, now);
         if (raw && plausible(raw) && camQ(qm)) {
@@ -85,7 +90,7 @@ export class AR {
       },
     });
     s.camera.projectionMatrix.fromArray(controller.getProjectionMatrix()); s.camera.projectionMatrixInverse.copy(s.camera.projectionMatrix).invert();
-    await controller.addImageTargetsFromBuffer(await (await fetch(taar || `targets/${this.id}.taar`)).arrayBuffer());
+    if (mind) { await controller.addImageTargets(`targets/${this.id}.mind`); const [tw, th] = controller.markerDimensions[0]; post = new THREE.Matrix4().compose(new THREE.Vector3(tw / 2, th / 2, 0), new THREE.Quaternion(), new THREE.Vector3(tw, tw, tw)); } else await controller.addImageTargetsFromBuffer(await (await fetch(taar || `targets/${this.id}.taar`)).arrayBuffer());
 
     const feed = document.createElement('canvas'); feed.width = vw; feed.height = vh;
     const fg = feed.getContext('2d', { willReadFrequently: true });

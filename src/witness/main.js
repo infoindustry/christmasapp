@@ -128,7 +128,7 @@ const ar = new AR(stage, w.id, {
   exited: () => setMode('scene', true),
 });
 const sup = await AR.support(); for (const b of document.querySelectorAll('#modes button[data-mode]')) if (b.dataset.mode !== 'scene') b.hidden = !sup[b.dataset.mode];
-if (GAME || QUIZ || BETH) document.querySelector('#modes button[data-mode=marker]').hidden = true;   // no printed medallion for the game
+if (GAME || QUIZ || BETH) document.querySelector('#modes button[data-mode=marker]').hidden = true; if (GAME || QUIZ || BETH) document.querySelector('#modes button[data-mode=marker2]').hidden = true;   // no printed medallion for the game
 if (document.querySelectorAll('#modes button:not([hidden])').length < 2) $('modes').hidden = true;
 fit();
 let busy = false;
@@ -137,7 +137,7 @@ async function setMode(m, silent = false) {
   try {
     if (ar.kind) await ar.stop();
     $('arhint').hidden = true;
-    if (m === 'marker') await ar.startMarker(); else if (m === 'surface') await ar.startSurface();
+    if (m === 'marker') await ar.startMarker(); else if (m === 'marker2') await ar.startMarker('mindar'); else if (m === 'surface') await ar.startSurface();
   } catch (e) { console.warn('AR failed', e); await ar.stop(); m = 'scene'; $('arhint').hidden = false; $('arhint').textContent = 'Не удалось включить камеру. Разреши доступ к камере и попробуй ещё раз.'; setTimeout(() => ($('arhint').hidden = true), 4000); }
   for (const b of document.querySelectorAll('#modes button')) b.classList.toggle('on', b.dataset.mode === m);
   busy = false;

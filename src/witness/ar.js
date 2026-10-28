@@ -49,6 +49,7 @@ export class AR {
     s.controls.enabled = false;
     s.camera.matrixAutoUpdate = false; s.camera.matrix.identity(); s.camera.matrixWorld.identity();
     s.arRoot.matrixAutoUpdate = false; s.arRoot.visible = false;
+    const wasFixed = s.fixedFacing; s.fixedFacing = true; if (s.figure) s.figure.rotation.y = 0; this.cleanup.push(() => { s.fixedFacing = wasFixed; });   // on the printed page the figure stands facing the reader; it must not spin after the camera
     s.anchor.rotation.set(Math.PI / 2, 0, 0);   // the stage's up (y) becomes the page's normal (+z, out of the paper)
 
     const taar = new URLSearchParams(location.search).get('taar'), mine = 0;   // each witness has its own small tracking file (?taar= : test with another one)
@@ -68,8 +69,8 @@ export class AR {
     // Fusion: the medallion does not move in the room, so its pose is averaged in a frame that does not turn with the phone (camera pose x the gyroscope's rotation).
     // The tracker's noise is then smoothed hard without any lag when the phone turns. If the gyroscope disagrees with the tracker, plain camera-space smoothing takes over.
     const qm = new THREE.Quaternion(), Qm = new THREE.Matrix4(), Mc = new THREE.Matrix4(), Mw = new THREE.Matrix4(), Rinv = new THREE.Matrix4(), mq = new THREE.Quaternion(), mp = new THREE.Vector3(), ms = new THREE.Vector3();
-    const fsm = new PoseSmoother({ lostGrace: 0.8, posMin: 0.45, rotMin: 0.35, posBeta: 6, rotBeta: 2 }); let fusionOn = true; const bad = [];
-    this.dbg = { updates: 0, found: 0 }; const smoother = new PoseSmoother({ validator: plausible, lostGrace: 0.8 }); this.dbg.smoother = smoother;
+    const fsm = new PoseSmoother({ lostGrace: 0.8, posMin: 0.45, rotMin: 0.3, posBeta: 6, rotBeta: 1.5, rotGate: 18 }); let fusionOn = true; const bad = [];
+    this.dbg = { updates: 0, found: 0 }; const smoother = new PoseSmoother({ validator: plausible, lostGrace: 0.8, rotMin: 0.3, rotBeta: 1.5, rotGate: 18 }); this.dbg.smoother = smoother;
     const controller = new Controller({
       inputWidth: vw, inputHeight: vh,
       onUpdate: d => {
